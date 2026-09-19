@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { DEMO_NOTICE } from "@/content/company";
 import { LABEL_TOPIK, type Topik, faq } from "@/content/faq";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
 import { linkWa } from "@/lib/whatsapp";
@@ -7,7 +6,7 @@ import { linkWa } from "@/lib/whatsapp";
 export const metadata: Metadata = {
   title: "FAQ",
   description:
-    "Pertanyaan yang paling sering diajukan sebelum mendaftar umroh: uang muka, pelunasan, pembatalan, dan dokumen. Situs demo.",
+    "Pertanyaan sebelum mendaftar umroh: uang muka, pelunasan, pembatalan, dan dokumen. Situs demo.",
 };
 
 const URUTAN: Topik[] = ["pendaftaran", "pembayaran", "pembatalan", "dokumen", "layanan"];
@@ -16,12 +15,8 @@ export default function FaqPage() {
   return (
     <main className="mx-auto w-full max-w-[800px] px-4 py-8 sm:px-6 sm:py-12">
       <header>
-        <h1 className="text-3xl sm:text-4xl">Pertanyaan yang sering diajukan</h1>
-        <p className="mt-3 text-muted">
-          Pertanyaan yang paling sering kami terima sebelum jamaah mendaftar, dijawab dengan angka
-          dan ketentuan, bukan dengan ajakan menghubungi admin.
-        </p>
-        <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>
+        <h1 className="text-3xl sm:text-4xl">Pertanyaan sebelum mendaftar</h1>
+        <p className="mt-3 text-muted">Dijawab dengan angka dan ketentuan.</p>
       </header>
 
       <div className="mt-8 space-y-8">
@@ -50,7 +45,7 @@ export default function FaqPage() {
         <h2 className="text-xl">Pertanyaan Anda belum terjawab?</h2>
         <p className="mt-2 text-sm text-muted">
           Kirim pertanyaannya langsung. Kalau menyangkut satu paket tertentu, buka halaman paketnya
-          lalu tekan tombol di sana — pesan Anda akan otomatis membawa nama paket dan tanggalnya.
+          lalu tekan tombol di sana, pesan Anda akan otomatis membawa nama paket dan tanggalnya.
         </p>
         <a
           href={linkWa({ kind: "umum" })}

@@ -78,7 +78,7 @@ export const hajiPackages: HajiPackage[] = [
     priceUSD: 27500,
     dpUSD: 10000,
     installmentNote:
-      "Pembayaran bertahap dalam tahun berjalan. Bila visa tidak terbit, dana dikembalikan sesuai ketentuan yang disepakati di awal — bukan ditahan.",
+      "Pembayaran bertahap dalam tahun berjalan. Bila visa tidak terbit, dana dikembalikan sesuai ketentuan yang disepakati di awal, bukan ditahan.",
     durationDays: 22,
     makkahHotel: hotelMakkah.fairmont,
     madinahHotel: hotelMadinah.darAlTaqwa,

@@ -32,6 +32,8 @@ export type Departure = {
 
 export type ItineraryDay = {
   day: number;
+  /** Diisi bila hari-hari berurutan berisi sama dan dilipat jadi satu baris. */
+  endDay?: number;
   title: string;
   description: string;
 };
@@ -52,7 +54,6 @@ export type Package = {
   facilities: string[];
   exclusions: string[];
   requirements: string[];
-  tags: string[];
   featured: boolean;
   departures: Departure[];
 };

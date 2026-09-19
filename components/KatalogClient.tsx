@@ -30,7 +30,7 @@ const SORT: { nilai: SortKey; label: string }[] = [
   { nilai: "harga-turun", label: "Harga tertinggi" },
 ];
 
-const kelasKontrol = "min-h-11 w-full rounded-card border border-hairline bg-surface px-3 text-sm";
+const kelasKontrol = "min-h-11 w-full rounded-card border border-hairline bg-surface px-3 text-base";
 const TANPA_FILTER = { tipe: undefined, bulan: undefined, maks: undefined, durasi: undefined };
 
 export function KatalogClient({
@@ -85,7 +85,7 @@ export function KatalogClient({
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <fieldset className="sm:col-span-2 lg:col-span-4">
-            <legend className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+            <legend className="mb-1.5 text-sm font-medium text-muted">
               Jenis
             </legend>
             <div className="flex flex-wrap gap-1.5">
@@ -113,7 +113,7 @@ export function KatalogClient({
           <div>
             <label
               htmlFor="f-bulan"
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+              className="mb-1.5 block text-sm font-medium text-muted"
             >
               Bulan keberangkatan
             </label>
@@ -135,7 +135,7 @@ export function KatalogClient({
           <div>
             <label
               htmlFor="f-durasi"
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+              className="mb-1.5 block text-sm font-medium text-muted"
             >
               Durasi
             </label>
@@ -157,7 +157,7 @@ export function KatalogClient({
           <div>
             <label
               htmlFor="f-maks"
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+              className="mb-1.5 block text-sm font-medium text-muted"
             >
               Harga maksimum (quad)
             </label>
@@ -178,7 +178,7 @@ export function KatalogClient({
           <div>
             <label
               htmlFor="f-sort"
-              className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted"
+              className="mb-1.5 block text-sm font-medium text-muted"
             >
               Urutkan
             </label>

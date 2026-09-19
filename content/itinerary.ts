@@ -36,7 +36,7 @@ const HARI_ZIARAH_MADINAH = (day: number): ItineraryDay => ({
 
 const HARI_KE_MAKKAH = (day: number): ItineraryDay => ({
   day,
-  title: "Madinah menuju Makkah — Umroh Pertama",
+  title: "Madinah menuju Makkah: Umroh Pertama",
   description:
     "Check-out, mandi dan berihram, mengambil miqat di Bir Ali, perjalanan darat ke Makkah, lalu melaksanakan thawaf, sa'i, dan tahallul.",
 });
@@ -69,7 +69,7 @@ const HARI_TIBA = (day: number): ItineraryDay => ({
 });
 
 export function itinerary9(): ItineraryDay[] {
-  return [
+  return gabung([
     HARI_BERANGKAT,
     HARI_TIBA_MADINAH(2),
     HARI_NABAWI(3),
@@ -79,11 +79,11 @@ export function itinerary9(): ItineraryDay[] {
     HARI_ZIARAH_MAKKAH(7),
     HARI_PULANG(8),
     HARI_TIBA(9),
-  ];
+  ]);
 }
 
 export function itinerary12(): ItineraryDay[] {
-  return [
+  return gabung([
     HARI_BERANGKAT,
     HARI_TIBA_MADINAH(2),
     HARI_NABAWI(3),
@@ -96,11 +96,11 @@ export function itinerary12(): ItineraryDay[] {
     HARI_HARAM(10),
     HARI_PULANG(11),
     HARI_TIBA(12),
-  ];
+  ]);
 }
 
 export function itinerary14(): ItineraryDay[] {
-  return [
+  return gabung([
     HARI_BERANGKAT,
     HARI_TIBA_MADINAH(2),
     HARI_NABAWI(3),
@@ -115,5 +115,17 @@ export function itinerary14(): ItineraryDay[] {
     HARI_HARAM(12),
     HARI_PULANG(13),
     HARI_TIBA(14),
-  ];
+  ]);
+}
+
+/** Hari berurutan dengan isi yang sama dilipat jadi satu baris, misalnya "Hari 10-12". */
+function gabung(days: ItineraryDay[]): ItineraryDay[] {
+  return days.reduce<ItineraryDay[]>((hasil, d) => {
+    const akhir = hasil[hasil.length - 1];
+    if (akhir && akhir.title === d.title && akhir.description === d.description) {
+      akhir.endDay = d.day;
+      return hasil;
+    }
+    return [...hasil, { ...d }];
+  }, []);
 }

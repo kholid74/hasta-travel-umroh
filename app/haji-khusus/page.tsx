@@ -23,25 +23,25 @@ function KartuHaji({ paket }: { paket: HajiPackage }) {
 
       <dl className="mt-4 grid grid-cols-2 gap-4 border-y border-hairline py-4 text-sm sm:grid-cols-4">
         <div>
-          <dt className="text-xs text-muted">Masa tunggu</dt>
+          <dt className="text-sm text-muted">Masa tunggu</dt>
           <dd className="font-display text-xl font-semibold text-secondary">
             {tanpaAntre ? "Tanpa antre" : `± ${paket.waitingYears} tahun`}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Perkiraan berangkat</dt>
+          <dt className="text-sm text-muted">Perkiraan berangkat</dt>
           <dd className="font-display text-xl font-semibold text-secondary">
             {paket.estimatedDepartureYear}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Biaya</dt>
+          <dt className="text-sm text-muted">Biaya</dt>
           <dd className="font-display text-xl font-semibold text-secondary">
             {dolar(paket.priceUSD)}
           </dd>
         </div>
         <div>
-          <dt className="text-xs text-muted">Setoran awal</dt>
+          <dt className="text-sm text-muted">Setoran awal</dt>
           <dd className="font-display text-xl font-semibold text-secondary">
             {dolar(paket.dpUSD)}
           </dd>
@@ -53,8 +53,8 @@ function KartuHaji({ paket }: { paket: HajiPackage }) {
       </p>
       <p className="mt-2 text-sm text-muted">
         <span className="font-semibold text-ink">Pembayaran:</span> {paket.installmentNote} Kurs
-        rupiah mengikuti tanggal pembayaran, jadi nilai rupiahnya dikonfirmasi saat konsultasi —
-        bukan dipatok di halaman ini supaya tidak menyesatkan.
+        rupiah mengikuti tanggal pembayaran, jadi nilai rupiahnya dikonfirmasi saat konsultasi.
+        Angkanya tidak dipatok di halaman ini karena kurs berubah.
       </p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -63,19 +63,19 @@ function KartuHaji({ paket }: { paket: HajiPackage }) {
           { kota: "Madinah", hotel: paket.madinahHotel },
         ].map(({ kota, hotel }) => (
           <div key={kota}>
-            <p className="text-[13px] font-medium text-secondary">
+            <p className="text-sm font-medium text-secondary">
               {kota} · {hotel.name}
             </p>
             <div className="mt-1.5">
               <HotelDistanceBadge hotel={hotel} />
             </div>
-            <p className="mt-1 text-xs text-muted">{hotelMeta(hotel)}</p>
+            <p className="mt-1 text-sm text-muted">{hotelMeta(hotel)}</p>
           </div>
         ))}
       </div>
 
       <details className="mt-5 border-t border-hairline pt-4">
-        <summary className="cursor-pointer list-none text-sm font-semibold text-primary">
+        <summary className="cursor-pointer list-none py-3 text-sm font-semibold text-primary">
           Lihat fasilitas dan syarat pendaftaran
         </summary>
         <div className="mt-3 grid gap-5 sm:grid-cols-2">
@@ -122,7 +122,7 @@ export default function HajiKhususPage() {
         <h1 className="text-3xl sm:text-4xl">Haji Khusus</h1>
         <p className="mt-3 text-muted">
           Haji Khusus tidak dijual seperti umroh. Yang Anda daftarkan bukan tanggal keberangkatan,
-          melainkan antrean — karena itu halaman ini menampilkan masa tunggu dan skema pembayaran
+          melainkan antrean. Karena itu halaman ini menampilkan masa tunggu dan skema pembayaran
           lebih dulu, bukan hitung mundur seat.
         </p>
         <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>

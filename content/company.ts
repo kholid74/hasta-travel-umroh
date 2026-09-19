@@ -28,4 +28,4 @@ export const company = {
 } as const;
 
 export const DEMO_NOTICE =
-  "Situs demo — seluruh data perusahaan, harga, dan testimoni di sini fiktif.";
+  "Situs demo: seluruh data perusahaan, harga, dan testimoni di sini fiktif.";

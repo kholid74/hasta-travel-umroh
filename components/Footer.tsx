@@ -29,7 +29,7 @@ export function Footer() {
               href={URL_SIMPU}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-4 hover:text-primary"
+              className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-primary"
             >
               Cek di SISKOPATUH Kemenag
             </a>
@@ -37,7 +37,7 @@ export function Footer() {
         </div>
 
         <nav aria-label="Navigasi footer">
-          <ul className="space-y-2 text-sm">
+          <ul className="text-sm">
             {[
               ["/paket-umroh", "Paket Umroh"],
               ["/haji-khusus", "Haji Khusus"],
@@ -47,7 +47,7 @@ export function Footer() {
               ["/kontak", "Kontak"],
             ].map(([href, label]) => (
               <li key={href}>
-                <Link href={href} className="hover:text-primary">
+                <Link href={href} className="inline-flex min-h-11 items-center hover:text-primary">
                   {label}
                 </Link>
               </li>

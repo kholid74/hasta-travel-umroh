@@ -47,6 +47,21 @@ export default function JadwalPage() {
         <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>
       </header>
 
+      {baris.length === 0 && (
+        <div className="mt-8 rounded-card border border-hairline bg-surface p-8 text-center">
+          <p className="font-display text-xl">Belum ada keberangkatan terjadwal</p>
+          <p className="mx-auto mt-2 max-w-md text-muted">
+            Semua tanggal pada data demo ini sudah lewat. Tanyakan jadwal terbaru lewat WhatsApp.
+          </p>
+          <Link
+            href="/kontak"
+            className="mt-4 inline-flex min-h-11 items-center rounded-card bg-primary px-4 text-sm font-semibold text-onprimary"
+          >
+            Buka halaman kontak
+          </Link>
+        </div>
+      )}
+
       <div className="mt-8 space-y-8">
         {[...perBulan.entries()].map(([kunci, isi]) => (
           <section key={kunci} aria-labelledby={`bulan-${kunci}`}>
@@ -76,17 +91,17 @@ export default function JadwalPage() {
                       </p>
                       <Link
                         href={`/paket-umroh/${paket.slug}?d=${keberangkatan.date}`}
-                        className="text-sm underline underline-offset-4 hover:text-primary"
+                        className="text-[15px] underline underline-offset-4 hover:text-primary"
                       >
                         {paket.name}
                       </Link>
-                      <p className="text-sm text-muted">
+                      <p className="text-[15px] text-muted">
                         {keberangkatan.departureCity} · {keberangkatan.airline} ·{" "}
                         {paket.makkahHotel.distanceMeters} m dari Masjidil Haram
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-sm font-semibold ${warna}`}>
+                      <p className={`text-[15px] font-semibold ${warna}`}>
                         {LABEL_STATUS[status]}
                         {status !== "sold-out" && ` · sisa ${keberangkatan.seatsAvailable}`}
                       </p>

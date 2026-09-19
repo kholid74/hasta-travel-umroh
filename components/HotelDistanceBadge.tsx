@@ -15,11 +15,11 @@ const LABEL_RUTE: Record<Hotel["route"], string> = {
  */
 export function HotelDistanceBadge({ hotel }: { hotel: Hotel }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-card border border-hairline bg-surface px-2.5 py-1.5 text-[13px] leading-none text-muted">
+    <span className="inline-flex items-center gap-2 rounded-card border border-hairline bg-surface px-2.5 py-1.5 text-sm leading-tight text-muted">
       <Footprints aria-hidden className="size-4 shrink-0 text-primary" strokeWidth={1.75} />
       <span className="font-semibold text-ink tabular-nums">{hotel.distanceMeters} m</span>
       <span aria-hidden>·</span>
-      <span className="whitespace-nowrap">±{menitJalan(hotel.distanceMeters)} menit jalan santai</span>
+      <span>±{menitJalan(hotel.distanceMeters)} menit jalan santai</span>
     </span>
   );
 }

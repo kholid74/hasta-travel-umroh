@@ -6,7 +6,7 @@ import { tanggalPanjang } from "@/lib/format";
  * jamaah sungguhan. CTA paket tetap membawa konteks paket apa adanya — itu
  * fitur yang sedang didemonstrasikan.
  */
-const PENUTUP_DEMO = `\n\n— Pesan ini dikirim dari situs demo ${company.name} (${company.studio.name})`;
+const PENUTUP_DEMO = `\n\nPesan ini dikirim dari situs demo ${company.name} (${company.studio.name}).`;
 
 export type WaContext =
   | { kind: "umum" }

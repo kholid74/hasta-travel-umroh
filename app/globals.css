@@ -49,6 +49,30 @@ h1, h2, h3 {
   outline-offset: 2px;
 }
 
+/* Penanda buka/tutup untuk <details>: tanpa ini, baris FAQ dan itinerary tidak terlihat bisa dibuka. */
+summary {
+  display: flex;
+  align-items: baseline;
+  cursor: pointer;
+}
+summary::after {
+  content: "+";
+  margin-left: auto;
+  padding-left: 1rem;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+details[open] > summary::after {
+  content: "\2212";
+}
+
+/* Bilah CTA tetap di ponsel menutup dasar halaman; beri footer ruang di bawahnya. */
+@media (max-width: 767px) {
+  body:has([data-sticky-cta]) footer {
+    padding-bottom: 5rem;
+  }
+}
+
 ::selection {
   background: var(--color-primary);
   color: var(--color-onprimary);

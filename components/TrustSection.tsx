@@ -35,14 +35,13 @@ export function TrustSection({ ringkas = false }: { ringkas?: boolean }) {
       <p className="mt-3 max-w-2xl text-sm text-muted">
         <strong className="font-semibold text-ink">Situs demo:</strong> nomor izin di atas sengaja
         dibuat tidak valid, jadi pencarian di SISKOPATUH tidak akan menemukannya. Pada situs klien
-        yang sebenarnya, tombol ini mengantar Anda ke data izin yang asli. Kejujuran soal ini adalah
-        bagian dari yang sedang kami tunjukkan.
+        yang sebenarnya, tombol ini mengantar Anda ke data izin yang asli.
       </p>
 
       {!ringkas && (
         <div className="mt-6 grid gap-6 border-t border-hairline pt-6 sm:grid-cols-2">
           <div>
-            <h3 className="text-base">Kantor yang bisa didatangi</h3>
+            <h3 className="text-base">Alamat kantor (contoh)</h3>
             <p className="mt-1.5 text-sm text-muted">
               {company.address.street}
               <br />
@@ -50,7 +49,7 @@ export function TrustSection({ ringkas = false }: { ringkas?: boolean }) {
             </p>
           </div>
           <div>
-            <h3 className="text-base">Rekening resmi</h3>
+            <h3 className="text-base">Rekening perusahaan (contoh)</h3>
             <p className="mt-1.5 text-sm text-muted">
               {company.bank.name} · {company.bank.accountNumber}
               <br />
@@ -68,10 +67,10 @@ export function TrustSection({ ringkas = false }: { ringkas?: boolean }) {
         <div className="mt-6 border-t border-hairline pt-6">
           <h3 className="text-base">Cara memastikan situs ini bukan tiruan</h3>
           <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-muted">
-            <li>Periksa alamat domain di bilah browser — tiruan biasanya menambah atau mengubah satu huruf.</li>
+            <li>Periksa alamat domain di bilah browser. Tiruan biasanya menambah atau mengubah satu huruf.</li>
             <li>Cocokkan nomor izin di halaman ini dengan hasil pencarian di SISKOPATUH, bukan dengan gambar sertifikat yang dipasang di situs.</li>
             <li>Pastikan nama pemilik rekening adalah nama perusahaan, bukan nama orang.</li>
-            <li>Curigai harga yang jauh di bawah pasaran. Selisih beberapa juta wajar; selisih belasan juta hampir selalu ada yang dikorbankan.</li>
+            <li>Curigai harga yang jauh di bawah pasaran. Selisih beberapa juta wajar; selisih belasan juta patut ditanyakan: apa yang dikurangi?</li>
           </ol>
         </div>
       )}

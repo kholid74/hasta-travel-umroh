@@ -22,7 +22,7 @@ export default function KatalogPage() {
         <h1 className="text-3xl sm:text-4xl">Paket Umroh</h1>
         <p className="mt-3 text-muted">
           Setiap paket menampilkan jarak hotel ke masjid dalam meter, tipe aksesnya, dan perkiraan
-          waktu jalan kaki pada kecepatan jamaah lansia — sekitar 50 meter per menit. Angkanya bisa
+          waktu jalan kaki pada kecepatan jamaah lansia, sekitar 50 meter per menit. Angkanya bisa
           Anda cek sendiri di peta.
         </p>
         <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>

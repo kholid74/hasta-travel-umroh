@@ -77,7 +77,6 @@ export const packages: Package[] = [
     price: harga(25.9, 27.9, 30.9),
     makkahHotel: hotelMakkah.alKiswah,
     madinahHotel: hotelMadinah.rove,
-    tags: ["Termurah", "Hotel dengan shuttle"],
     featured: true,
     departures: [
       dep("umroh-hemat-9-hari", "2026-10-14", "Jakarta", "Lion Air", 18),
@@ -95,7 +94,6 @@ export const packages: Package[] = [
     price: harga(27.9, 29.9, 32.9),
     makkahHotel: hotelMakkah.mGrandAjyad,
     madinahHotel: hotelMadinah.alAnsarGolden,
-    tags: ["Durasi singkat"],
     featured: false,
     departures: [
       dep("umroh-reguler-9-hari", "2026-10-07", "Jakarta", "Saudia", 0),
@@ -112,7 +110,6 @@ export const packages: Package[] = [
     price: harga(29.9, 31.9, 34.9),
     makkahHotel: hotelMakkah.grandAlMassa,
     madinahHotel: hotelMadinah.badrAlMaqam,
-    tags: ["Paling banyak dipilih"],
     featured: false,
     departures: [
       dep("umroh-reguler-12-hari", "2026-10-21", "Jakarta", "Saudia", 15),
@@ -130,7 +127,6 @@ export const packages: Package[] = [
     price: harga(32.5, 34.5, 37.9),
     makkahHotel: hotelMakkah.elafAjyad,
     madinahHotel: hotelMadinah.alEimanRoyal,
-    tags: ["Hotel bintang 4"],
     featured: false,
     departures: [
       dep("umroh-nyaman-12-hari", "2026-11-04", "Jakarta", "Qatar Airways", 11),
@@ -147,7 +143,6 @@ export const packages: Package[] = [
     price: harga(38.9, 41.5, 45.9),
     makkahHotel: hotelMakkah.swissotel,
     madinahHotel: hotelMadinah.pullmanZamzam,
-    tags: ["Hotel bintang 5", "Akses langsung"],
     featured: false,
     departures: [
       dep("umroh-dekat-haram-9-hari", "2026-10-28", "Jakarta", "Saudia", 6),
@@ -164,7 +159,6 @@ export const packages: Package[] = [
     price: harga(44.5, 47.5, 52.9),
     makkahHotel: hotelMakkah.pullmanZamzam,
     madinahHotel: hotelMadinah.movenpick,
-    tags: ["Hotel bintang 5", "Akses langsung", "Rombongan kecil"],
     featured: true,
     departures: [
       dep("umroh-premium-12-hari", "2026-11-25", "Jakarta", "Garuda Indonesia", 8),
@@ -181,7 +175,6 @@ export const packages: Package[] = [
     price: harga(49.9, 53.5, 58.9),
     makkahHotel: hotelMakkah.fairmont,
     madinahHotel: hotelMadinah.darAlTaqwa,
-    tags: ["Rute bebas tangga", "Kursi roda tersedia", "Rombongan kecil"],
     featured: true,
     departures: [
       dep("umroh-ramah-lansia-12-hari", "2026-10-21", "Jakarta", "Garuda Indonesia", 5),
@@ -198,7 +191,6 @@ export const packages: Package[] = [
     price: harga(41.5, 44.5, 49.5),
     makkahHotel: hotelMakkah.hiltonSuites,
     madinahHotel: hotelMadinah.frontel,
-    tags: ["Kamar keluarga", "Cocok libur sekolah"],
     featured: false,
     departures: [
       dep("umroh-keluarga-14-hari", "2026-12-20", "Jakarta", "Saudia", 2, harga(44.5, 47.5, 52.5)),
@@ -215,7 +207,6 @@ export const packages: Package[] = [
     price: harga(28.9, 30.9, 33.9),
     makkahHotel: hotelMakkah.anjum,
     madinahHotel: hotelMadinah.rove,
-    tags: ["Durasi panjang", "Hotel dengan shuttle"],
     featured: false,
     departures: [
       dep("umroh-ekonomis-14-hari", "2026-11-11", "Makassar", "Lion Air", 25),
@@ -232,7 +223,6 @@ export const packages: Package[] = [
     price: harga(34.9, 36.9, 40.5),
     makkahHotel: hotelMakkah.elafAjyad,
     madinahHotel: hotelMadinah.odst,
-    tags: ["Ziarah Thaif"],
     featured: false,
     departures: [
       dep("umroh-plus-thaif-12-hari", "2026-11-18", "Jakarta", "Saudia", 13),
@@ -248,7 +238,6 @@ export const packages: Package[] = [
     price: harga(46.9, 49.9, 54.9),
     makkahHotel: hotelMakkah.leMeridien,
     madinahHotel: hotelMadinah.millennium,
-    tags: ["3 hari Istanbul", "Hotel bintang 4-5"],
     featured: true,
     departures: [
       dep("umroh-plus-turki-14-hari", "2026-10-07", "Jakarta", "Turkish Airlines", 7),
@@ -264,7 +253,6 @@ export const packages: Package[] = [
     price: harga(42.9, 45.5, 49.9),
     makkahHotel: hotelMakkah.hiltonSuites,
     madinahHotel: hotelMadinah.odst,
-    tags: ["2 hari Dubai"],
     featured: false,
     departures: [
       dep("umroh-plus-dubai-12-hari", "2026-12-16", "Jakarta", "Emirates", 4),
@@ -280,7 +268,6 @@ export const packages: Package[] = [
     price: harga(45.5, 48.5, 53.5),
     makkahHotel: hotelMakkah.leMeridien,
     madinahHotel: hotelMadinah.badrAlMaqam,
-    tags: ["3 hari Mesir"],
     featured: false,
     departures: [
       dep("umroh-plus-kairo-14-hari", "2026-11-04", "Jakarta", "Saudia", 0),
@@ -290,13 +277,12 @@ export const packages: Package[] = [
   bangun({
     id: "p14",
     slug: "umroh-awal-ramadhan-1448-12-hari",
-    name: "Umroh Awal Ramadhan 1448 H — 12 Hari",
+    name: "Umroh Awal Ramadhan 1448 H, 12 Hari",
     type: "umroh-ramadhan",
     duration: 12,
     price: harga(36.9, 38.9, 42.9),
     makkahHotel: hotelMakkah.grandAlMassa,
     madinahHotel: hotelMadinah.alAnsarGolden,
-    tags: ["Awal Ramadhan"],
     featured: false,
     departures: [
       dep("umroh-awal-ramadhan-1448-12-hari", "2027-02-05", "Jakarta", "Saudia", 9),
@@ -306,13 +292,12 @@ export const packages: Package[] = [
   bangun({
     id: "p15",
     slug: "umroh-pertengahan-ramadhan-1448-14-hari",
-    name: "Umroh Pertengahan Ramadhan 1448 H — 14 Hari",
+    name: "Umroh Pertengahan Ramadhan 1448 H, 14 Hari",
     type: "umroh-ramadhan",
     duration: 14,
     price: harga(42.9, 45.9, 50.9),
     makkahHotel: hotelMakkah.elafAjyad,
     madinahHotel: hotelMadinah.alEimanRoyal,
-    tags: ["Pertengahan Ramadhan"],
     featured: false,
     departures: [
       dep("umroh-pertengahan-ramadhan-1448-14-hari", "2027-02-17", "Jakarta", "Saudia", 3),
@@ -322,13 +307,12 @@ export const packages: Package[] = [
   bangun({
     id: "p16",
     slug: "umroh-lailatul-qadr-1448-14-hari",
-    name: "Umroh Lailatul Qadr 1448 H — 14 Hari",
+    name: "Umroh Lailatul Qadr 1448 H, 14 Hari",
     type: "umroh-ramadhan",
     duration: 14,
     price: harga(57.9, 61.9, 68.9),
     makkahHotel: hotelMakkah.swissotel,
     madinahHotel: hotelMadinah.pullmanZamzam,
-    tags: ["10 malam terakhir", "Hotel bintang 5", "Akses langsung"],
     featured: true,
     departures: [
       dep("umroh-lailatul-qadr-1448-14-hari", "2027-02-24", "Jakarta", "Garuda Indonesia", 0),
@@ -338,13 +322,12 @@ export const packages: Package[] = [
   bangun({
     id: "p17",
     slug: "umroh-syawal-1448-12-hari",
-    name: "Umroh Syawal 1448 H — 12 Hari",
+    name: "Umroh Syawal 1448 H, 12 Hari",
     type: "umroh-reguler",
     duration: 12,
     price: harga(33.9, 35.9, 39.5),
     makkahHotel: hotelMakkah.hyattJabalOmar,
     madinahHotel: hotelMadinah.odst,
-    tags: ["Setelah Idul Fitri", "Akses terowongan ber-AC"],
     featured: false,
     departures: [
       dep("umroh-syawal-1448-12-hari", "2027-03-17", "Jakarta", "Saudia", 15),
@@ -360,7 +343,6 @@ export const packages: Package[] = [
     price: harga(39.9, 42.5, 46.9),
     makkahHotel: hotelMakkah.hiltonSuites,
     madinahHotel: hotelMadinah.frontel,
-    tags: ["Libur sekolah", "Kamar keluarga"],
     featured: false,
     departures: [
       dep("umroh-akhir-tahun-12-hari", "2026-12-23", "Jakarta", "Saudia", 1),

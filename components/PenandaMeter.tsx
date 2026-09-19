@@ -16,7 +16,7 @@ export function PenandaMeter() {
     >
       <line x1="8" y1="80" x2="312" y2="80" stroke="var(--color-hairline)" strokeWidth="2" />
       <rect x="2" y="52" width="11" height="28" fill="var(--color-muted)" />
-      <text x="2" y="100" fontSize="10" fill="var(--color-muted)">
+      <text x="2" y="116" fontSize="12" fill="var(--color-muted)">
         Masjid
       </text>
       {titik.map(({ m, x }) => {
@@ -35,7 +35,7 @@ export function PenandaMeter() {
             >
               {m} m
             </text>
-            <text x={px} y="100" textAnchor="middle" fontSize="10" fill="var(--color-muted)">
+            <text x={px} y="100" textAnchor="middle" fontSize="12" fill="var(--color-muted)">
               ±{menitJalan(m)} mnt
             </text>
           </g>

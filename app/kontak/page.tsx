@@ -64,7 +64,7 @@ export default function KontakPage() {
 
       <section aria-labelledby="kantor" className="mt-10 rounded-card border border-hairline bg-surface p-6">
         <h2 id="kantor" className="text-xl">
-          Kantor
+          Kantor (contoh)
         </h2>
         <p className="mt-2 text-muted">
           {company.address.street}
@@ -72,9 +72,9 @@ export default function KontakPage() {
           {company.address.city} {company.address.postalCode}
         </p>
         <p className="mt-3 text-sm text-muted">
-          Senin sampai Jumat 09.00-17.00, Sabtu 09.00-14.00. Silakan datang tanpa janji, tetapi
-          menghubungi lebih dulu lewat WhatsApp membuat kami bisa menyiapkan rincian paket yang
-          ingin Anda bandingkan.
+          Jam kerja contoh: Senin sampai Jumat 09.00-17.00, Sabtu 09.00-14.00. Alamat ini fiktif,
+          jadi tidak ada kantor yang bisa didatangi. Pada situs klien, bagian ini memuat alamat dan
+          jam kerja yang sebenarnya.
         </p>
       </section>
 

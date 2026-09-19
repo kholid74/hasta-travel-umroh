@@ -19,19 +19,27 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: `${company.name} — ${company.tagline}`,
+    default: `${company.name}: ${company.tagline}`,
     template: `%s · ${company.name}`,
   },
   description:
-    "Katalog paket Umroh & Haji Khusus dengan jarak hotel ke masjid yang ditampilkan dalam meter, bukan klaim samar. Situs demo.",
+    "Katalog paket Umroh & Haji Khusus dengan jarak hotel ke masjid yang ditampilkan dalam meter. Situs demo.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="id" className={`${instrument.variable} ${manrope.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        <a
+          href="#main"
+          className="sr-only rounded-card bg-primary px-4 py-2 font-semibold text-onprimary focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50"
+        >
+          Lewati ke konten
+        </a>
         <Header />
-        <div className="flex-1">{children}</div>
+        <div id="main" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </div>
         <Footer />
       </body>
     </html>

@@ -19,7 +19,7 @@ export const faq: FaqItem[] = [
   {
     topik: "pembayaran",
     q: "Kapan pelunasan paling lambat?",
-    a: "Contoh ketentuan: 40 hari sebelum keberangkatan. Batas ini bukan formalitas — tiket dan hotel diterbitkan pada rentang itu, dan keterlambatan bisa membuat harga berubah.",
+    a: "Contoh ketentuan: 40 hari sebelum keberangkatan. Tiket dan hotel diterbitkan pada rentang itu, dan keterlambatan bisa membuat harga berubah.",
   },
   {
     topik: "pembayaran",
@@ -29,7 +29,7 @@ export const faq: FaqItem[] = [
   {
     topik: "pembatalan",
     q: "Kalau saya batal berangkat, apakah uang kembali?",
-    a: "Contoh ketentuan: sebelum tiket terbit, uang kembali dipotong biaya administrasi. Setelah tiket terbit dan visa diproses, biaya yang sudah dikeluarkan ke maskapai dan hotel tidak bisa ditarik kembali. Rinciannya dijelaskan sebelum Anda membayar, bukan sesudah.",
+    a: "Contoh ketentuan: sebelum tiket terbit, uang kembali dipotong biaya administrasi. Setelah tiket terbit dan visa diproses, biaya yang sudah dikeluarkan ke maskapai dan hotel tidak bisa ditarik kembali. Rinciannya dijelaskan sebelum Anda membayar.",
   },
   {
     topik: "pembatalan",

@@ -106,23 +106,23 @@ export function DetailClient({
           })}
         </div>
 
-        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-hairline pt-5 text-sm sm:grid-cols-4">
+        <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-hairline pt-5 sm:grid-cols-4">
           <div>
-            <dt className="text-xs text-muted">Keberangkatan</dt>
+            <dt className="text-sm text-muted">Keberangkatan</dt>
             <dd className="font-medium">{tanggalPanjang(dipilih.date)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Kota keberangkatan</dt>
+            <dt className="text-sm text-muted">Kota keberangkatan</dt>
             <dd className="font-medium">{dipilih.departureCity}</dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Maskapai</dt>
+            <dt className="text-sm text-muted">Maskapai</dt>
             <dd>
               <AirlineLogo airline={dipilih.airline} />
             </dd>
           </div>
           <div>
-            <dt className="text-xs text-muted">Ketersediaan</dt>
+            <dt className="text-sm text-muted">Ketersediaan</dt>
             <dd>
               <Status seats={dipilih.seatsAvailable} />
             </dd>
@@ -169,9 +169,9 @@ export function DetailClient({
       </section>
 
       {/* CTA yang selalu terlihat di mobile — harga dan tanggal ikut terbawa. */}
-      <div className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-hairline bg-surface px-4 py-3 md:hidden">
+      <div data-sticky-cta className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t border-hairline bg-surface px-4 py-3 md:hidden">
         <div>
-          <p className="text-xs text-muted">{tanggalPanjang(dipilih.date)}</p>
+          <p className="text-sm text-muted">{tanggalPanjang(dipilih.date)}</p>
           <p className="font-display text-lg font-semibold tabular-nums text-secondary">
             {rupiahSingkat(harga.quad)}
           </p>

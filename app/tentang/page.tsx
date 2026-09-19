@@ -17,8 +17,8 @@ export default function TentangPage() {
       <header>
         <h1 className="text-3xl sm:text-4xl">Tentang {company.name}</h1>
         <p className="mt-3 text-lg text-muted">
-          {company.tagline} — {company.name} menemani perjalanan ibadah Anda menuju Baitullah,
-          dengan persiapan yang matang dan layanan yang penuh perhatian.
+          {company.name} menulis jarak hotel dalam meter, tipe rutenya, dan waktu jalan kaki
+          jamaah lansia, supaya Anda memilih paket dengan angka, bukan kesan.
         </p>
         <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>
       </header>
@@ -28,15 +28,15 @@ export default function TentangPage() {
           Kenapa kami menulis jarak dalam meter
         </h2>
         <p className="mt-3 text-muted">
-          Hampir semua travel menulis &ldquo;hotel dekat Masjidil Haram&rdquo;. Masalahnya,
+          Sebuah paket bisa menulis &ldquo;hotel dekat Masjidil Haram&rdquo;. Masalahnya,
           &ldquo;dekat&rdquo; tidak punya satuan. Hotel 200 meter dan hotel 900 meter sama-sama bisa
           disebut dekat, padahal untuk jamaah berusia 70 tahun selisih itu menentukan ia masih
           sanggup kembali ke masjid untuk shalat berikutnya atau tidak.
         </p>
         <p className="mt-3 text-muted">
           Karena itu setiap paket di situs ini menuliskan jarak dalam meter, tipe rutenya, dan
-          apakah rute itu bebas tangga. Waktu jalan kaki dihitung pada kecepatan jamaah lansia —
-          sekitar 50 meter per menit — bukan kecepatan orang muda yang sedang buru-buru. Kalau angka
+          apakah rute itu bebas tangga. Waktu jalan kaki dihitung pada kecepatan jamaah lansia
+          (sekitar 50 meter per menit), bukan kecepatan orang muda yang sedang buru-buru. Kalau angka
           kami terasa terlalu lambat untuk Anda, itu memang disengaja: melebihkan ke arah lambat
           adalah satu-satunya arah kesalahan yang tidak merugikan siapa pun.
         </p>
@@ -62,7 +62,7 @@ export default function TentangPage() {
           <li>Paket yang sudah penuh tetap ditampilkan dengan status Sold Out, tidak disembunyikan.</li>
           <li>Harga ditulis untuk tiga jenis okupansi kamar, bukan hanya angka termurah.</li>
           <li>Hotel yang jauh dari masjid ditulis jaraknya sama jelasnya dengan yang dekat.</li>
-          <li>Nomor izin bisa dicek sendiri, bukan hanya dipajang sebagai gambar sertifikat.</li>
+          <li>Nomor izin bisa dicek sendiri di SISKOPATUH.</li>
         </ul>
       </section>
 

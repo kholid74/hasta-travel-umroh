@@ -73,7 +73,7 @@ Home · Paket Umroh · Detail Paket · Haji Khusus · Jadwal Keberangkatan · FA
 Nomor: `6285156589720` (Kalsara).
 
 - CTA paket: pesan kontekstual paket (nama + tanggal), ditutup baris otomatis:
-  `— Pesan ini dikirim dari situs demo Hasta Travel (Kalsara Digital Studio)`
+  `Pesan ini dikirim dari situs demo Hasta Travel (Kalsara Digital Studio).`
 - CTA penjualan terpisah di footer + banner demo: "Saya ingin website seperti ini".
 - Link `wa.me` dibedakan per lokasi CTA untuk analitik dasar.
 
@@ -136,3 +136,26 @@ Next.js 15 App Router + TypeScript + Tailwind v4. Semua halaman SSG. Deploy **Ve
 3. Halaman detail paket -> **REVIEW**
 4. Haji Khusus, Jadwal Keberangkatan, FAQ, Tentang, Kontak
 5. Home **terakhir** — home adalah ringkasan dari katalog & detail; menulisnya duluan menghasilkan copy kosong.
+
+## 11. Revisi setelah audit antislop (2026-09-18)
+
+Dial: ENERGY 2 / RHYTHM 2 / MOTION 1.
+Design Read: katalog pariwisata ibadah untuk keluarga jamaah lansia, bahasa visual gelap-hangat editorial, satu aksen amber.
+
+**Dipertahankan atas keputusan pemilik** (audit #5, #6, #9):
+
+- Testimoni fiktif di Home tetap ada, berlabel "DATA DEMO, fiktif" tepat di bawah kutipan (R-18 dilewati sadar, R-38 dipenuhi lewat label).
+- Atribut `route` dan `stepFree` pada hotel nyata tetap ditampilkan sebagai perkiraan. Jarak dibulatkan ke 10 m dan bisa dicek di peta; dua atribut lain tidak bisa diverifikasi dari peta.
+- Ikon Lucide tetap. Alasan per ikon: `Footprints` = jarak jalan kaki pada badge hotel; `Check`/`X` = sudah/belum termasuk; `SlidersHorizontal` = tombol filter; `ExternalLink` = tautan keluar situs (SISKOPATUH, sumber foto); `ShieldCheck` = blok verifikasi legalitas.
+
+**Perubahan dari audit:**
+
+- Panah dekoratif pada tombol dihapus. Label CTA memuat aksinya ("Buka detail dan pilih tanggal").
+- Label kapital ber-tracking lebar diganti teks biasa.
+- Hero Home membuka dengan tesis jarak dalam meter, dan `PenandaMeter` kembali ke Home (membatalkan pemindahan di bagian 7). Kalimat generik tentang "niat" dibuang dari Home; `company.tagline` tetap dipakai di judul situs dan halaman Tentang.
+- Baris pesan WhatsApp otomatis tidak lagi diawali tanda pisah.
+- Menu utama membungkus ke baris kedua di ponsel (tidak lagi menggulir), tombol WhatsApp header tampil di ponsel, semua tautan teks utama minimal 44px.
+- Ditambah `not-found.tsx`, `error.tsx`, keadaan kosong di Jadwal dan di seksi paket pilihan Home, serta tautan "Lewati ke konten".
+- Penanda buka/tutup `+`/`−` pada semua `<details>`.
+- Ukuran teks fakta utama (ketersediaan, label harga, meta hotel) naik satu tingkat.
+- Alamat, rekening, dan jam kerja di Kontak dan TrustSection dilabeli "(contoh)"; ajakan datang ke kantor dihapus.

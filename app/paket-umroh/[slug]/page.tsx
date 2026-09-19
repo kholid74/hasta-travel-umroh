@@ -44,13 +44,13 @@ export async function generateMetadata({
 function BlokHotel({ kota, hotel }: { kota: string; hotel: Hotel }) {
   return (
     <div className="rounded-card border border-hairline bg-surface p-5">
-      <p className="text-xs font-semibold uppercase tracking-wider text-muted">{kota}</p>
+      <p className="text-sm font-medium text-muted">{kota}</p>
       <h3 className="mt-1 text-lg">{hotel.name}</h3>
       <div className="mt-3">
         <HotelDistanceBadge hotel={hotel} />
       </div>
-      <p className="mt-2 text-sm text-muted">{hotelMeta(hotel)}</p>
-      <ul className="mt-4 space-y-1.5 border-t border-hairline pt-4 text-sm text-muted">
+      <p className="mt-2 text-[15px] text-muted">{hotelMeta(hotel)}</p>
+      <ul className="mt-4 space-y-1.5 border-t border-hairline pt-4 text-[15px] text-muted">
         <li>
           <span className="font-medium text-ink">{hotel.distanceMeters} meter</span> ke{" "}
           {hotel.landmark}, diukur berjalan kaki ke pintu terdekat.
@@ -84,7 +84,10 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
   return (
     <main className="mx-auto w-full max-w-[1200px] px-4 py-8 pb-28 sm:px-6 sm:py-12 md:pb-12">
       <nav aria-label="Breadcrumb" className="text-sm text-muted">
-        <Link href="/paket-umroh" className="underline underline-offset-4 hover:text-primary">
+        <Link
+          href="/paket-umroh"
+          className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-primary"
+        >
           Paket Umroh
         </Link>
         <span aria-hidden> · </span>
@@ -92,7 +95,7 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
       </nav>
 
       <header className="mt-4 max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+        <p className="text-sm font-medium text-muted">
           {LABEL_TIPE[paket.type]} · {paket.duration} hari
         </p>
         <h1 className="mt-1.5 text-3xl sm:text-4xl">{paket.name}</h1>
@@ -115,7 +118,7 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
         </h2>
         <p className="mt-2 max-w-2xl text-muted">
           Angka di bawah bisa Anda cek sendiri di peta. Kami menuliskannya dalam meter karena
-          &ldquo;dekat masjid&rdquo; berarti hal yang berbeda untuk orang yang berbeda — dan
+          &ldquo;dekat masjid&rdquo; berarti hal yang berbeda untuk orang yang berbeda, dan
           perbedaan 200 meter dengan 800 meter bisa menentukan seseorang sempat ikut shalat
           berjamaah atau tidak.
         </p>
@@ -136,6 +139,7 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
                 <summary className="flex cursor-pointer list-none items-baseline gap-3 p-4">
                   <span className="font-display text-sm font-semibold tabular-nums text-accent">
                     Hari {hari.day}
+                    {hari.endDay ? `-${hari.endDay}` : ""}
                   </span>
                   <span className="font-medium">{hari.title}</span>
                 </summary>
@@ -177,9 +181,9 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
         <h2 id="syarat" className="text-2xl">
           Syarat pendaftaran
         </h2>
-        <ul className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+        <ul className="mt-4 grid gap-x-8 sm:grid-cols-2">
           {paket.requirements.map((s) => (
-            <li key={s} className="rounded-card border border-hairline bg-surface px-4 py-3">
+            <li key={s} className="border-t border-hairline py-3">
               {s}
             </li>
           ))}
@@ -193,14 +197,14 @@ export default async function DetailPaketPage({ params }: { params: Promise<{ sl
         <p className="mt-2 max-w-2xl text-muted">
           Setiap rombongan didampingi satu pembimbing ibadah berbahasa Indonesia sejak manasik
           sampai kembali ke Tanah Air. Pada situs demo ini nama dan foto pembimbing sengaja tidak
-          ditampilkan — data seperti itu akan terlihat seperti data asli, dan justru itu yang paling
+          ditampilkan: data seperti itu akan terlihat seperti data asli, dan justru itu yang paling
           sering dipalsukan situs tiruan.
         </p>
       </section>
 
       <section aria-labelledby="faq" className="mt-10">
         <h2 id="faq" className="text-2xl">
-          Pertanyaan yang paling sering diajukan
+          Pertanyaan sebelum mendaftar
         </h2>
         <div className="mt-4 space-y-2">
           {faqDetailPaket.map((item) => (
