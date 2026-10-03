@@ -1,0 +1,88 @@
+"use client";
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { Plus, Upload, FileText, Check, X, ArrowLeft, Pencil } from "lucide-react";
+import type { Jamaah as PersonRecord, VisaStatus } from "@/content/admin/types";
+import { newJamaah } from "@/content/admin/seed";
+import { bookingFor, dateLabel, documentPercent, outstanding, paid, paymentStatus, uid, validPassport } from "@/lib/admin/model";
+import { rupiah } from "@/lib/format";
+import { downloadText } from "@/lib/admin/export";
+import { useDemo } from "./Store";
+import { Avatar, Badge, DataTable, Empty, Fields, Modal, PageHeader, Panel, Person, Progress, SelectFilter, Tabs } from "./ui";
+import { CreateForm } from "./CreateForm";
+
+export function DocumentChecklist({ jamaahId }: { jamaahId: string }) {
+  const { state, transact, notify } = useDemo();
+  const j = state.jamaah.find(j => j.id === jamaahId)!;
+  const [preview, setPreview] = useState<string | null>(null);
+  return <><div className="panel-body"><p className="admin-notice">Berkas dipilih untuk simulasi verifikasi di browser. Tidak dikirim atau disimpan di server.</p>{Object.entries(j.documents).map(([name, status]) => <div className="checklist-row" key={name}><FileText size={18} className="muted" /><span><b>{name}</b><small><Badge>{status}</Badge></small></span><label className="admin-button" title={`Pilih berkas ${name}`}><Upload size={13} />Unggah<input type="file" aria-label={`Unggah ${name}`} accept="image/jpeg,image/png,application/pdf" style={{ display: "none" }} onChange={e => { const file = e.target.files?.[0]; if (!file) return; if (file.size > 5 * 1024 * 1024 || !["image/jpeg", "image/png", "application/pdf"].includes(file.type)) { notify("Pilih JPG, PNG, atau PDF maksimal 5 MB.", true); return; } transact(s => { s.jamaah.find(p => p.id === j.id)!.documents[name] = "Diunggah"; }, `${name} ${j.name} diunggah (simulasi)`, "Dokumen"); setPreview(`${file.name} · ${Math.ceil(file.size / 1024)} KB`); }} /></label>{status === "Diunggah" && <><button className="icon-button" title="Verifikasi dokumen" aria-label={`Verifikasi ${name}`} onClick={() => transact(s => { s.jamaah.find(p => p.id === j.id)!.documents[name] = "Terverifikasi"; }, `${name} ${j.name} terverifikasi`, "Dokumen")}><Check size={17} /></button><button className="icon-button" title="Tolak dokumen" aria-label={`Tolak ${name}`} onClick={() => transact(s => { s.jamaah.find(p => p.id === j.id)!.documents[name] = "Ditolak"; }, `${name} ${j.name} ditolak; perlu unggahan ulang`, "Dokumen")}><X size={17} /></button></>}</div>)}{preview && <p className="admin-notice section-gap">Berkas terakhir: {preview}</p>}</div></>;
+}
+
+export function VisaPanel({ jamaahId }: { jamaahId: string }) {
+  const { state, transact } = useDemo();
+  const j = state.jamaah.find(j => j.id === jamaahId)!;
+  return <Panel title="Pengurusan visa" subtitle="Workflow internal · simulasi tanpa koneksi API visa"><div className="panel-body"><form className="admin-form" onSubmit={e => {
+    e.preventDefault(); const f = new FormData(e.currentTarget);
+    transact(s => {
+      const p = s.jamaah.find(p => p.id === j.id)!;
+      const visa = String(f.get("status")) as VisaStatus;
+      if (visa !== "Belum diajukan" && (!p.passport || p.documents.Paspor !== "Terverifikasi")) throw new Error("Lengkapi nomor dan verifikasi paspor sebelum memproses visa.");
+      if (visa === "Disetujui" && (!String(f.get("number")).trim() || !f.get("visaApproved") || !f.get("visaExpiry"))) throw new Error("Nomor, tanggal persetujuan, dan masa berlaku visa wajib diisi.");
+      for (const key of ["visaSubmitted", "visaApproved", "visaExpiry", "visaNotes"] as const) p[key] = String(f.get(key) ?? "").trim();
+      if (p.visaApproved && p.visaExpiry && p.visaExpiry <= p.visaApproved) throw new Error("Masa berlaku harus setelah tanggal persetujuan visa.");
+      p.visa = visa; p.visaNumber = String(f.get("number")).trim();
+    }, `Visa ${j.name} diperbarui`, "Visa");
+  }}><div className="form-grid"><label>Status visa<select name="status" defaultValue={j.visa}>{["Belum diajukan", "Diajukan", "Diproses", "Disetujui", "Ditolak"].map(s => <option key={s}>{s}</option>)}</select></label><label>Nomor visa<input name="number" defaultValue={j.visaNumber} placeholder="DEMO-Vxxxx" /></label>{([["visaSubmitted", "Tanggal pengajuan"], ["visaApproved", "Tanggal persetujuan"], ["visaExpiry", "Berlaku hingga"]] as const).map(([key, label]) => <label key={key}>{label}<input type="date" name={key} defaultValue={j[key]} /></label>)}</div><label>Catatan visa<textarea name="visaNotes" defaultValue={j.visaNotes} rows={3} /></label><p className="muted">Riwayat pengajuan dan persetujuan dicatat pada tab Aktivitas.</p><button className="admin-button primary">Simpan status visa</button></form></div></Panel>;
+}
+
+export default function JamaahModule({ id }: { id?: string }) {
+  const { state, transact, notify } = useDemo();
+  const [create, setCreate] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [tab, setTab] = useState("Data pribadi");
+  const [selection, setSelection] = useState<string[]>([]);
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const importRef = useRef<HTMLInputElement>(null);
+  const j = state.jamaah.find(j => j.id === id);
+  const setFilter = (key: string, value: string) => { setFilters(f => ({ ...f, [key]: value })); setSelection([]); };
+  const packageName = (p: PersonRecord) => { const b = bookingFor(state, p.id); const d = state.departures.find(d => d.id === b?.departureId); return state.packages.find(p => p.id === d?.packageId)?.name ?? "Belum ada paket"; };
+  if (id && !j) return <Empty title="Jamaah tidak ditemukan" text="Data mungkin telah direset. Kembali ke daftar jamaah melalui navigasi." />;
+  if (j) {
+    const b = bookingFor(state, j.id), d = state.departures.find(d => d.id === b?.departureId);
+    return <><Link href="/admin/jamaah" className="text-button"><ArrowLeft size={13} style={{ display: "inline" }} /> Daftar jamaah</Link><div className="detail-banner section-gap"><Avatar name={j.name} /><div style={{ flex: 1 }}><h1>{j.name}</h1><p>{j.id} · {packageName(j)}</p><Badge>{b ? "Aktif" : "Belum booking"}</Badge></div><button className="admin-button" onClick={() => setEdit(true)}><Pencil size={14} />Edit data</button></div>
+      <Tabs items={["Data pribadi", "Paspor", "Dokumen", "Visa", "Booking", "Pembayaran", "Kamar", "Keluarga / Grup", "Aktivitas"]} value={tab} onChange={setTab} />
+      {tab === "Data pribadi" && <Panel title="Identitas jamaah" subtitle="Gunakan nama sesuai paspor"><Fields data={{ "Nama lengkap": j.name, NIK: j.nik, "Jenis kelamin": j.gender, "Kota kelahiran": j.birthPlace, "Tanggal lahir": dateLabel(j.birthDate), "Status pernikahan": j.marital, "Golongan darah": j.blood, Telepon: j.phone, Email: j.email, Alamat: j.address, "Kontak darurat": j.emergency }} /></Panel>}
+      {tab === "Paspor" && <Panel title="Data paspor" action={<button className="text-button" onClick={() => setEdit(true)}>Lengkapi / edit →</button>}><Fields data={{ "Nomor paspor": j.passport, "Tanggal penerbitan": dateLabel(j.passportIssue), "Berlaku hingga": dateLabel(j.passportExpiry), "Kantor penerbit": j.passportOffice, "Status verifikasi": <Badge>{j.documents.Paspor}</Badge> }} /><div className="panel-body">{!validPassport(j, d?.date ?? "2026-10-02") && <p className="admin-notice warning">Paspor belum lengkap atau masa berlaku kurang dari 6 bulan setelah keberangkatan. Periksa sebelum mengajukan visa.</p>}<p className="admin-notice section-gap">Arsip paspor demo tidak memuat foto identitas asli. Gunakan tab Dokumen untuk mencoba unggah dan verifikasi.</p></div></Panel>}
+      {tab === "Dokumen" && <Panel title="Kelengkapan dokumen" subtitle={`${documentPercent(j)}% terverifikasi`}><DocumentChecklist jamaahId={j.id} /></Panel>}
+      {tab === "Visa" && <VisaPanel jamaahId={j.id} />}
+      {tab === "Booking" && (b && d ? <Panel title="Rincian booking" action={<Link className="text-button" href={`/admin/booking/${b.id}`}>Buka booking →</Link>}><Fields data={{ "Kode booking": b.id, Paket: packageName(j), Keberangkatan: `${d.id} · ${dateLabel(d.date)}`, "Tipe kamar": b.roomType, "Tanggal booking": dateLabel(b.date), Agen: state.agents.find(a => a.id === j.agentId)?.name ?? "Langsung", "Nilai booking": rupiah(b.total) }} /></Panel> : <Empty title="Belum memiliki booking" text="Buka modul Booking untuk memilih keberangkatan jamaah ini." />)}
+      {tab === "Pembayaran" && (b ? <Panel title="Riwayat pembayaran" action={<Link className="text-button" href={`/admin/invoice/${b.id}`}>Buka invoice →</Link>}><Fields data={{ "Total tagihan": rupiah(b.total), Terbayar: rupiah(paid(state, b.id)), Sisa: rupiah(outstanding(state, b)), Status: <Badge>{paymentStatus(state, b)}</Badge> }} /><DataTable title="pembayaran" rows={state.payments.filter(p => p.bookingId === b.id)} columns={[{ label: "Transaksi", value: p => p.id }, { label: "Tanggal", value: p => p.date, render: p => dateLabel(p.date) }, { label: "Nominal", value: p => p.amount, render: p => rupiah(p.amount) }, { label: "Status", value: p => p.status, render: p => <Badge>{p.status}</Badge> }]} /></Panel> : <Empty title="Belum ada invoice" />)}
+      {tab === "Kamar" && <div className="two-columns">{["Makkah", "Madinah"].map(hotel => { const r = state.rooms.find(r => r.hotel === hotel && r.jamaahIds.includes(j.id)); return <Panel key={hotel} title={hotel}><Fields data={{ "Nomor kamar": r?.number ?? "Belum dialokasikan", "Tipe kamar": r ? `${r.capacity} orang` : "—", "Teman sekamar": r ? r.jamaahIds.filter(p => p !== j.id).map(p => state.jamaah.find(j => j.id === p)?.name).join(", ") : "—" }} /><div className="panel-body"><Link href={`/admin/rooming?departure=${d?.id ?? ""}`} className="text-button">Atur rooming list →</Link></div></Panel>; })}</div>}
+      {tab === "Keluarga / Grup" && <Panel title={j.family || "Belum terhubung dengan keluarga"} action={<button className="text-button" onClick={() => setEdit(true)}>Ubah grup →</button>}><div className="panel-body stack">{j.family && state.jamaah.filter(p => p.family === j.family).map(p => <Person key={p.id} name={p.name} sub={p.id} href={`/admin/jamaah/${p.id}`} />)}</div></Panel>}
+      {tab === "Aktivitas" && <Panel title="Aktivitas jamaah"><ul className="activity-list">{state.activities.filter(a => a.action.includes(j.name) || a.action.includes(j.id)).map(a => <li key={a.id}><span className="activity-dot" /><div>{a.action}<small>{dateLabel(a.date)} · {a.user}</small></div></li>)}</ul>{!state.activities.some(a => a.action.includes(j.name) || a.action.includes(j.id)) && <Empty title="Belum ada perubahan pada jamaah ini" />}</Panel>}
+      {edit && <Modal title={`Edit ${j.name}`} onClose={() => setEdit(false)} wide><form className="admin-form" onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); if (transact(s => { const p = s.jamaah.find(p => p.id === j.id)!; for (const k of ["name", "phone", "email", "city", "address", "nik", "birthPlace", "birthDate", "marital", "blood", "emergency", "passport", "passportOffice", "passportIssue", "passportExpiry", "family"] as const) p[k] = String(f.get(k) ?? "").trim(); p.gender = String(f.get("gender")) as PersonRecord["gender"]; p.agentId = String(f.get("agentId")); if (p.passportIssue && p.passportExpiry && p.passportExpiry <= p.passportIssue) throw new Error("Tanggal kedaluwarsa paspor harus setelah tanggal penerbitan."); }, `Data ${j.name} diperbarui`, "Jamaah")) setEdit(false); }}><div className="form-grid">{([ ["name", "Nama lengkap"], ["phone", "Telepon"], ["email", "Email"], ["city", "Kota"], ["address", "Alamat"], ["nik", "NIK (demo)"], ["birthPlace", "Kota kelahiran"], ["birthDate", "Tanggal lahir"], ["marital", "Status pernikahan"], ["blood", "Golongan darah"], ["emergency", "Kontak darurat"], ["passport", "Nomor paspor"], ["passportOffice", "Kantor penerbit paspor"], ["passportIssue", "Tanggal penerbitan paspor"], ["passportExpiry", "Berlaku sampai"], ["family", "Nama keluarga / grup"] ] as const).map(([key, label]) => <label key={key}>{label}<input name={key} defaultValue={j[key]} required={key === "name" || key === "phone"} type={key === "email" ? "email" : ["birthDate", "passportIssue", "passportExpiry"].includes(key) ? "date" : "text"} /></label>)}<label>Jenis kelamin<select name="gender" defaultValue={j.gender}><option>Laki-laki</option><option>Perempuan</option></select></label><label>Agen<select name="agentId" defaultValue={j.agentId}><option value="">Langsung</option>{state.agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label></div><div className="modal-actions"><button className="admin-button primary">Simpan perubahan</button></div></form></Modal>}
+    </>;
+  }
+  const rows = state.jamaah.filter(j => { const b = bookingFor(state, j.id); const d = state.departures.find(d => d.id === b?.departureId); return (!filters.package || d?.packageId === filters.package) && (!filters.departure || d?.id === filters.departure) && (!filters.payment || (b && paymentStatus(state, b) === filters.payment)) && (!filters.documents || (filters.documents === "Lengkap" ? documentPercent(j) === 100 : documentPercent(j) < 100)) && (!filters.visa || j.visa === filters.visa) && (!filters.agent || j.agentId === filters.agent) && (!filters.city || j.city === filters.city); });
+  return <><PageHeader title="Jamaah" description="Satu tempat untuk mengenal, mendampingi, dan mempersiapkan setiap jamaah." actions={<><button className="admin-button" onClick={() => importRef.current?.click()}><Upload size={15} />Impor JSON</button><button className="admin-button primary" onClick={() => setCreate(true)}><Plus size={15} />Tambah jamaah</button></>} />
+    <input hidden ref={importRef} type="file" accept="application/json,.json" onChange={async e => { const file = e.target.files?.[0]; if (!file) return; try { if (file.size > 1024 * 1024) throw new Error("Berkas maksimal 1 MB."); const input: unknown = JSON.parse(await file.text()); if (!Array.isArray(input) || !input.length || input.length > 100) throw new Error("Impor harus berupa array berisi 1–100 jamaah."); transact(s => { input.forEach((row: unknown) => { if (!row || typeof row !== "object" || !("name" in row) || !("phone" in row) || typeof row.name !== "string" || typeof row.phone !== "string" || row.name.trim().length < 3 || !/^[+\d\s-]{8,18}$/.test(row.phone)) throw new Error("Setiap baris harus memiliki name dan phone yang valid."); if (s.jamaah.some(j => j.phone === row.phone)) throw new Error(`Nomor ${row.phone} sudah terdaftar. Tidak ada data diimpor.`); s.jamaah.push(newJamaah(uid("JMH"), row.name.trim(), row.phone)); }); }, `${input.length} jamaah berhasil diimpor`, "Jamaah"); } catch (err) { notify(err instanceof Error ? err.message : "Format tidak valid.", true); } e.target.value = ""; }} />
+    <div className="flex-between" style={{ marginBottom: 16 }}><p className="muted">{state.jamaah.length} jamaah terdaftar · {state.bookings.filter(b => b.status === "Aktif").length} booking aktif</p><button className="text-button" onClick={() => downloadText("template-jamaah.json", JSON.stringify([{ name: "Salman Al Farisi", phone: "08000000999" }], null, 2))}>Unduh format impor</button></div>
+    <DataTable title="jamaah" rows={rows} selection={selection} onSelection={setSelection} filters={<>{[
+      { key: "package", label: "Semua paket", options: state.packages.map(p => ({ value: p.id, label: p.name })) },
+      { key: "departure", label: "Keberangkatan", options: state.departures.map(d => ({ value: d.id, label: d.id })) },
+      { key: "payment", label: "Pembayaran", options: ["Lunas", "DP", "Cicilan", "Belum bayar", "Jatuh tempo"].map(v => ({ value: v, label: v })) },
+      { key: "documents", label: "Dokumen", options: ["Lengkap", "Belum lengkap"].map(v => ({ value: v, label: v })) },
+      { key: "visa", label: "Visa", options: ["Belum diajukan", "Diajukan", "Diproses", "Disetujui", "Ditolak"].map(v => ({ value: v, label: v })) },
+      { key: "agent", label: "Agen", options: state.agents.map(a => ({ value: a.id, label: a.name })) },
+      { key: "city", label: "Kota", options: [...new Set(state.jamaah.map(j => j.city))].map(v => ({ value: v, label: v })) },
+    ].map(f => <SelectFilter key={f.key} label={f.label} value={filters[f.key] ?? ""} onChange={v => setFilter(f.key, v)} options={f.options} />)}</>} columns={[
+      { label: "Jamaah", value: j => `${j.name} ${j.id}`, render: j => <Person name={j.name} sub={j.id} href={`/admin/jamaah/${j.id}`} /> },
+      { label: "Kontak", value: j => j.phone, render: j => <>{j.phone}<small>{j.city} · {j.gender}</small></> },
+      { label: "Paket / keberangkatan", value: j => packageName(j), render: j => <>{packageName(j)}<small>{bookingFor(state, j.id)?.departureId || "Belum ada"}</small></> },
+      { label: "Pembayaran", value: j => { const b = bookingFor(state, j.id); return b ? paymentStatus(state, b) : "Belum booking"; }, render: j => { const b = bookingFor(state, j.id); return <Badge>{b ? paymentStatus(state, b) : "Belum booking"}</Badge>; } },
+      { label: "Dokumen", value: j => documentPercent(j), render: j => <div style={{ minWidth: 75 }}><small>{documentPercent(j)}% lengkap</small><Progress value={documentPercent(j)} /></div> },
+      { label: "Visa", value: j => j.visa, render: j => <Badge>{j.visa}</Badge> },
+      { label: "Agen", value: j => state.agents.find(a => a.id === j.agentId)?.name ?? "Langsung" },
+    ]} />{create && <CreateForm kind="Jamaah" onClose={() => setCreate(false)} />}
+  </>;
+}
