@@ -1,4 +1,5 @@
 import type { Package } from "../types";
+import type { Costing, CostScenario, CostTemplate } from "./costing";
 
 export type AdminPackage = Omit<Package, "departures"> & { status: "Draft" | "Terbit" | "Ditutup" | "Arsip" };
 export type Departure = {
@@ -33,6 +34,7 @@ export type Notification = { id: string; category: string; title: string; text: 
 export type CmsEntry = { id: string; kind: "artikel" | "testimoni" | "galeri"; title: string; category: string; body: string; status: "Draft" | "Terbit"; date: string; image?: string };
 export type Staff = { id: string; name: string; email: string; role: string; active: boolean };
 export type DemoState = {
+  costings: Costing[]; costTemplates: CostTemplate[]; costScenarios: CostScenario[];
   packages: AdminPackage[]; departures: Departure[]; jamaah: Jamaah[]; bookings: Booking[];
   payments: Payment[]; leads: Lead[]; agents: Agent[]; rooms: Room[]; expenses: Expense[];
   inventory: Inventory[]; manasik: Manasik[]; activities: Activity[]; notifications: Notification[];

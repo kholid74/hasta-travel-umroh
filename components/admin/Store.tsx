@@ -5,10 +5,11 @@ import type { DemoState } from "@/content/admin/types";
 import { createSeed } from "@/content/admin/seed";
 import { uid } from "@/lib/admin/model";
 
-type Store = { state: DemoState; transact: (fn: (draft: DemoState) => void, message: string, module?: string) => boolean; notify: (message: string, error?: boolean) => void; reset: () => void };
+type Store = { state: DemoState; resetVersion: number; transact: (fn: (draft: DemoState) => void, message: string, module?: string) => boolean; notify: (message: string, error?: boolean) => void; reset: () => void };
 const Context = createContext<Store | null>(null);
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState(createSeed);
+  const [resetVersion, setResetVersion] = useState(0);
   const current = useRef(state);
   const [toast, setToast] = useState<{ message: string; error: boolean } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -31,7 +32,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
       return true;
     } catch (error) { notify(error instanceof Error ? error.message : "Perubahan tidak dapat disimpan.", true); return false; }
   }
-  function reset() { const seed = createSeed(); current.current = seed; setState(seed); notify("Data demo dikembalikan ke kondisi awal."); }
-  return <Context.Provider value={{ state, transact, notify, reset }}>{children}{toast && <div ref={toastRef} popover="manual" className={`admin-toast ${toast.error ? "error" : ""}`} role={toast.error ? "alert" : "status"}>{toast.error ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}<span>{toast.message}</span><button aria-label="Tutup notifikasi" onClick={() => setToast(null)}><X size={16} /></button></div>}</Context.Provider>;
+  function reset() { const seed = createSeed(); current.current = seed; setState(seed); setResetVersion(v => v + 1); notify("Data demo dikembalikan ke kondisi awal."); }
+  return <Context.Provider value={{ state, resetVersion, transact, notify, reset }}>{children}{toast && <div ref={toastRef} popover="manual" className={`admin-toast ${toast.error ? "error" : ""}`} role={toast.error ? "alert" : "status"}>{toast.error ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}<span>{toast.message}</span><button aria-label="Tutup notifikasi" onClick={() => setToast(null)}><X size={16} /></button></div>}</Context.Provider>;
 }
 export function useDemo() { const value = useContext(Context); if (!value) throw new Error("DemoProvider diperlukan"); return value; }

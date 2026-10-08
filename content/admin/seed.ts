@@ -1,6 +1,7 @@
 import { packages as catalog } from "../packages";
 import { company } from "../company";
 import type { DemoState, Jamaah } from "./types";
+import { createCostingSeed } from "./costing";
 
 export const DEMO_TODAY = "2026-10-02";
 export const documentNames = ["KTP", "KK", "Paspor", "Foto", "Vaksin", "Buku nikah", "Akta kelahiran", "Asuransi"];
@@ -29,6 +30,7 @@ export function createSeed(): DemoState {
   ]);
   const leads = ["Salman Al Farisi", "Zahra Aulia", "Hana Syafira", "Rizwan Hakim", "Putri Maharani", "Fikri Ramadhan", "Raisa Annisa", "Naufal Irfan", "Dian Kartika", "Iqbal Maulana", "Suci Ramadhani", "Faisal Akbar", "Dina Oktaviani", "Rafi Abdullah", "Nabila Azmi", "Benny Saputra", "Husna Karim", "Asep Saefullah", "Intan Safira", "Teguh Santoso", "Winda Apriliyani", "Farhan Zaki", "Meutia Azzahra", "Lukman Hakim"].map((name, i) => ({ id: `LD-${301 + i}`, name, phone: `08000000${200 + i}`, packageId: departures[i % 8].packageId, source: ["Website", "WhatsApp", "Instagram", "Referral", "Agen", "Walk-in", "Meta Ads"][i % 7], sales: ["Rina Amelia", "Dimas Pratama", "Nadia Putri"][i % 3], stage: (["Lead Baru", "Dihubungi", "Follow Up", "Qualified", "Lost"] as const)[i % 5], lastContact: "2026-10-01", followUp: "2026-10-03", notes: ["Tertarik keberangkatan bersama keluarga. Meminta rincian hotel dan jadwal manasik."] }));
   return {
+    ...createCostingSeed(packages, departures),
     packages, departures, jamaah, bookings, payments, leads, agents,
     rooms: departures.flatMap(d => ["Makkah", "Madinah"].flatMap(hotel => Array.from({ length: 4 }, (_, i) => ({ id: `${d.id}-${hotel}-${i}`, departureId: d.id, hotel: hotel as "Makkah" | "Madinah", number: String(1201 + i), capacity: i < 2 ? 4 : i === 2 ? 3 : 2, gender: i % 2 ? "Perempuan" as const : "Laki-laki" as const, jamaahIds: bookings.filter(b => b.departureId === d.id).map(b => jamaah.find(j => j.id === b.jamaahId)!).filter(j => j.gender === (i % 2 ? "Perempuan" : "Laki-laki")).slice(i < 2 ? 0 : 3, i < 2 ? 3 : 4).map(j => j.id) })))),
     expenses: departures.flatMap((d, i) => ["Tiket pesawat", "Hotel", "Visa", "Transportasi", "Katering", "Pembimbing", "Handling", "Perlengkapan", "Marketing", "Lainnya"].map((category, k) => ({ id: `EXP-${i}-${k}`, departureId: d.id, category, vendor: [d.airline, "Al Haramain Hospitality", "Nusantara Visa Services", "Al Noor Transport"][k % 4], amount: [90000000, 45000000, 12000000, 8000000, 6500000, 4000000, 2000000, 4000000, 1500000, 1000000][k] * (i === 0 ? 1 : 0.25), date: "2026-09-28", status: k % 3 === 0 ? "Menunggu" as const : "Dibayar" as const }))),

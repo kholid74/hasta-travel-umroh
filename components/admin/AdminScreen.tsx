@@ -7,6 +7,7 @@ const Jamaah = dynamic(() => import("./Jamaah"));
 const Packages = dynamic(() => import("./Packages"));
 const Departures = dynamic(() => import("./Departures"));
 const Finance = dynamic(() => import("./Finance"));
+const Costing = dynamic(() => import("./Costing"));
 const Documents = dynamic(() => import("./Documents"));
 const Rooming = dynamic(() => import("./Rooming"));
 const Operations = dynamic(() => import("./Operations"));
@@ -17,6 +18,7 @@ const CMS = dynamic(() => import("./CMS"));
 const Reports = dynamic(() => import("./Reports"));
 const System = dynamic(() => import("./System"));
 export function AdminScreen({ module, id }: { module: string; id?: string }) {
+  if (module === "hpp") return <Costing id={id} />;
   if (module === "panduan") return <Guide />;
   if (module === "jamaah") return <Jamaah id={id} />;
   if (["paket", "website-paket"].includes(module)) return <Packages id={id} website={module === "website-paket"} />;

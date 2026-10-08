@@ -2,7 +2,7 @@ export const navigation = [
   { group: "OVERVIEW", items: [["dashboard", "Dashboard", "dashboard"], ["panduan", "Panduan Admin", "booking"]] },
   { group: "SALES", items: [["crm", "CRM / Leads", "leads"], ["booking", "Booking", "booking"], ["jamaah", "Jamaah", "users"]] },
   { group: "OPERASIONAL", items: [["paket", "Paket Umrah", "package"], ["keberangkatan", "Keberangkatan", "plane"], ["manifest", "Manifest", "list"], ["dokumen", "Dokumen & Visa", "file"], ["rooming", "Rooming List", "bed"], ["manasik", "Manasik", "calendar"], ["transportasi", "Transportasi", "bus"]] },
-  { group: "FINANCE", items: [["pembayaran", "Pembayaran", "wallet"], ["invoice", "Invoice", "receipt"], ["pengeluaran", "Pengeluaran", "expense"], ["komisi", "Komisi Agen", "commission"]] },
+  { group: "FINANCE", items: [["hpp", "HPP & Kalkulasi Paket", "chart"], ["pembayaran", "Pembayaran", "wallet"], ["invoice", "Invoice", "receipt"], ["pengeluaran", "Pengeluaran", "expense"], ["komisi", "Komisi Agen", "commission"]] },
   { group: "PARTNERS", items: [["agen", "Agen", "handshake"], ["vendor", "Supplier / Vendor", "building"]] },
   { group: "INVENTORY", items: [["perlengkapan", "Perlengkapan Jamaah", "box"]] },
   { group: "COMMUNICATION", items: [["broadcast", "Broadcast", "send"], ["notifikasi", "Notification Center", "bell"]] },

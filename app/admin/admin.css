@@ -7,6 +7,16 @@
 .admin-app input:not([type=checkbox]):not([type=color]):not([type=file]),.admin-app select,.admin-app textarea { min-width:0; border:1px solid #dce2da; border-radius:6px; padding:9px 12px; background:white; color:var(--a-ink); font:inherit; min-height:40px; }
 .admin-app input[type=checkbox] { accent-color:var(--a-green); width:15px; height:15px; flex-shrink:0; }
 .admin-app textarea { resize:vertical; } .admin-app select { max-width:100%; }
+.costing-inputs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; padding:22px; border:0; min-width:0; }
+.costing-inputs label,.costing-version { display:grid; gap:7px; font-size:11px; font-weight:600; min-width:0; }
+.costing-inputs input { width:100%; }
+.costing-actions { margin:0 0 18px; }
+.costing-group { display:flex; gap:8px; align-items:center; font-size:11px; }
+.costing-note { max-width:250px; white-space:normal; }
+.admin-app .costing-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.admin-app .costing-stats strong { font-size:22px; overflow-wrap:anywhere; }
+@media(max-width:1000px) { .costing-inputs { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .admin-app .costing-stats { grid-template-columns:1fr; } .costing-inputs { grid-template-columns:1fr; padding:18px; } }
 .admin-guide { max-width:1200px; margin:0 auto; }
 .guide-hero { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:40px; padding:40px; background:#193d2e; color:#fff; border-radius:12px; }
 .guide-eyebrow { display:flex; align-items:center; gap:8px; color:#eec77b; font-size:10px; font-weight:700; letter-spacing:1.5px; }

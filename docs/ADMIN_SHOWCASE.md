@@ -59,7 +59,7 @@ Semua path berikut berawalan `/admin/`.
 | Overview | `dashboard`, `panduan` (penjelasan seluruh menu, enam tahap perjalanan, dan langkah mencoba demo) |
 | Sales | `crm`, `leads-website`, `booking`, `booking/[id]`, `jamaah`, `jamaah/[id]` |
 | Operasional | `paket`, `paket/[id]`, `keberangkatan`, `keberangkatan/[id]`, `manifest`, `dokumen`, `rooming`, `manasik`, `transportasi` |
-| Finance | `pembayaran`, `invoice`, `invoice/[bookingId]`, `pengeluaran`, `komisi` |
+| Finance | `hpp`, `hpp/[departureId]`, `pembayaran`, `invoice`, `invoice/[bookingId]`, `pengeluaran`, `komisi` |
 | Partners | `agen`, `agen/[id]`, `vendor` |
 | Inventory | `perlengkapan` |
 | Komunikasi | `broadcast`, `notifikasi` |

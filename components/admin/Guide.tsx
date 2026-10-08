@@ -6,8 +6,9 @@ const journey = [
   {
     id: "siapkan", label: "Siapkan bisnis", role: "Owner & admin", title: "Siapkan fondasi perjalanan",
     intro: "Mulai dari profil travel, pembagian tugas tim, lalu tentukan produk dan jadwal yang akan dijual.",
-    result: "Tim memiliki acuan paket, harga, tanggal, dan kuota sebelum menerima pendaftaran.",
+    result: "Tim memiliki acuan paket, HPP, harga, tanggal, dan kuota sebelum menerima pendaftaran.",
     features: [
+      { slug: "hpp", text: "Hitung HPP per keberangkatan dari biaya per jamaah, per grup, dan per unit dalam IDR, SAR, atau USD. Pisahkan peserta berbayar dan gratis, uji skenario harga serta margin, lalu simpan draft atau finalisasi. Gunakan template paket untuk keberangkatan lain; perubahan versi final melalui revisi. Semua data hanya tersimpan selama sesi demo dan tidak mengubah harga publik." },
       { slug: "settings", text: "Atur profil travel, rekening pembayaran, cabang, dan preferensi dokumen. Rekening dipakai pada invoice demo; pengaturan lainnya memperlihatkan konfigurasi yang tersedia." },
       { slug: "users", text: "Kenali pembagian tugas melalui daftar pengguna, status aktif, pilihan peran, dan matriks izin. Pengaturan peran di showcase merupakan simulasi, belum membatasi akses atau membuat akun sungguhan." },
       { slug: "paket", text: "Kelola penawaran umrah: harga, durasi, itinerary, hotel, dan penerbangan. Buat atau duplikasi paket, lalu atur status publikasinya. Harga booking yang sudah dibuat tetap memakai harga saat pemesanan." },
