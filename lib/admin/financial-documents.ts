@@ -23,7 +23,7 @@ export function financialDocument(state: DemoState, bookingId: string, kind: Doc
   const historyLines = ["Riwayat Pembayaran", ...(balance.history.length ? balance.history.flatMap(paymentLines) : ["Belum ada pembayaran tercatat."])];
   const summary = [`Total Harga Paket: ${documentMoney(balance.contract)}`, `Total Pembayaran Terverifikasi: ${documentMoney(balance.collected)}`, `Sisa Tagihan: ${documentMoney(balance.balance)}`];
   const templates: Record<DocumentKind, string[]> = {
-    invoice: [`Tanggal invoice: ${dateLabel(b.date)}`, ...(b.due ? [`Jatuh tempo: ${dateLabel(b.due)}`] : []), "RINCIAN TAGIHAN", `1 paket / 1 jamaah: ${documentMoney(balance.contract)}`, "Tidak ada rincian biaya tambahan pada kontrak sumber.", ...assumptions, ...(state.settings.bank && state.settings.account ? [`Instruksi demo: ${state.settings.bank} / ${state.settings.account}. Rekening simulasi; jangan transfer dana.`] : [])],
+    invoice: [`Tanggal invoice: ${dateLabel(b.date)}`, ...(b.due ? [`Jatuh tempo: ${dateLabel(b.due)}`] : []), "RINCIAN TAGIHAN", `1 paket / 1 jamaah: ${documentMoney(balance.contract)}`],
     receipt: payment ? ["PEMBAYARAN DITERIMA - SIMULASI", ...paymentLines(payment), `Booking terkait: ${b.id}`, ...assumptions] : [],
     statement: [`Tanggal laporan: ${dateLabel(generated)}`, ...assumptions],
   };
@@ -37,5 +37,6 @@ export function financialDocument(state: DemoState, bookingId: string, kind: Doc
     history: balance.history.map(p => ({ id: p.id, amount: BigInt(p.amount), date: dateLabel(p.date), method: p.method, status: p.status, verified: p.verifiedAt ? dateLabel(p.verifiedAt) : "", reference: p.reference || "" })),
     assumptions: assumptions.join(" "),
     instructions: state.settings.bank && state.settings.account ? state.settings.bank + " / " + state.settings.account : "",
+    bank: { name: state.settings.bank?.trim() || "", account: state.settings.account?.trim() || "", holder: state.settings.accountHolder?.trim() || "" },
   }, lines: [...identity, ...templates[kind], ...historyLines, ...summary, "DEMO - bukan faktur pajak atau bukti pembayaran riil. Tidak menyatakan kepatuhan pajak.", "Hanya pembayaran Terverifikasi mengurangi tagihan. Menunggu dan Dikembalikan tidak dihitung. Riwayat adalah snapshot saat penerbitan; periksa status terbaru di workspace."] };
 }
