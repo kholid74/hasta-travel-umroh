@@ -8,7 +8,8 @@ const journey = [
     intro: "Mulai dari profil travel, pembagian tugas tim, lalu tentukan produk dan jadwal yang akan dijual.",
     result: "Tim memiliki acuan paket, HPP, harga, tanggal, dan kuota sebelum menerima pendaftaran.",
     features: [
-      { slug: "hpp", text: "Hitung HPP per keberangkatan dari biaya per jamaah, per grup, dan per unit dalam IDR, SAR, atau USD. Pisahkan peserta berbayar dan gratis, uji skenario harga serta margin, lalu simpan draft atau finalisasi. Gunakan template paket untuk keberangkatan lain; perubahan versi final melalui revisi. Semua data hanya tersimpan selama sesi demo dan tidak mengubah harga publik." },
+      { slug: "haji-khusus", text: "Kelola paket Haji Khusus, tahun rencana, mata uang, fasilitas, dokumen, dan tahapan pembayaran yang dapat disesuaikan. Pendaftaran memakai identitas jamaah, booking dan pembayaran bersama, dengan perencanaan Haji terpisah dari Umrah. Seluruh proses ilustratif dan perlu validasi operasional." },
+      { slug: "hpp", text: "Hitung HPP per keberangkatan dari biaya per jamaah, per grup, dan per unit dalam IDR, SAR, atau USD. Pisahkan peserta berbayar dan gratis, uji skenario harga serta margin, lalu simpan draft atau finalisasi. Gunakan template paket untuk keberangkatan lain; perubahan versi final melalui revisi. Data yang disimpan bertahan di browser setelah refresh dan tidak mengubah harga publik. HPP juga mendukung Haji Khusus dan perbandingan versi." },
       { slug: "settings", text: "Atur profil travel, rekening pembayaran, cabang, dan preferensi dokumen. Rekening dipakai pada invoice demo; pengaturan lainnya memperlihatkan konfigurasi yang tersedia." },
       { slug: "users", text: "Kenali pembagian tugas melalui daftar pengguna, status aktif, pilihan peran, dan matriks izin. Pengaturan peran di showcase merupakan simulasi, belum membatasi akses atau membuat akun sungguhan." },
       { slug: "paket", text: "Kelola penawaran umrah: harga, durasi, itinerary, hotel, dan penerbangan. Buat atau duplikasi paket, lalu atur status publikasinya. Harga booking yang sudah dibuat tetap memakai harga saat pemesanan." },
@@ -49,7 +50,7 @@ const journey = [
       { slug: "rooming", text: "Atur kamar Makkah dan Madinah lewat drag-and-drop, tombol Atur, atau Auto Assign. Alokasi memeriksa rombongan, kapasitas, dan jenis kelamin; tinjau peringatan bila anggota keluarga terpisah." },
       { slug: "manasik", text: "Buat jadwal pembekalan dengan tanggal, waktu, lokasi, dan pemateri. Catat kehadiran jamaah agar tim mengetahui siapa yang sudah mengikuti manasik." },
       { slug: "transportasi", text: "Tinjau rincian penerbangan, jadwal, terminal, serta PNR contoh. Alokasikan jamaah ke bus dengan pemeriksaan kapasitas dan lihat informasi pengemudi serta rute." },
-      { slug: "perlengkapan", text: "Pantau stok, kebutuhan, dan distribusi koper maupun perlengkapan lainnya. Tambahkan stok dan tandai barang diterima per jamaah; distribusi memeriksa stok serta mencegah pencatatan ganda." },
+      { slug: "perlengkapan", text: "Catat penerimaan dan koreksi stok per gudang. Pilih booking Umrah atau Haji, alokasikan template kit, lalu serahkan sebagian atau seluruh barang dengan penerima dan bukti PDF. Stok fisik, reservasi dan tersedia mengikuti ledger; rilis sisa atau catat retur layak/rusak tanpa menghapus riwayat." },
       { slug: "vendor", text: "Lihat mitra pemasok dan transaksi terkait. Daftar vendor berasal dari pengeluaran yang dicatat, sehingga mitra baru muncul saat digunakan pada transaksi biaya." },
       { slug: "manifest", text: "Tinjau daftar jamaah per rombongan, filter data, lalu ekspor Excel atau cetak melalui browser. Checklist SISKOPATUH membantu persiapan data; tidak mengirim data ke sistem pemerintah." },
     ],
@@ -152,7 +153,7 @@ export default function Guide() {
         <div className="guide-section-heading"><span className="guide-kicker">SEBELUM MENJELAJAH</span><h2 id="help-title">Hal kecil yang membantu Anda mencoba</h2></div>
         <div className="guide-help">
           <details open><summary>Bagaimana berpindah dan mencari data?</summary><p>Gunakan sidebar untuk berpindah modul; di ponsel, buka tombol navigasi. Pencarian global atau Ctrl/Cmd + K menemukan jamaah, paket, booking, invoice, keberangkatan, dan agen. Tombol + Tambah menyediakan pintasan input. Tabel menyediakan pencarian, pengurutan, filter, dan ekspor sesuai modulnya.</p></details>
-          <details open><summary>Apakah perubahan saya tersimpan?</summary><p>Data demo saling terhubung selama Anda berpindah menu di workspace. Memuat ulang halaman atau memilih Reset demo akan mengembalikan data contoh. Gunakan data fiktif saat mencoba.</p></details>
+          <details open><summary>Apakah perubahan saya tersimpan?</summary><p>Data demo saling terhubung selama Anda berpindah menu di workspace. Perubahan tersimpan di browser ini dan bertahan setelah memuat ulang halaman. Pilih Reset data demo di menu profil untuk mengembalikan contoh awal. Gunakan data fiktif saat mencoba.</p></details>
           <details open><summary>Apa yang masih berupa simulasi?</summary><p>WhatsApp, email, pembayaran, pencairan komisi, pengajuan visa, dan SISKOPATUH belum terhubung ke layanan nyata. CMS belum memublikasikan perubahan ke website, berkas dokumen belum disimpan, dan User & Roles belum menerapkan akses pengguna sungguhan. Status serta pratinjau menunjukkan alur kerja yang bisa Anda evaluasi.</p></details>
         </div>
       </section>

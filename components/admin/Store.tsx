@@ -4,16 +4,34 @@ import { CheckCircle2, X, CircleAlert } from "lucide-react";
 import type { DemoState } from "@/content/admin/types";
 import { createSeed } from "@/content/admin/seed";
 import { uid } from "@/lib/admin/model";
+import { DEMO_STORAGE_KEY, decodeDemo, encodeDemo } from "@/lib/admin/persistence";
+
+import { assertInventoryHistory, validateInventory } from "@/lib/admin/inventory";
 
 type Store = { state: DemoState; resetVersion: number; transact: (fn: (draft: DemoState) => void, message: string, module?: string) => boolean; notify: (message: string, error?: boolean) => void; reset: () => void };
 const Context = createContext<Store | null>(null);
 export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState(createSeed);
   const [resetVersion, setResetVersion] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [storageError, setStorageError] = useState("");
   const current = useRef(state);
   const [toast, setToast] = useState<{ message: string; error: boolean } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const toastRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(DEMO_STORAGE_KEY);
+      if (stored) {
+        const restored = decodeDemo(stored);
+        current.current = restored;
+        // Restore browser-only state before mounting forms with local draft state.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setState(restored);
+      }
+    } catch (error) { setStorageError(error instanceof Error ? error.message : "Penyimpanan browser tidak tersedia."); }
+    setReady(true);
+  }, []);
   useEffect(() => { if (toast) toastRef.current?.showPopover(); }, [toast]);
   useEffect(() => () => clearTimeout(timer.current), []);
   function notify(message: string, error = false) {
@@ -25,14 +43,23 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     try {
       const next = structuredClone(current.current);
       fn(next);
+      assertInventoryHistory(current.current, next);
+      validateInventory(next);
       next.activities.unshift({ id: uid("ACT"), date: new Date().toISOString(), user: "Ahmad", module, action: message });
+      try { localStorage.setItem(DEMO_STORAGE_KEY, encodeDemo(next)); }
+      catch { throw new Error("Perubahan belum disimpan: penyimpanan browser penuh atau diblokir. Izinkan penyimpanan, lalu coba lagi."); }
       current.current = next;
       setState(next);
       notify(message);
       return true;
     } catch (error) { notify(error instanceof Error ? error.message : "Perubahan tidak dapat disimpan.", true); return false; }
   }
-  function reset() { const seed = createSeed(); current.current = seed; setState(seed); setResetVersion(v => v + 1); notify("Data demo dikembalikan ke kondisi awal."); }
-  return <Context.Provider value={{ state, resetVersion, transact, notify, reset }}>{children}{toast && <div ref={toastRef} popover="manual" className={`admin-toast ${toast.error ? "error" : ""}`} role={toast.error ? "alert" : "status"}>{toast.error ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}<span>{toast.message}</span><button aria-label="Tutup notifikasi" onClick={() => setToast(null)}><X size={16} /></button></div>}</Context.Provider>;
+  function reset() {
+    try {
+      const seed = createSeed(); localStorage.setItem(DEMO_STORAGE_KEY, encodeDemo(seed));
+      current.current = seed; setState(seed); setStorageError(""); setResetVersion(v => v + 1); notify("Data demo dikembalikan ke kondisi awal.");
+    } catch { notify("Reset belum tersimpan: izinkan penyimpanan browser atau kosongkan ruang, lalu coba lagi.", true); }
+  }
+  return <Context.Provider value={{ state, resetVersion, transact, notify, reset }}>{!ready ? <p className="admin-notice" role="status">Memuat data demo tersimpan…</p> : storageError ? <div className="panel-body stack"><p role="alert" className="form-error">{storageError}</p><button className="admin-button" onClick={() => { if (window.confirm("Hapus perubahan demo tersimpan dan kembali ke data awal?")) reset(); }}>Reset data demo</button></div> : children}{toast && <div ref={toastRef} popover="manual" className={`admin-toast ${toast.error ? "error" : ""}`} role={toast.error ? "alert" : "status"}>{toast.error ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}<span>{toast.message}</span><button aria-label="Tutup notifikasi" onClick={() => setToast(null)}><X size={16} /></button></div>}</Context.Provider>;
 }
 export function useDemo() { const value = useContext(Context); if (!value) throw new Error("DemoProvider diperlukan"); return value; }

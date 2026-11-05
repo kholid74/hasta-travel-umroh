@@ -9,7 +9,7 @@ export function PageHeader({ title, description, actions }: { title: string; des
 }
 export function Badge({ children }: { children: ReactNode }) {
   const text = String(children);
-  const tone = /Lunas|Terverifikasi|Disetujui|Terbit|Siap|Dibayar|Selesai|Aktif|Won/.test(text) ? "green" : /Ditolak|Batal|Lost|Jatuh tempo|Belum ada/.test(text) ? "red" : /Menunggu|DP|Cicilan|Follow|Diproses|Persiapan|Diunggah|Hampir/.test(text) ? "amber" : "neutral";
+  const tone = /Lunas|Terverifikasi|Disetujui|Terbit|Siap|Dibayar|Selesai|Aktif|Won|Cukup/.test(text) ? "green" : /Ditolak|Batal|Lost|Jatuh tempo|Belum ada/.test(text) ? "red" : /Menunggu|DP|Cicilan|Follow|Diproses|Persiapan|Diunggah|Hampir|Perlu restock|Sebagian diterima|Dialokasikan/.test(text) ? "amber" : "neutral";
   return <span className={`admin-badge ${tone}`}><span className="badge-dot" />{children}</span>;
 }
 export function Stat({ label, value, detail, icon }: { label: string; value: ReactNode; detail: ReactNode; icon?: ReactNode }) {
@@ -55,4 +55,4 @@ export function DataTable<T extends { id: string }>({ rows, columns, title = "da
   </div>;
 }
 export function SelectFilter({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) { return <select aria-label={label} value={value} onChange={e => onChange(e.target.value)}><option value="">{label}</option>{options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select>; }
-export function Fields({ data }: { data: Record<string, ReactNode> }) { return <dl className="admin-fields">{Object.entries(data).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v || "Belum diisi"}</dd></div>)}</dl>; }
+export function Fields({ data }: { data: Record<string, ReactNode> }) { return <dl className="admin-fields">{Object.entries(data).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v === "" || v === null || v === undefined ? "Belum diisi" : v}</dd></div>)}</dl>; }

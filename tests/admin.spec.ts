@@ -1,12 +1,13 @@
 import { test, expect, type Page } from "@playwright/test";
 import { createSeed, newJamaah } from "../content/admin/seed";
 import { adminRoutes, moduleTitle } from "../content/admin/navigation";
-import { addBooking, assignRoom, autoAssign, convertLead, distribute, members, outstanding, paid, recordPayment, verifyPayment } from "../lib/admin/model";
+import { addBooking, assignRoom, autoAssign, convertLead, members, outstanding, paid, recordPayment, verifyPayment } from "../lib/admin/model";
+import { allocateKit, postHandover, postMovement, stockBalance } from "../lib/admin/inventory";
 import { signSession, validSession } from "../lib/admin/session-token";
 
 test("model preserves relationships, capacity, payment and allocation invariants", () => {
   const s = createSeed();
-  expect(s.jamaah).toHaveLength(48);
+  expect(s.jamaah).toHaveLength(51);
   expect(s.leads).toHaveLength(24);
   for (const d of s.departures) expect(members(s, d.id).length).toBeLessThanOrEqual(d.capacity);
   for (const b of s.bookings) { expect(s.jamaah.some(j => j.id === b.jamaahId)).toBeTruthy(); expect(paid(s, b.id)).toBeLessThanOrEqual(b.total); }
@@ -31,11 +32,11 @@ test("model preserves relationships, capacity, payment and allocation invariants
   const assigned = rooms.flatMap(r => r.jamaahIds);
   expect(new Set(assigned).size).toBe(assigned.length);
   rooms.forEach(r => expect(r.jamaahIds.length).toBeLessThanOrEqual(r.capacity));
-  distribute(s, [b.jamaahId], "Koper Besar");
-  distribute(s, [b.jamaahId], "Koper Besar");
-  expect(s.jamaah.find(j => j.id === b.jamaahId)!.equipment.filter(i => i === "Koper Besar")).toHaveLength(1);
-  s.inventory.find(i => i.name === "Mukena")!.stock = 0;
-  expect(() => distribute(s, [b.jamaahId], "Mukena")).toThrow();
+  const kit = allocateKit(s, b.id, "KIT-UMRAH", "WH-JKT");
+  const input = { id: "HO-TEST", allocationId: kit.id, quantities: [{ itemId: "ITM-1", quantity: 1 }], receivedBy: "Ilham Demo", receivedAt: "2026-10-02", notes: "Demo" };
+  postHandover(s, input);
+  expect(() => postHandover(s, input)).toThrow();
+  expect(() => postMovement(s, { id: "TEST-OUT", itemId: "ITM-5", warehouseId: "WH-JKT", type: "ADJUSTMENT_OUT", quantity: stockBalance(s, "ITM-5", "WH-JKT").available + 1, createdAt: "2026-10-02", note: "Uji", referenceId: "" })).toThrow();
   s.jamaah.push(newJamaah("JMH-capacity", "Ilham Zain", "08000000123"));
   d.capacity = members(s, d.id).length;
   expect(() => addBooking(s, "JMH-capacity", d.id)).toThrow();
@@ -99,7 +100,7 @@ test("login protection, every sidebar route, public routes and responsive shell"
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await page.screenshot({ path: "test-results/dashboard-mobile.png", fullPage: true });
-  for (const path of ["/", "/paket-umroh", "/paket-umroh/umroh-reguler-9-hari", "/haji-khusus", "/jadwal-keberangkatan", "/tentang", "/kontak", "/faq"]) { const response = await request.get(path); expect(response.status(), path).toBe(200); }
+  for (const path of ["/", "/paket-umroh", "/paket-umroh/umroh-reguler-9-hari", "/haji-khusus", "/jadwal-keberangkatan", "/tentang", "/kontak", "/faq", "/favicon.ico"]) { const response = await request.get(path); expect(response.status(), path).toBe(200); }
   await page.getByRole("button", { name: "Menu profil Ahmad" }).click();
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/login$/);
@@ -140,7 +141,7 @@ test("lead converts to booking, payment verifies, and inventory follows shared s
   await dialog.getByRole("button", { name: "Konversi ke booking" }).click();
   await expect(page.getByRole("status")).toContainText("dikonversi");
   await navigate(page, "booking");
-  await page.getByRole("textbox", { name: "Cari booking" }).fill("Salman");
+  await page.getByRole("textbox", { name: "Cari booking" }).fill("Salman Al Farisi");
   await expect(page.locator("tbody tr")).toHaveCount(1);
   await page.locator("tbody tr td").first().getByRole("link").click();
   await page.getByRole("button", { name: "Catat pembayaran" }).click();
@@ -151,13 +152,21 @@ test("lead converts to booking, payment verifies, and inventory follows shared s
   await expect(page.getByRole("status")).toContainText("terverifikasi");
   await expect(page.locator(".invoice-sheet")).toContainText("Rp 10.000.000");
   await navigate(page, "perlengkapan");
-  const table = page.locator(".admin-panel").filter({ has: page.getByRole("heading", { name: "Distribusi perlengkapan" }) });
-  await table.getByRole("textbox").fill("Salman");
-  await table.locator("tbody input[type=checkbox]").check();
-  await table.getByRole("button", { name: "Tandai dibagikan" }).click();
-  await expect(table.locator("tbody")).toContainText("Diterima");
+  await page.getByRole("button", { name: "Distribusi", exact: true }).click();
+  await page.getByRole("button", { name: "Alokasikan kit", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Cari jamaah / booking").fill("Salman Al Farisi");
+  await page.getByRole("dialog").getByRole("combobox", { name: "Booking aktif", exact: true }).selectOption({ index: 1 });
+  await page.getByRole("dialog").getByRole("combobox", { name: "Template kit", exact: true }).selectOption("KIT-UMRAH");
+  await page.getByRole("dialog").getByRole("button", { name: "Tinjau pencatatan" }).click();
+  await page.getByRole("dialog").last().getByRole("button", { name: "Ya, lanjutkan" }).click();
+  await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill("Salman Al Farisi");
+  await page.getByRole("button", { name: "Serahkan", exact: true }).click();
+  await page.getByRole("dialog").getByLabel("Serahkan Koper Besar", { exact: true }).fill("1");
+  await page.getByRole("dialog").getByRole("button", { name: "Tinjau pencatatan" }).click();
+  await page.getByRole("dialog").last().getByRole("button", { name: "Ya, lanjutkan" }).click();
+  await expect(page.locator("tbody")).toContainText("1/1 diterima");
   await navigate(page, "aktivitas");
-  await expect(page.locator("tbody")).toContainText("Koper Besar dibagikan");
+  await expect(page.locator("tbody")).toContainText("Serah terima Koper Besar");
 });
 
 test("documents, rooming, manasik, CMS and broadcast actions update the demo", async ({ page }) => {

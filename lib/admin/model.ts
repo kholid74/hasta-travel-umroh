@@ -1,17 +1,32 @@
 import type { Booking, DemoState, Jamaah, Room } from "@/content/admin/types";
+import { kitReady } from "./inventory";
+import { validDate } from "./hajj";
 import { DEMO_TODAY, newJamaah } from "@/content/admin/seed";
 
 export const uid = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 export const dateLabel = (iso: string) => iso ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(iso.slice(0, 10) + "T00:00:00Z")) : "Belum diisi";
 export const members = (s: DemoState, departureId: string) => s.bookings.filter(b => b.departureId === departureId && b.status === "Aktif").map(b => s.jamaah.find(j => j.id === b.jamaahId)!);
 export const bookingFor = (s: DemoState, jamaahId: string) => s.bookings.find(b => b.jamaahId === jamaahId && b.status === "Aktif");
-export const paid = (s: DemoState, bookingId: string) => s.payments.filter(p => p.bookingId === bookingId && p.status === "Terverifikasi").reduce((n, p) => n + p.amount, 0);
-export const outstanding = (s: DemoState, b: Booking) => b.status === "Batal" ? 0 : Math.max(0, b.total - paid(s, b.id));
+export const packageForBooking = (s: DemoState, b: Booking) => b.productType === "HAJJ_SPECIAL" ? s.hajjPackages.find(p => p.id === b.hajjPackageId) : s.packages.find(p => p.id === s.departures.find(d => d.id === b.departureId)?.packageId);
+export const bookingHref = (b: Booking) => b.productType === "HAJJ_SPECIAL" ? `/admin/haji-khusus/${b.hajjPackageId}` : `/admin/keberangkatan/${b.departureId}`;
+export function financialBalance(s: DemoState, b: Booking, strict = false) {
+  const exact = (n: number) => { if (!Number.isSafeInteger(n) || n < 0) throw new Error("Nominal keuangan tidak valid."); return BigInt(n); };
+  const contract = exact(b.total);
+  const history = s.payments.filter(p => p.bookingId === b.id).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  history.forEach(p => exact(p.amount));
+  const payments = history.filter(p => p.status === "Terverifikasi");
+  const collected = payments.reduce((n, p) => n + exact(p.amount), BigInt(0));
+  if (strict && (collected > contract || (b.status === "Batal" && collected > BigInt(0)))) throw new Error("Pembayaran tidak konsisten dengan kontrak. Tinjau transaksi sebelum menerbitkan dokumen.");
+  return { contract, collected, balance: b.status === "Batal" ? BigInt(0) : contract - collected, payments, history };
+}
+export const paid = (s: DemoState, id: string) => { const b = s.bookings.find(b => b.id === id); return b ? Number(financialBalance(s, b).collected) : 0; };
+export const outstanding = (s: DemoState, b: Booking) => Number(financialBalance(s, b).balance);
 export function paymentStatus(s: DemoState, b: Booking) {
   if (b.status === "Batal") return "Batal";
   const amount = paid(s, b.id);
   if (amount >= b.total) return "Lunas";
-  if (b.due < DEMO_TODAY) return "Jatuh tempo";
+  if (b.due && b.due < DEMO_TODAY) return "Jatuh tempo";
+  if (b.productType === "HAJJ_SPECIAL") return amount === 0 ? "Belum bayar" : "Cicilan";
   return amount === 0 ? "Belum bayar" : amount <= 10000000 ? "DP" : "Cicilan";
 }
 export const documentPercent = (j: Jamaah) => Math.round(Object.values(j.documents).filter(s => s === "Terverifikasi").length / Object.keys(j.documents).length * 100);
@@ -27,7 +42,7 @@ export function readiness(s: DemoState, departureId: string) {
     Visa: ratio(j => j.visa === "Disetujui"),
     Kamar: ratio(j => ["Makkah", "Madinah"].every(h => s.rooms.some(r => r.departureId === departureId && r.hotel === h && r.jamaahIds.includes(j.id)))),
     Manasik: ratio(j => s.manasik.some(e => e.departureId === departureId && e.attendees.includes(j.id))),
-    Perlengkapan: ratio(j => s.inventory.every(i => j.equipment.includes(i.name))),
+    Perlengkapan: ratio(j => { const b = bookingFor(s, j.id); return !!b && kitReady(s, b.id); }),
     ...Object.fromEntries(Object.entries(d.checks).map(([k, v]) => [k, v ? 100 : 0])),
   };
   return { checks, percent: Math.round(Object.values(checks).reduce((a, b) => a + b, 0) / Object.keys(checks).length) };
@@ -44,7 +59,7 @@ export function addBooking(s: DemoState, jamaahId: string, departureId: string, 
   if (p.status !== "Terbit" || d.status !== "Persiapan") throw new Error("Pendaftaran keberangkatan ini sudah ditutup.");
   if (bookingFor(s, jamaahId)) throw new Error("Jamaah sudah memiliki booking aktif.");
   if (members(s, departureId).length >= d.capacity) throw new Error("Kapasitas keberangkatan sudah penuh.");
-  const booking: Booking = { id: uid("BK"), jamaahId, departureId, roomType, total: p.price[roomType.toLowerCase() as "quad" | "triple" | "double"], date: DEMO_TODAY, due: d.date, status: "Aktif" };
+  const booking: Booking = { id: uid("BK"), contractDescription: p.name, productType: "UMRAH", jamaahId, departureId, roomType, total: p.price[roomType.toLowerCase() as "quad" | "triple" | "double"], date: DEMO_TODAY, due: d.date, status: "Aktif" };
   s.bookings.unshift(booking);
   return booking;
 }
@@ -60,12 +75,14 @@ export function convertLead(s: DemoState, leadId: string, departureId: string) {
   lead.bookingId = b.id;
   return b;
 }
-export function recordPayment(s: DemoState, bookingId: string, amount: number, method: string) {
+export function recordPayment(s: DemoState, bookingId: string, amount: number, method: string, date = DEMO_TODAY, reference = "") {
   const b = s.bookings.find(b => b.id === bookingId);
   if (!b || b.status !== "Aktif") throw new Error("Booking tidak aktif.");
-  const pending = s.payments.filter(p => p.bookingId === b.id && p.status === "Menunggu").reduce((n, p) => n + p.amount, 0);
-  if (!Number.isSafeInteger(amount) || amount <= 0 || amount > outstanding(s, b) - pending) throw new Error("Nominal harus lebih dari nol dan tidak melebihi sisa tagihan setelah pembayaran tertunda.");
-  s.payments.unshift({ id: uid("PAY"), bookingId, amount, date: DEMO_TODAY, method, status: "Menunggu" });
+  if (!validDate(date) || !method.trim() || method.length > 80 || reference.trim().length > 120) throw new Error("Tanggal, metode, atau referensi pembayaran tidak valid.");
+  const balance = financialBalance(s, b);
+  const pending = balance.history.filter(p => p.status === "Menunggu").reduce((n, p) => n + BigInt(p.amount), BigInt(0));
+  if (!Number.isSafeInteger(amount) || amount <= 0 || BigInt(amount) > balance.balance - pending) throw new Error("Nominal harus lebih dari nol dan tidak melebihi sisa tagihan setelah pembayaran tertunda.");
+  s.payments.unshift({ id: uid("PAY"), bookingId, amount, date, method, reference: reference.trim(), status: "Menunggu" });
 }
 export function verifyPayment(s: DemoState, id: string) {
   const p = s.payments.find(p => p.id === id);
@@ -73,6 +90,7 @@ export function verifyPayment(s: DemoState, id: string) {
   const b = s.bookings.find(b => b.id === p.bookingId)!;
   if (b.status !== "Aktif" || p.amount > outstanding(s, b)) throw new Error("Pembayaran melebihi sisa tagihan atau booking dibatalkan.");
   p.status = "Terverifikasi";
+  p.verifiedAt = new Date().toISOString();
   const lead = s.leads.find(l => l.bookingId === b.id);
   if (lead && outstanding(s, b) === 0) lead.stage = "Won";
 }
@@ -92,12 +110,4 @@ export function autoAssign(s: DemoState, departureId: string, hotel: Room["hotel
     const room = s.rooms.find(r => r.departureId === departureId && r.hotel === hotel && r.gender === j.gender && r.jamaahIds.length < r.capacity);
     if (room) assignRoom(s, j.id, room.id);
   }
-}
-export function distribute(s: DemoState, jamaahIds: string[], itemName: string) {
-  const item = s.inventory.find(i => i.name === itemName);
-  if (!item) throw new Error("Barang tidak ditemukan.");
-  const people = s.jamaah.filter(j => jamaahIds.includes(j.id) && !j.equipment.includes(itemName));
-  const distributed = s.jamaah.filter(j => j.equipment.includes(itemName)).length;
-  if (people.length > item.stock - distributed) throw new Error("Stok tidak cukup. Tambahkan stok sebelum distribusi.");
-  people.forEach(j => j.equipment.push(itemName));
 }

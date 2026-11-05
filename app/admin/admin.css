@@ -12,7 +12,16 @@
 .costing-inputs input { width:100%; }
 .costing-actions { margin:0 0 18px; }
 .costing-group { display:flex; gap:8px; align-items:center; font-size:11px; }
-.costing-note { max-width:250px; white-space:normal; }
+.costing-note { display:block; max-width:250px; white-space:normal; }
+.inventory-filters { margin-bottom:22px; }
+.inventory-filters select { flex:1 1 180px; max-width:100%; }
+.inventory-module .table-scroll td { white-space:normal; min-width:110px; max-width:300px; overflow-wrap:anywhere; }
+.hajj-list { padding-left:18px; margin:10px 0; font-size:12px; line-height:1.8; overflow-wrap:anywhere; }
+.hajj-milestones { border:1px solid var(--a-line); border-radius:8px; padding:16px; min-width:0; }
+.hajj-milestones legend { padding:0 6px; font-size:12px; font-weight:600; }
+.hajj-milestone { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto; align-items:end; gap:12px; margin-bottom:16px; }
+.hajj-milestone .text-button { padding-bottom:10px; }
+@media(max-width:480px) { .hajj-milestone { grid-template-columns:minmax(0,1fr); } }
 .admin-app .costing-stats { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .admin-app .costing-stats strong { font-size:22px; overflow-wrap:anywhere; }
 @media(max-width:1000px) { .costing-inputs { grid-template-columns:repeat(2,minmax(0,1fr)); } }

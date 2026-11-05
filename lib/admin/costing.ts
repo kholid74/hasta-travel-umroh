@@ -1,6 +1,8 @@
+import { hajjCostItems } from "@/content/admin/hajj";
 import type { Costing, CostItem, CostPlan } from "@/content/admin/costing";
 import type { DemoState } from "@/content/admin/types";
 import { uid } from "./model";
+import { hajjPrice, validDate } from "./hajj";
 
 const ZERO = BigInt(0), ONE = BigInt(1), HUNDRED = BigInt(100);
 
@@ -32,6 +34,7 @@ export function itemBase(item: CostItem) {
   return rounded(quantity * price * rate, BigInt(1000000000));
 }
 export function calculateCosting(plan: CostPlan) {
+  if (!validDate(plan.assumptionDate)) throw new Error("Isi tanggal asumsi kurs yang valid.");
   const paying = count(plan.payingCount, false), foc = count(plan.focCount, true);
   const selling = decimal(plan.sellingPrice, 2, "Harga jual"), discount = decimal(plan.discountPerPerson, 2, "Diskon per jamaah");
   if (selling <= ZERO || discount > selling) throw new Error("Harga jual harus positif; diskon tidak boleh melebihi harga jual.");
@@ -70,52 +73,65 @@ export function costingPercent(value: bigint | null) {
   return `${value < ZERO ? "−" : ""}${abs / HUNDRED},${String(abs % HUNDRED).padStart(2, "0")}%`;
 }
 export function latestCosting(state: DemoState, departureId: string) {
-  return state.costings.filter(c => c.departureId === departureId).sort((a, b) => b.revision - a.revision)[0];
+  return state.costings.filter(c => costingTargetId(c) === departureId).sort((a, b) => b.revision - a.revision)[0];
 }
+export const costingTargetId = (c: Costing) => c.productType === "HAJJ_SPECIAL" ? c.packageId : c.departureId;
+export function costingTargets(state: DemoState) {
+  return [
+    ...state.departures.map(d => ({ id: d.id, packageId: d.packageId, capacity: d.capacity, date: d.date, year: Number(d.date.slice(0, 4)), productType: "UMRAH" as const, name: state.packages.find(p => p.id === d.packageId)?.name ?? d.id })),
+    ...state.hajjPackages.map(p => ({ id: p.id, packageId: p.id, capacity: p.capacity, date: p.departureDate, year: p.departureYear, productType: "HAJJ_SPECIAL" as const, name: p.name })),
+  ];
+}
+export type CostingTarget = ReturnType<typeof costingTargets>[number];
 export function newCosting(state: DemoState, departureId: string) {
+  const hajj = state.hajjPackages.find(p => p.id === departureId);
   const departure = state.departures.find(d => d.id === departureId);
   const product = state.packages.find(p => p.id === departure?.packageId);
-  if (!departure || !product) throw new Error("Pilih keberangkatan yang valid.");
+  if (!hajj && (!departure || !product)) throw new Error("Pilih paket atau keberangkatan yang valid.");
   if (latestCosting(state, departureId)) throw new Error("Costing sudah tersedia; buka atau buat revisi dari costing tersebut.");
+  const target = costingTargets(state).find(t => t.id === departureId)!;
+  const template = state.costTemplates.find(t => t.packageId === target.packageId);
   const result: Costing = {
-    id: uid("HPP"), departureId, revision: 1, status: "Draft", payingCount: Math.min(35, departure.capacity), focCount: 0,
-    sellingPrice: String(product.price.quad), discountPerPerson: "0", notes: "",
-    items: structuredClone(state.costTemplates.find(t => t.packageId === product.id)?.items ?? []),
+    id: uid("HPP"), departureId: hajj ? "" : departureId, revision: 1, status: "Draft", payingCount: Math.min(35, target.capacity), focCount: 0,
+    productType: target.productType, packageId: target.packageId, packageName: target.name,
+    departureYear: target.year, departureDate: target.date, assumptionDate: template?.assumptionDate ?? hajj?.assumptionDate ?? "2026-10-02",
+    sellingPrice: String(hajj ? hajjPrice(hajj) : product!.price.quad), discountPerPerson: "0", notes: hajj?.planningNotes ?? "",
+    items: structuredClone(template?.items ?? (hajj ? hajjCostItems(hajj.id) : [])),
   };
   state.costings.unshift(result);
   return result;
 }
 function draft(state: DemoState, id: string) {
   const costing = state.costings.find(c => c.id === id);
-  if (!costing || costing.status !== "Draft" || latestCosting(state, costing.departureId)?.id !== id) throw new Error("Costing final atau revisi lama terkunci. Buat revisi baru untuk mengubahnya.");
+  if (!costing || costing.status !== "Draft" || latestCosting(state, costingTargetId(costing))?.id !== id) throw new Error("Costing final atau revisi lama terkunci. Buat revisi baru untuk mengubahnya.");
   return costing;
 }
 export function saveCosting(state: DemoState, id: string, plan: CostPlan, finalize = false) {
   const costing = draft(state, id);
   calculateCosting(plan);
-  Object.assign(costing, structuredClone({ payingCount: plan.payingCount, focCount: plan.focCount, sellingPrice: plan.sellingPrice, discountPerPerson: plan.discountPerPerson, items: plan.items, notes: plan.notes }));
+  Object.assign(costing, structuredClone({ assumptionDate: plan.assumptionDate, payingCount: plan.payingCount, focCount: plan.focCount, sellingPrice: plan.sellingPrice, discountPerPerson: plan.discountPerPerson, items: plan.items, notes: plan.notes }));
   if (finalize) { costing.status = "Final"; costing.finalizedAt = new Date().toISOString(); }
 }
 export function reviseCosting(state: DemoState, id: string) {
   const previous = state.costings.find(c => c.id === id);
-  if (!previous || previous.status !== "Final" || latestCosting(state, previous.departureId)?.id !== id) throw new Error("Revisi hanya dapat dibuat dari costing final terbaru.");
-  const revision: Costing = { ...structuredClone(previous), id: uid("HPP"), revision: previous.revision + 1, status: "Draft" };
+  if (!previous || previous.status !== "Final" || latestCosting(state, costingTargetId(previous))?.id !== id) throw new Error("Revisi hanya dapat dibuat dari costing final terbaru.");
+  const target = costingTargets(state).find(t => t.id === costingTargetId(previous))!;
+  const revision: Costing = { ...structuredClone(previous), id: uid("HPP"), revision: previous.revision + 1, status: "Draft", packageName: target.name, departureYear: target.year, departureDate: target.date };
   delete revision.finalizedAt;
   state.costings.unshift(revision);
   return revision;
 }
 export function saveCostTemplate(state: DemoState, id: string) {
   const costing = state.costings.find(c => c.id === id);
-  const departure = state.departures.find(d => d.id === costing?.departureId);
-  if (!costing || !departure) throw new Error("Costing tidak ditemukan.");
+  if (!costing) throw new Error("Costing tidak ditemukan.");
   calculateCosting(costing);
-  const template = { packageId: departure.packageId, items: structuredClone(costing.items) };
-  const index = state.costTemplates.findIndex(t => t.packageId === departure.packageId);
+  const template = { packageId: costing.packageId, assumptionDate: costing.assumptionDate, items: structuredClone(costing.items) };
+  const index = state.costTemplates.findIndex(t => t.packageId === costing.packageId);
   if (index >= 0) state.costTemplates[index] = template;
   else state.costTemplates.push(template);
 }
 export function saveCostScenario(state: DemoState, costingId: string, name: string, plan: CostPlan) {
   if (!state.costings.some(c => c.id === costingId) || !name.trim()) throw new Error("Nama skenario dan costing wajib diisi.");
   calculateCosting(plan);
-  state.costScenarios.unshift({ payingCount: plan.payingCount, focCount: plan.focCount, sellingPrice: plan.sellingPrice, discountPerPerson: plan.discountPerPerson, items: structuredClone(plan.items), notes: plan.notes, id: uid("SCN"), costingId, name: name.trim() });
+  state.costScenarios.unshift({ assumptionDate: plan.assumptionDate, payingCount: plan.payingCount, focCount: plan.focCount, sellingPrice: plan.sellingPrice, discountPerPerson: plan.discountPerPerson, items: structuredClone(plan.items), notes: plan.notes, id: uid("SCN"), costingId, name: name.trim() });
 }

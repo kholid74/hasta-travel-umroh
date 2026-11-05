@@ -7,7 +7,7 @@ function item(overrides: Partial<CostItem> = {}): CostItem {
   return { id: "cost-1", name: "Biaya", category: "Kategori baru", type: "person", audience: "paying", quantity: "1", unit: "orang", unitPrice: "100", currency: "IDR", exchangeRate: "1", notes: "", ...overrides };
 }
 function plan(overrides: Partial<CostPlan> = {}): CostPlan {
-  return { payingCount: 20, focCount: 2, sellingPrice: "200", discountPerPerson: "0", notes: "", items: [item()], ...overrides };
+  return { assumptionDate: "2026-10-02", payingCount: 20, focCount: 2, sellingPrice: "200", discountPerPerson: "0", notes: "", items: [item()], ...overrides };
 }
 
 test("costing calculates per person, fixed group, units and mixed currencies exactly", () => {
@@ -72,7 +72,7 @@ test("scenario profit, loss and break-even respect fixed units without mutating 
 
 test("final costing is immutable, revisions and package templates are independent snapshots", () => {
   const state = createSeed(), original = structuredClone(state);
-  expect(state.costings).toHaveLength(3);
+  expect(state.costings).toHaveLength(5);
   expect(calculateCosting(state.costings[0]).profit).toBeGreaterThan(BigInt(0));
   expect(calculateCosting(state.costings[2]).profit).toBeLessThan(BigInt(0));
   const costing = state.costings[0];
@@ -110,7 +110,8 @@ test("costing UI edits components, simulates, finalizes, revises and resets the 
   await page.goto("/admin/login");
   await page.getByRole("button", { name: "Masuk ke workspace" }).click();
   await page.locator(".admin-sidebar").getByRole("link", { name: "HPP & Kalkulasi Paket", exact: true }).click();
-  await expect(page.locator("tbody tr")).toHaveCount(seed.departures.length);
+  await expect(page.locator("tbody tr")).toHaveCount(8);
+  await expect(page.locator(".table-footer")).toContainText(`dari ${seed.departures.length + seed.hajjPackages.length} data`);
   await page.locator("tbody").getByRole("link", { name: new RegExp(departure.id) }).click();
   await expect(page.getByRole("heading", { name: `HPP ${departure.id}` })).toBeVisible();
   await page.getByLabel("Jamaah berbayar rencana", { exact: true }).fill("0");

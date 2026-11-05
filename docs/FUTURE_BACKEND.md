@@ -7,7 +7,7 @@ Dokumen perencanaan, bukan implementasi backend. Tidak ada migrasi, database, AP
 | Fitur | Implementasi demo | Kebutuhan produksi |
 | --- | --- | --- |
 | Data operasional | Mock bertipe dalam React Context | Neon PostgreSQL, transaksi, constraint, otorisasi |
-| Penyimpanan browser | Tidak memakai localStorage | Hindari penyimpanan PII di browser; gunakan API terotorisasi |
+| Penyimpanan browser | M1.1 memakai localStorage berversi untuk data fiktif dan reset demo | Hindari penyimpanan PII di browser; gunakan API terotorisasi |
 | Autentikasi | Backend Server Actions, satu kredensial publik, cookie bertanda tangan | Provider auth, user unik, hash password/provider identity, sesi dapat dicabut, rate limit, MFA/reset password |
 | Users & Roles | Frontend state, matriks dapat diedit | Izin diperiksa pada setiap pembacaan dan mutasi server |
 | Dokumen | Pemilihan file dan status frontend | Object storage privat, URL berumur pendek, pemeriksaan berkas, lifecycle/retensi |

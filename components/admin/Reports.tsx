@@ -1,4 +1,5 @@
 "use client";
+import { stockBalance } from "@/lib/admin/inventory";
 import { useState } from "react";
 import { BarChart, Bar, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useDemo } from "./Store";
@@ -19,7 +20,7 @@ export default function Reports({ analytics = false }: { analytics?: boolean }) 
   const payments = state.payments.filter(p => p.status === "Terverifikasi" && inPeriod(p.date));
   const expenses = state.expenses.filter(e => inPeriod(e.date));
   const revenue = bookings.reduce((n, b) => n + b.total, 0), collected = payments.reduce((n, p) => n + p.amount, 0), cost = expenses.reduce((n, e) => n + e.amount, 0);
-  const packageRows = state.packages.map(p => { const bs = bookings.filter(b => state.departures.find(d => d.id === b.departureId)?.packageId === p.id); return { id: p.id, name: p.name, count: bs.length, amount: bs.reduce((n, b) => n + b.total, 0), note: p.status }; });
+  const packageRows = [...state.packages, ...state.hajjPackages].map(p => { const bs = bookings.filter(b => (b.hajjPackageId === p.id || state.departures.find(d => d.id === b.departureId)?.packageId === p.id)); return { id: p.id, name: p.name, count: bs.length, amount: bs.reduce((n, b) => n + b.total, 0), note: p.status }; });
   let rows: ReportRow[] = packageRows;
   let countLabel = "Booking", amountLabel = "Nilai booking", noteLabel = "Status";
   if (report === "Penerimaan") { countLabel = "Transaksi"; amountLabel = "Terverifikasi"; noteLabel = "Metode"; rows = [...new Set(payments.map(p => p.date))].sort().map(date => ({ id: date, name: date, count: payments.filter(p => p.date === date).length, amount: payments.filter(p => p.date === date).reduce((n, p) => n + p.amount, 0), note: "Transfer / tunai" })); }
@@ -28,7 +29,7 @@ export default function Reports({ analytics = false }: { analytics?: boolean }) 
   if (report === "Performa agen") { noteLabel = "Komisi estimasi"; rows = state.agents.map(a => { const bs = bookings.filter(b => state.jamaah.find(j => j.id === b.jamaahId)?.agentId === a.id); return { id: a.id, name: a.name, count: bs.length, amount: bs.reduce((n, b) => n + b.total, 0), note: rupiah(bs.length * a.commission) }; }); }
   if (report === "Sumber jamaah" || report === "Konversi lead") { countLabel = "Lead"; amountLabel = "Konversi ke booking"; noteLabel = "Rasio konversi"; const groups = report === "Sumber jamaah" ? [...new Set(state.leads.map(l => l.source))] : [...leadStages]; rows = groups.map(name => { const ls = state.leads.filter(l => report === "Sumber jamaah" ? l.source === name : l.stage === name); return { id: name, name, count: ls.length, amount: ls.filter(l => l.bookingId).length, note: `${Math.round(ls.filter(l => l.bookingId).length / Math.max(1, ls.length) * 100)}%` }; }); }
   if (report === "Kesiapan dokumen") { countLabel = "Dokumen terverifikasi"; amountLabel = "Kelengkapan"; noteLabel = "Visa"; rows = state.jamaah.map(j => ({ id: j.id, name: j.name, count: Object.values(j.documents).filter(s => s === "Terverifikasi").length, amount: documentPercent(j), note: j.visa })); }
-  if (report === "Persediaan") { countLabel = "Stok masuk"; amountLabel = "Sisa fisik"; noteLabel = "Distribusi"; rows = state.inventory.map(i => { const count = state.jamaah.filter(j => j.equipment.includes(i.name)).length; return { id: i.id, name: i.name, count: i.stock, amount: i.stock - count, note: `${count} telah dibagikan` }; }); }
+  if (report === "Persediaan") { countLabel = "Fisik"; amountLabel = "Tersedia"; noteLabel = "Reservasi"; rows = state.inventory.map(i => { const balances = state.warehouses.map(w => stockBalance(state, i.id, w.id)); return { id: i.id, name: i.name, count: balances.reduce((n, b) => n + b.physical, 0), amount: balances.reduce((n, b) => n + b.available, 0), note: balances.reduce((n, b) => n + b.reserved, 0) + " " + i.unit + " direservasi" }; }); }
   const currency = !["Sumber jamaah", "Konversi lead", "Kesiapan dokumen", "Persediaan"].includes(report);
   const snapshot = !currency;
   const chartRows = rows.slice().sort((a, b) => b.count - a.count).slice(0, 7).map(r => ({ name: r.name.length > 20 ? r.name.slice(0, 19) + "…" : r.name, jumlah: r.count }));

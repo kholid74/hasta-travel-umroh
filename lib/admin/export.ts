@@ -11,6 +11,10 @@ export function exportExcel(filename: string, headers: string[], rows: Cell[][])
   download(`<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Hasta Travel"><Table>${xml}</Table></Worksheet></Workbook>`, `${filename}.xml`, "application/vnd.ms-excel");
 }
 export function downloadText(filename: string, content: string) { download(content, filename, "text/plain;charset=utf-8"); }
+export function exportCSV(filename: string, headers: string[], rows: Cell[][]) {
+  const cell = (value: Cell) => { const s = String(value); return `"${(typeof value === "string" && /^[=+@\-\t\r]/.test(s) ? "'" + s : s).replaceAll('"', '""')}"`; };
+  download("\uFEFF" + [headers, ...rows].map(row => row.map(cell).join(",")).join("\r\n"), `${filename}.csv`, "text/csv;charset=utf-8");
+}
 
 export function printTable(title: string, headers: string[], rows: Cell[][], notes: string[] = []) {
   const popup = window.open("", "_blank", "width=1000,height=750");

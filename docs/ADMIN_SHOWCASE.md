@@ -101,7 +101,7 @@ Autentikasi ini hanya gerbang showcase, bukan identitas pelanggan atau penyimpan
 
 ## Reset dan persistensi
 
-State demo bertahan saat berpindah modul menggunakan navigasi internal. Refresh penuh, logout, atau Reset Data Demo mengembalikan seed. Tidak ada localStorage untuk PII atau data operasional. Login menggunakan cookie server tersendiri.
+Sejak M1.1, perubahan demo tersimpan pada localStorage browser (`hasta-workspace-m1.1`) dan bertahan setelah refresh maupun logout. Reset Data Demo mengembalikan seed dan penyimpanan browser. Gunakan hanya data fiktif; jangan masukkan PII asli. Login menggunakan cookie server tersendiri. Lihat [laporan M1.1](M1_1_REPORT.md).
 
 Role matrix, konfigurasi default, dan preferensi keamanan adalah simulasi konfigurasi. Peran akun demo tetap Owner. Profil rekening dipakai pada invoice; preferensi lain tidak mengganti kebijakan server. CMS dan galeri hanya pratinjau internal, menggunakan aset foto berlisensi yang sudah ada.
 
