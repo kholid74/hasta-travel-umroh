@@ -5,7 +5,7 @@ import { Users, UserCheck, Plane, Wallet, Receipt, Contact, ArrowUpRight, ArrowR
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useDemo } from "./Store";
 import { Badge, PageHeader, Panel, Progress, Stat } from "./ui";
-import { bookingFor, dateLabel, documentPercent, members, outstanding, paid, paymentStatus, readiness, validPassport } from "@/lib/admin/model";
+import { bookingFor, dateLabel, documentPercent, financialBalance, members, outstanding, paid, paymentStatus, readiness, validPassport } from "@/lib/admin/model";
 import { rupiah, rupiahSingkat } from "@/lib/format";
 import { DEMO_TODAY } from "@/content/admin/seed";
 
@@ -13,7 +13,8 @@ export default function Dashboard() {
   const { state } = useDemo();
   const [period, setPeriod] = useState("2026-10");
   const active = state.bookings.filter(b => b.status === "Aktif");
-  const collected = state.payments.filter(p => p.status === "Terverifikasi" && p.date.startsWith(period)).reduce((n, p) => n + p.amount, 0);
+  const verifiedPayments = active.flatMap(b => financialBalance(state, b).payments);
+  const collected = Number(verifiedPayments.filter(p => p.date.startsWith(period)).reduce((n, p) => n + BigInt(p.amount), BigInt(0)));
   const debt = active.reduce((n, b) => n + outstanding(state, b), 0);
   const upcoming = state.departures.filter(d => d.status === "Persiapan" && d.date >= DEMO_TODAY).sort((a, b) => a.date.localeCompare(b.date));
   const periodDepartures = upcoming.filter(d => d.date.startsWith(period));
@@ -23,7 +24,7 @@ export default function Dashboard() {
   const chart = Array.from({ length: 4 }, (_, i) => {
     const from = i * 8 + 1, to = Math.min(from + 7, 31);
     const ps = state.payments.filter(p => p.date.startsWith(period) && Number(p.date.slice(8)) >= from && Number(p.date.slice(8)) <= to);
-    return { name: `${from}–${to}`, Terverifikasi: ps.filter(p => p.status === "Terverifikasi").reduce((n, p) => n + p.amount, 0) / 1e6, Menunggu: ps.filter(p => p.status === "Menunggu").reduce((n, p) => n + p.amount, 0) / 1e6 };
+    return { name: `${from}–${to}`, Terverifikasi: Number(verifiedPayments.filter(p => ps.includes(p)).reduce((n, p) => n + BigInt(p.amount), BigInt(0))) / 1e6, Menunggu: Number(ps.filter(p => p.status === "Menunggu").reduce((n, p) => n + BigInt(p.amount), BigInt(0))) / 1e6 };
   });
   const stages = [
     ["Lead baru", state.leads.filter(l => l.stage === "Lead Baru").length, "crm"],

@@ -1,16 +1,15 @@
 "use client";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { costCategories, type Costing as CostingRecord, type CostItem, type CostPlan } from "@/content/admin/costing";
-import type { Departure } from "@/content/admin/types";
-import { calculateCosting, costingMoney as money, costingPercent as percent, itemBase, latestCosting, newCosting, reviseCosting, saveCosting, saveCostScenario, saveCostTemplate } from "@/lib/admin/costing";
+import { costCategories, costTypeLabels as typeLabels, costAudienceLabels as audienceLabels, type Costing as CostingRecord, type CostItem, type CostPlan } from "@/content/admin/costing";
+import { productLabels } from "@/content/admin/types";
+import CostingComparison from "./CostingComparison";
+import { costingTargets, type CostingTarget, calculateCosting, costingMoney as money, costingPercent as percent, itemBase, latestCosting, newCosting, reviseCosting, saveCosting, saveCostScenario, saveCostTemplate } from "@/lib/admin/costing";
 import { dateLabel, uid } from "@/lib/admin/model";
 import { useDemo } from "./Store";
 import { Badge, Confirm, DataTable, Empty, Modal, PageHeader, Panel, SelectFilter, Stat, Tabs } from "./ui";
 
-const typeLabels = { person: "Per jamaah", group: "Per grup", unit: "Per unit" };
-const audienceLabels = { all: "Seluruh peserta", paying: "Jamaah berbayar", foc: "Peserta gratis / FOC" };
 function calculate(plan: CostPlan) {
   try { return { result: calculateCosting(plan), error: "" }; }
   catch (error) { return { result: null, error: error instanceof Error ? error.message : "Periksa input costing." }; }
@@ -19,35 +18,41 @@ function calculate(plan: CostPlan) {
 export default function Costing({ id }: { id?: string }) {
   const { state, resetVersion, transact } = useDemo();
   const [packageId, setPackageId] = useState("");
+  const [productType, setProductType] = useState("");
+  const [view, setView] = useState("Perhitungan");
+  const targets = costingTargets(state);
   const [versionId, setVersionId] = useState("");
-  const departure = state.departures.find(d => d.id === id);
+  const departure = targets.find(d => d.id === id);
   if (id && !departure) return <Empty title="Keberangkatan tidak ditemukan" />;
   if (departure) {
-    const versions = state.costings.filter(c => c.departureId === departure.id).sort((a, b) => b.revision - a.revision);
+    const versions = state.costings.filter(c => (c.productType === "HAJJ_SPECIAL" ? c.packageId : c.departureId) === departure.id).sort((a, b) => b.revision - a.revision);
     const current = versions.find(c => c.id === versionId) ?? versions[0];
     if (!current) return <>
       <Link className="text-button" href="/admin/hpp">← Semua costing</Link>
-      <PageHeader title="Mulai costing keberangkatan" description={`${departure.id} · ${state.packages.find(p => p.id === departure.packageId)?.name}`} />
+      <PageHeader title="Mulai costing keberangkatan" description={`${departure.id} · ${departure.name}`} />
       <Panel title="Gunakan template paket"><div className="panel-body stack"><p>{state.costTemplates.some(t => t.packageId === departure.packageId) ? "Komponen biaya dan kurs dari template paket akan disalin ke draft baru. Tinjau kuantitas, harga, dan jumlah peserta sebelum menyimpan." : "Paket ini belum memiliki template. Mulai draft kosong dan tambahkan komponen biaya sesuai kebutuhan."}</p><button className="admin-button primary" onClick={() => transact(s => { newCosting(s, departure.id); }, `Draft HPP ${departure.id} dibuat`, "HPP")}>Buat draft costing</button></div></Panel>
     </>;
-    return <CostingEditor key={`${current.id}:${resetVersion}`} costing={current} departure={departure} onRevision={setVersionId} versions={<label className="costing-version">Revisi costing<select aria-label="Revisi costing" value={current.id} onChange={e => setVersionId(e.target.value)}>{versions.map(c => <option key={c.id} value={c.id}>Revisi {c.revision} · {c.status}</option>)}</select></label>} />;
+    return <CostingEditor key={`${current.id}:${resetVersion}`} costing={current} departure={departure} onRevision={setVersionId} versions={versions} />;
   }
-  const rows = state.departures.filter(d => !packageId || d.packageId === packageId).map(d => {
+  const rows = targets.filter(d => (!packageId || d.packageId === packageId) && (!productType || d.productType === productType)).map(d => {
     const costing = latestCosting(state, d.id);
     return { ...d, costing, result: costing ? calculate(costing).result : null };
   });
   return <>
     <PageHeader title="HPP & Kalkulasi Paket" description="Rencanakan biaya setiap keberangkatan, uji harga jual, lalu simpan versi yang disepakati." />
-    <p className="admin-notice">Demo dalam memori: draft, template, dan skenario tersimpan selama sesi workspace; refresh atau Reset demo mengembalikan data contoh. Harga publik, booking, pembayaran, dan jumlah jamaah aktual tidak berubah.</p>
+    <p className="admin-notice">Data demo tersimpan di browser ini setelah Simpan. Refresh mempertahankan perubahan; Reset data demo mengembalikan contoh awal. Harga publik, booking, pembayaran, dan jumlah jamaah aktual tidak berubah.</p>
+    <Tabs items={["Perhitungan", "Bandingkan versi"]} value={view} onChange={setView} />
+    {view === "Bandingkan versi" ? <CostingComparison key={resetVersion} /> : <>
     <div className="admin-stats section-gap">
-      <Stat label="Keberangkatan" value={state.departures.length} detail="Satu paket bisa memiliki HPP berbeda" />
-      <Stat label="Costing draft" value={state.departures.filter(d => latestCosting(state, d.id)?.status === "Draft").length} detail="Versi terbaru yang masih dapat diedit" />
-      <Stat label="Costing final" value={state.departures.filter(d => latestCosting(state, d.id)?.status === "Final").length} detail="Perubahan melalui revisi baru" />
+      <Stat label="Keberangkatan" value={targets.length} detail="Satu paket bisa memiliki HPP berbeda" />
+      <Stat label="Costing draft" value={targets.filter(d => latestCosting(state, d.id)?.status === "Draft").length} detail="Versi terbaru yang masih dapat diedit" />
+      <Stat label="Costing final" value={targets.filter(d => latestCosting(state, d.id)?.status === "Final").length} detail="Perubahan melalui revisi baru" />
       <Stat label="Template paket" value={state.costTemplates.length} detail="Komponen dan kurs dapat digunakan ulang" />
     </div>
-    <DataTable title="costing" rows={rows} filters={<SelectFilter label="Semua paket" value={packageId} onChange={setPackageId} options={state.packages.map(p => ({ value: p.id, label: p.name }))} />} columns={[
-      { label: "Paket", value: r => state.packages.find(p => p.id === r.packageId)?.name ?? "" },
-      { label: "Keberangkatan", value: r => r.id, render: r => <Link className="text-button" href={`/admin/hpp/${r.id}`}>{r.id}<small>{dateLabel(r.date)}</small></Link> },
+    <DataTable title="costing" rows={rows} filters={<><SelectFilter label="Semua produk" value={productType} onChange={v => { setProductType(v); setPackageId(""); }} options={Object.entries(productLabels).map(([value, label]) => ({ value, label }))} /><SelectFilter label="Semua paket" value={packageId} onChange={setPackageId} options={[...state.packages, ...state.hajjPackages].filter(p => !productType || p.productType === productType).map(p => ({ value: p.id, label: p.name }))} /></>} columns={[
+      { label: "Produk", value: r => productLabels[r.productType] },
+      { label: "Paket", value: r => r.name },
+      { label: "Keberangkatan", value: r => r.id, render: r => <Link className="text-button" href={`/admin/hpp/${r.id}`}>{r.id}<small>{r.date ? dateLabel(r.date) : `Rencana ${r.year}`}</small></Link> },
       { label: "Rencana berbayar / FOC", value: r => r.costing ? `${r.costing.payingCount} / ${r.costing.focCount}` : "Belum diisi" },
       { label: "Total biaya", value: r => r.result ? money(r.result.total) : "—" },
       { label: "HPP / jamaah", value: r => r.result ? money(r.result.hpp) : "—" },
@@ -55,11 +60,11 @@ export default function Costing({ id }: { id?: string }) {
       { label: "Margin", value: r => r.result ? percent(r.result.margin) : "—", render: r => <span className={r.result && r.result.profit < BigInt(0) ? "red-text" : "green-text"}>{r.result ? percent(r.result.margin) : "—"}</span> },
       { label: "Status", value: r => r.costing ? `${r.costing.status} · R${r.costing.revision}${r.result ? "" : " · Belum lengkap"}` : "Belum dibuat", render: r => <Badge>{r.costing?.status ?? "Belum dibuat"}</Badge> },
       { label: "Kelola", value: r => r.id, render: r => <Link className="admin-button" href={`/admin/hpp/${r.id}`}>{r.costing ? "Buka costing" : "Buat costing"}</Link> },
-    ]} />
+    ]} /></>}
   </>;
 }
 
-function CostingEditor({ costing, departure, onRevision, versions }: { costing: CostingRecord; departure: Departure; onRevision: (id: string) => void; versions: ReactNode }) {
+function CostingEditor({ costing, departure, onRevision, versions }: { costing: CostingRecord; departure: CostingTarget; onRevision: (id: string) => void; versions: CostingRecord[] }) {
   const { state, transact, notify } = useDemo();
   const [plan, setPlan] = useState<CostPlan>(() => structuredClone(costing));
   const [dirty, setDirty] = useState(false);
@@ -70,7 +75,7 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
   const [grouped, setGrouped] = useState(true);
   const locked = costing.status === "Final";
   const { result, error } = calculate(plan);
-  const product = state.packages.find(p => p.id === departure.packageId)!;
+  const product = { id: departure.packageId, name: departure.name };
   function patch(update: Partial<CostPlan>) { setPlan(p => ({ ...p, ...update })); setDirty(true); }
   function save(final = false) {
     if (transact(s => saveCosting(s, costing.id, plan, final), `HPP ${departure.id} revisi ${costing.revision} ${final ? "difinalisasi" : "disimpan sebagai draft"}`, "HPP")) setDirty(false);
@@ -78,20 +83,21 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
   const rows = grouped ? [...plan.items].sort((a, b) => a.category.localeCompare(b.category, "id")) : plan.items;
   return <>
     <Link className="text-button" href="/admin/hpp">← Semua costing</Link>
-    <PageHeader title={`HPP ${departure.id}`} description={`${product.name} · ${dateLabel(departure.date)} · Revisi ${costing.revision}`} actions={<><Badge>{costing.status}</Badge>{versions}</>} />
+    <PageHeader title={`HPP ${departure.id}`} description={`${productLabels[costing.productType]} · ${costing.packageName} · Rencana ${costing.departureYear} · Revisi ${costing.revision}`} actions={<><Badge>{costing.status}</Badge><label className="costing-version">Revisi costing<select aria-label="Revisi costing" value={costing.id} onChange={e => { if (!dirty || window.confirm("Perubahan belum disimpan. Tinggalkan draft lokal?")) onRevision(e.target.value); }}>{versions.map(c => <option key={c.id} value={c.id}>Revisi {c.revision} · {c.status}</option>)}</select></label></>} />
     <div className="admin-actions costing-actions">
       {!locked ? <><button className="admin-button primary" disabled={!result} onClick={() => save()}>Simpan draft</button><button className="admin-button" disabled={!result} onClick={() => setConfirm("final")}>Finalisasi costing</button></> : <button className="admin-button primary" disabled={latestCosting(state, departure.id)?.id !== costing.id} onClick={() => {
         let nextId = "";
         if (transact(s => { nextId = reviseCosting(s, costing.id).id; }, `Revisi baru HPP ${departure.id} dibuat`, "HPP")) onRevision(nextId);
       }}>Buat revisi baru</button>}
       <button className="admin-button" disabled={dirty || !result} onClick={() => setConfirm("template")}>Jadikan template paket</button>
-      <Link className="text-button" href={`/admin/keberangkatan/${departure.id}`}>Lihat keberangkatan →</Link>
-      <Link className="text-button" href={`/admin/paket/${product.id}`}>Lihat paket →</Link>
+      {departure.productType === "UMRAH" && <Link className="text-button" href={`/admin/keberangkatan/${departure.id}`}>Lihat keberangkatan →</Link>}
+      <Link className="text-button" href={`/admin/${departure.productType === "HAJJ_SPECIAL" ? "haji-khusus" : "paket"}/${product.id}`}>Lihat paket →</Link>
     </div>
-    <p className="admin-notice">{locked ? `Versi final dikunci${costing.finalizedAt ? ` sejak ${dateLabel(costing.finalizedAt)}` : ""}. Buat revisi untuk mengubah biaya atau harga; versi ini tetap tersimpan.` : dirty ? "Ada perubahan yang belum disimpan. Simpan draft sebelum berpindah revisi, membuat template, atau meninggalkan halaman." : "Draft tersimpan dalam sesi demo. Refresh atau Reset demo akan mengembalikan contoh awal."} Costing tidak mengubah harga paket publik atau invoice.</p>
-    <Tabs items={["Breakdown biaya", "Simulasi harga", "Ringkasan"]} value={tab} onChange={setTab} />
-    {tab !== "Simulasi harga" && <Panel title="Dasar perhitungan" subtitle="Biaya peserta gratis tetap masuk, pembagi HPP hanya jamaah berbayar">
+    <p className="admin-notice">{locked ? `Versi final dikunci${costing.finalizedAt ? ` sejak ${dateLabel(costing.finalizedAt)}` : ""}. Buat revisi untuk mengubah biaya atau harga; versi ini tetap tersimpan.` : dirty ? "Ada perubahan yang belum disimpan. Simpan draft sebelum berpindah revisi, membuat template, atau meninggalkan halaman." : "Draft tersimpan di browser ini. Refresh mempertahankan versi tersimpan; Reset data demo mengembalikan contoh awal."} Costing tidak mengubah harga paket publik atau invoice.</p>
+    <Tabs items={["Breakdown biaya", "Simulasi harga", "Ringkasan", "Bandingkan versi"]} value={tab} onChange={setTab} />
+    {tab !== "Simulasi harga" && tab !== "Bandingkan versi" && <Panel title="Dasar perhitungan" subtitle="Biaya peserta gratis tetap masuk, pembagi HPP hanya jamaah berbayar">
       <fieldset disabled={locked} className="costing-inputs">
+        <label>Tanggal asumsi kurs<input required type="date" value={plan.assumptionDate} onChange={e => patch({ assumptionDate: e.target.value })} /></label>
         <label>Jamaah berbayar rencana<input aria-label="Jamaah berbayar rencana" type="number" min={1} max={10000} step={1} value={Number.isNaN(plan.payingCount) ? "" : plan.payingCount} onChange={e => patch({ payingCount: e.target.value === "" ? NaN : Number(e.target.value) })} /></label>
         <label>Peserta gratis / FOC<input aria-label="Peserta gratis / FOC" type="number" min={0} max={10000} step={1} value={Number.isNaN(plan.focCount) ? "" : plan.focCount} onChange={e => patch({ focCount: e.target.value === "" ? NaN : Number(e.target.value) })} /></label>
         <label>Harga jual / jamaah (IDR)<input aria-label="Harga jual / jamaah (IDR)" type="number" min="0.01" step="0.01" value={plan.sellingPrice} onChange={e => patch({ sellingPrice: e.target.value })} /></label>
@@ -110,7 +116,7 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
       ]} />
       <p className="admin-notice section-gap">Per jamaah = kuantitas × harga × kurs × peserta sasaran. Per grup dan per unit = kuantitas × harga × kurs. Harga per jamaah dibulatkan ke 2 desimal IDR sebelum dikalikan peserta. Kuantitas hotel dapat diisi kamar × malam; unit tidak bertambah otomatis saat jumlah jamaah berubah.</p>
     </div>}
-    {tab === "Simulasi harga" ? <Simulation costingId={costing.id} source={plan} capacity={departure.capacity} /> : <>
+    {tab === "Bandingkan versi" ? <CostingComparison versions={versions} /> : tab === "Simulasi harga" ? <Simulation costingId={costing.id} source={plan} capacity={departure.capacity} /> : <>
       {error && <p className="form-error section-gap" role="alert">{error}</p>}
       {result && <CostSummary plan={plan} />}
       {tab === "Ringkasan" && <div className="two-columns section-gap">
@@ -119,7 +125,7 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
       </div>}
     </>}
     {editing && <CostItemForm item={editing} onClose={() => setEditing(null)} onSave={item => { patch({ items: plan.items.some(i => i.id === item.id) ? plan.items.map(i => i.id === item.id ? item : i) : [...plan.items, item] }); setEditing(null); }} />}
-    {removing && <Confirm title="Hapus komponen biaya?" text="Komponen dihapus dari draft lokal. Simpan draft untuk menyimpan perubahan dalam sesi demo." onClose={() => setRemoving(null)} onConfirm={() => patch({ items: plan.items.filter(i => i.id !== removing) })} />}
+    {removing && <Confirm title="Hapus komponen biaya?" text="Komponen dihapus dari draft lokal. Simpan draft untuk menyimpan perubahan di browser." onClose={() => setRemoving(null)} onConfirm={() => patch({ items: plan.items.filter(i => i.id !== removing) })} />}
     {confirm && <Confirm title={confirm === "final" ? "Finalisasi costing?" : "Simpan sebagai template paket?"} text={confirm === "final" ? "Semua perubahan saat ini akan disimpan dan dikunci. Perubahan berikutnya harus melalui revisi; harga publik tetap." : "Komponen dan kurs dari versi tersimpan ini menggantikan template paket. Costing keberangkatan lain yang sudah dibuat tetap memakai salinannya sendiri."} onClose={() => setConfirm(null)} onConfirm={() => {
       if (confirm === "final") save(true);
       else if (dirty) notify("Simpan draft terlebih dahulu.", true);
@@ -137,10 +143,10 @@ function CostSummary({ plan }: { plan: CostPlan }) {
       <Stat label="HPP / jamaah berbayar" value={money(r.hpp)} detail="Total biaya ÷ jumlah jamaah berbayar" />
       <Stat label="Harga jual / jamaah" value={money(r.selling)} detail={`Setelah diskon: ${money(r.netSelling)}`} />
       <Stat label="Estimasi revenue" value={money(r.revenue)} detail="Harga setelah diskon × jamaah berbayar" />
-      <Stat label="Estimasi laba kotor" value={<span className={r.profit < BigInt(0) ? "red-text" : "green-text"}>{money(r.profit)}</span>} detail="Revenue − total biaya; bukan laba bersih" />
-      <Stat label="Margin laba kotor" value={percent(r.margin)} detail={`Markup sebelum diskon: ${percent(r.markup)}`} />
+      <Stat label="Estimasi margin paket" value={<span className={r.profit < BigInt(0) ? "red-text" : "green-text"}>{money(r.profit)}</span>} detail="Revenue − total biaya; bukan laba bersih" />
+      <Stat label="Margin persentase" value={percent(r.margin)} detail={`Markup sebelum diskon: ${percent(r.markup)}`} />
     </div>
-    <p className="admin-notice">Margin = laba kotor ÷ revenue. Markup = (harga jual sebelum diskon − HPP) ÷ HPP. Pembagi nol ditampilkan sebagai tidak terdefinisi. BEP: <b>{r.breakEven === null ? "tidak tercapai dengan asumsi biaya ini" : `${r.breakEven} jamaah berbayar`}</b>. BEP berlaku hanya jika harga, kurs, peserta gratis, jumlah kamar/bus, dan biaya tetap tidak berubah; pastikan kapasitas cukup.</p>
+    <p className="admin-notice">Hasil estimasi skenario dalam IDR, bukan laba akuntansi final. Asumsi kurs per {dateLabel(plan.assumptionDate)}; bukan kurs langsung. Komisi, kontingensi dan operasional ditambahkan sebagai komponen biaya. Margin = laba kotor ÷ revenue. Markup = (harga jual sebelum diskon − HPP) ÷ HPP. Pembagi nol ditampilkan sebagai tidak terdefinisi. BEP: <b>{r.breakEven === null ? "tidak tercapai dengan asumsi biaya ini" : `${r.breakEven} jamaah berbayar`}</b>. BEP berlaku hanya jika harga, kurs, peserta gratis, jumlah kamar/bus, dan biaya tetap tidak berubah; pastikan kapasitas cukup.</p>
   </div>;
 }
 
@@ -177,7 +183,7 @@ function Simulation({ costingId, source, capacity }: { costingId: string; source
   const saved = state.costScenarios.filter(s => s.costingId === costingId);
   const rows = result ? [20, 25, 30, 35, 40].map(n => ({ id: String(n), n, result: calculateCosting({ ...plan, payingCount: n }) })) : [];
   return <>
-    <p className="admin-notice">Simulasi terpisah dari draft costing dan data jamaah aktual. Biaya unit, kurs, serta peserta gratis tetap mengikuti salinan saat simulasi dibuka. Tinjau jumlah kamar/bus bila rombongan berubah. Skenario tersimpan hanya selama sesi demo.</p>
+    <p className="admin-notice">Simulasi terpisah dari draft costing dan data jamaah aktual. Biaya unit, kurs, serta peserta gratis tetap mengikuti salinan saat simulasi dibuka. Tinjau jumlah kamar/bus bila rombongan berubah. Skenario tersimpan di browser setelah Simpan.</p>
     <Panel title="Uji jumlah jamaah dan harga" className="section-gap">
       <div className="costing-inputs">
         <label>Jamaah berbayar simulasi<input aria-label="Jamaah berbayar simulasi" type="number" min={1} max={10000} value={Number.isNaN(plan.payingCount) ? "" : plan.payingCount} onChange={e => setPlan({ ...plan, payingCount: e.target.value === "" ? NaN : Number(e.target.value) })} /></label>

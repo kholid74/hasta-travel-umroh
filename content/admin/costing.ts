@@ -1,25 +1,32 @@
-import type { AdminPackage, Departure } from "./types";
+import type { AdminPackage, Departure, ProductType } from "./types";
 
-export const costCategories = ["Tiket pesawat", "Hotel Makkah", "Hotel Madinah", "Visa dan administrasi", "Transportasi", "Konsumsi / catering", "Handling dan ground service", "Tour leader / muthawif", "Perlengkapan jamaah", "Asuransi", "Manasik", "Biaya operasional", "Biaya lain-lain"];
+export const costTypeLabels = { person: "Per jamaah", group: "Per grup", unit: "Per unit" };
+export const costAudienceLabels = { all: "Seluruh peserta", paying: "Jamaah berbayar", foc: "Peserta gratis / FOC" };
+
+export const costCategories = ["Tiket pesawat", "Hotel Makkah", "Hotel Madinah", "Visa dan administrasi", "Transportasi", "Konsumsi / catering", "Handling dan ground service", "Tour leader / muthawif", "Perlengkapan jamaah", "Asuransi", "Manasik", "Biaya operasional", "Biaya lain-lain", "Komisi agen", "Kontingensi", "Akomodasi Haji", "Layanan Haji"];
 export type CostItem = {
   id: string; name: string; category: string; type: "person" | "group" | "unit";
   audience: "all" | "paying" | "foc"; quantity: string; unit: string;
   unitPrice: string; currency: "IDR" | "SAR" | "USD"; exchangeRate: string; notes: string;
 };
 export type CostPlan = {
+  assumptionDate: string;
   payingCount: number; focCount: number; sellingPrice: string; discountPerPerson: string;
   items: CostItem[]; notes: string;
 };
 export type Costing = CostPlan & {
+  productType: ProductType; packageId: string; packageName: string;
+  departureYear: number; departureDate: string;
   id: string; departureId: string; revision: number; status: "Draft" | "Final";
   finalizedAt?: string;
 };
-export type CostTemplate = { packageId: string; items: CostItem[] };
+export type CostTemplate = { packageId: string; assumptionDate: string; items: CostItem[] };
 export type CostScenario = CostPlan & { id: string; costingId: string; name: string };
 
 export function createCostingSeed(packages: AdminPackage[], departures: Departure[]) {
   const templates: CostTemplate[] = departures.slice(0, 3).map((d, i) => ({
     packageId: d.packageId,
+    assumptionDate: "2026-10-02",
     items: [
       { id: `CI-${i}-flight`, name: "Tiket pulang pergi termasuk pendamping", category: "Tiket pesawat", type: "person", audience: "all", quantity: "1", unit: "tiket", unitPrice: ["11500000", "14500000", "17500000"][i], currency: "IDR", exchangeRate: "1", notes: "Harga contoh, bukan penawaran maskapai." },
       { id: `CI-${i}-makkah`, name: "Hotel Makkah — kamar × malam", category: "Hotel Makkah", type: "unit", audience: "all", quantity: "45", unit: "kamar-malam", unitPrice: "380", currency: "SAR", exchangeRate: "4300", notes: "9 kamar × 5 malam; jumlah unit tetap dalam simulasi, sesuaikan bila rombongan berubah." },
@@ -33,6 +40,8 @@ export function createCostingSeed(packages: AdminPackage[], departures: Departur
   }));
   const costings: Costing[] = templates.map((template, i) => ({
     id: `HPP-${i + 1}`, departureId: departures[i].id, revision: 1, status: "Draft",
+    productType: "UMRAH", packageId: template.packageId, packageName: packages.find(p => p.id === template.packageId)!.name,
+    departureYear: Number(departures[i].date.slice(0, 4)), departureDate: departures[i].date, assumptionDate: template.assumptionDate,
     payingCount: [35, 30, 20][i], focCount: 2,
     sellingPrice: String(packages.find(p => p.id === template.packageId)!.price.quad),
     discountPerPerson: "0", notes: ["Reguler: biaya tetap terbagi ke 35 jamaah.", "Paket dengan tiket lebih mahal dan 30 jamaah.", "Contoh risiko rugi: tiket mahal dan hanya 20 jamaah berbayar."][i],

@@ -4,7 +4,17 @@ Admin: `/admin/login` · `demo@hasta.example` / `HastaDemo2026!`.
 
 Panduan lengkap: [Admin Showcase](docs/ADMIN_SHOWCASE.md) · [Future Backend](docs/FUTURE_BACKEND.md).
 
+M1.1 Haji Khusus & HPP: [Rencana](docs/M1_1_IMPLEMENTATION_PLAN.md) · [Laporan](docs/M1_1_REPORT.md).
+
 ## Getting Started
+
+M1.2 dokumen PDF: [Rencana](docs/M1_2_IMPLEMENTATION_PLAN.md) · [Laporan, contoh PDF dan screenshot](docs/M1_2_REPORT.md).
+
+M1.2B penyempurnaan visual: [Laporan dan sampel PDF berlogo](docs/M1_2B_REPORT.md).
+
+M2 Perlengkapan Jamaah: [Rencana](docs/M2_IMPLEMENTATION_PLAN.md) · [Laporan, hasil tes dan sampel bukti PDF](docs/M2_REPORT.md). Buka `/admin/perlengkapan` setelah login untuk penerimaan stok, alokasi kit, serah terima parsial dan laporan.
+
+Riwayat cicilan pada booking, jamaah dan PDF: [Audit dan hasil implementasi](docs/PAYMENT_HISTORY_PDF_AUDIT.md) · [Contoh invoice](docs/samples/payment-history/UMRAH-invoice.pdf) · [Contoh kuitansi](docs/samples/payment-history/UMRAH-receipt.pdf).
 
 First, run the development server:
 
@@ -22,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-Proyek menggunakan Next.js 16, React 19, Tailwind 4, Manrope dan Instrument Serif. Production login memerlukan environment `ADMIN_SESSION_SECRET` minimal 32 karakter acak. Data operasional merupakan simulasi dalam memori dan direset saat refresh.
+Proyek menggunakan Next.js 16, React 19, Tailwind 4, Manrope dan Instrument Serif. Production login memerlukan environment `ADMIN_SESSION_SECRET` minimal 32 karakter acak. Data operasional merupakan simulasi yang tersimpan di localStorage browser ini setelah disimpan. Refresh mempertahankan data; menu profil → Reset data demo mengembalikan contoh awal. Gunakan data fiktif.
 
 ## Learn More
 

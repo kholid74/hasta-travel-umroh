@@ -1,5 +1,7 @@
 # HPP & Kalkulasi Paket
 
+Pembaruan M1.1: HPP kini mendukung Haji Khusus, tanggal asumsi, perbandingan versi dan persistensi browser. Lihat [laporan M1.1](M1_1_REPORT.md); audit bertanggal di bawah menggambarkan kondisi sebelum implementasi awal.
+
 ## Audit sebelum implementasi — 8 Oktober 2026
 
 | Area | Temuan existing | Gap |
@@ -68,12 +70,12 @@ Margin/markup disajikan dua desimal persen. Revenue nol atau biaya nol menghasil
 1. Login admin, buka **Finance → HPP & Kalkulasi Paket** (`/admin/hpp`). Pilih keberangkatan untuk membuka `/admin/hpp/[departureId]`. Paket → Finance dan detail keberangkatan juga menyediakan tautan.
 2. Tiga costing contoh pertama memakai kombinasi biaya IDR/SAR/USD, 35/30/20 jamaah berbayar dan 2 pendamping gratis. Contoh pertama memiliki laba; contoh ketiga memakai tiket lebih mahal dengan peserta lebih sedikit sehingga rugi.
 3. Buka **Breakdown biaya**. Tambahkan komponen, pilih sasaran peserta, isi kurs, edit atau hapus baris. Kategori boleh diketik bebas. Gunakan pengelompokan kategori, pencarian, dan ekspor tabel.
-4. Ubah jamaah berbayar, FOC, harga, atau diskon. Ringkasan otomatis menghitung HPP, revenue, laba kotor, margin, markup, dan BEP. **Simpan draft** menyimpan perubahan dalam sesi demo.
+4. Ubah jamaah berbayar, FOC, harga, atau diskon. Ringkasan otomatis menghitung HPP, revenue, laba kotor, margin, markup, dan BEP. **Simpan draft** menyimpan perubahan di browser.
 5. Pada **Simulasi harga**, bandingkan 20/25/30/35/40 jamaah. Ubah harga menjadi Rp1.000.000 untuk contoh rugi yang jelas, simpan dengan nama, lalu muat kembali. Simulasi tidak mengubah dasar costing maupun jamaah aktual.
 6. **Jadikan template paket** menyalin komponen dari versi tersimpan. Buat keberangkatan baru dengan paket yang sama melalui menu Keberangkatan, buka HPP, lalu **Buat draft costing** untuk memakai template itu.
 7. **Finalisasi costing** mengunci versi. Klik **Buat revisi baru**, ubah draft baru, dan pilih versi lama melalui **Revisi costing** untuk membuktikan final sebelumnya tetap utuh.
 8. **Ringkasan** memperlihatkan total pengeluaran yang benar-benar tercatat (Menunggu dan Dibayar), terpisah dari rencana HPP. Aksi simpan/final/revisi/template/skenario tercatat di Activity Log.
-9. Menu profil → **Reset data demo** mengembalikan contoh awal, termasuk draft editor yang belum disimpan. Refresh juga menghapus perubahan sesi demo.
+9. Menu profil → **Reset data demo** mengembalikan contoh awal, termasuk draft editor yang belum disimpan. Sejak M1.1, refresh mempertahankan perubahan yang sudah disimpan.
 
 ## Verifikasi
 
@@ -87,6 +89,6 @@ Margin/markup disajikan dua desimal persen. Revenue nol atau biaya nol menghasil
 
 ## Limitasi dan langkah berikutnya
 
-Data hanya di memori workspace, tidak persist ke server/browser storage. Kurs dan kuantitas unit diisi manual. Model memakai satu harga jual rata-rata per jamaah untuk costing; tarif Quad/Triple/Double aktual dan invoice existing tetap independen. Perubahan lokal yang belum disimpan hilang saat meninggalkan editor. Finalisasi adalah penguncian di demo, belum approval multi-user atau audit yang tahan manipulasi.
+Sejak M1.1 data demo tersimpan di browser, tanpa server. Lihat [laporan M1.1](M1_1_REPORT.md). Kurs dan kuantitas unit diisi manual. Model memakai satu harga jual rata-rata per jamaah untuk costing; tarif Quad/Triple/Double aktual dan invoice existing tetap independen. Perubahan lokal yang belum disimpan hilang saat meninggalkan editor. Finalisasi adalah penguncian di demo, belum approval multi-user atau audit yang tahan manipulasi.
 
 Untuk produksi, simpan nominal sebagai database DECIMAL atau integer minor-unit, gunakan transaksi dan kontrol akses server, serta simpan revisi final secara immutable. Tambahkan integrasi biaya aktual, pricing campuran tipe kamar, dan aturan kapasitas bertingkat hanya saat kebutuhan operasionalnya ditetapkan. Pajak, rekonsiliasi bank, dan perhitungan laba bersih belum dicakup.

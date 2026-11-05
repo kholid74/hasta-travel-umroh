@@ -27,6 +27,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   useEffect(() => { const listener = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setSearch(v => !v); } if (e.key === "Escape") { setProfile(false); setMobile(false); setQuick(false); } }; window.addEventListener("keydown", listener); return () => window.removeEventListener("keydown", listener); }, []);
   const results = [
     ...state.jamaah.map(j => ({ name: j.name, sub: `Jamaah · ${j.id}`, href: `/admin/jamaah/${j.id}` })),
+    ...state.hajjPackages.map(p => ({ name: p.name, sub: `Haji Khusus · ${p.id}`, href: `/admin/haji-khusus/${p.id}` })),
     ...state.packages.map(p => ({ name: p.name, sub: `Paket · ${p.id}`, href: `/admin/paket/${p.id}` })),
     ...state.bookings.flatMap(b => [{ name: b.id, sub: `Booking · ${state.jamaah.find(j => j.id === b.jamaahId)?.name}`, href: `/admin/booking/${b.id}` }, { name: `INV/${b.id}`, sub: `Invoice · ${state.jamaah.find(j => j.id === b.jamaahId)?.name}`, href: `/admin/invoice/${b.id}` }]),
     ...state.departures.map(d => ({ name: d.id, sub: `Keberangkatan · ${d.date}`, href: `/admin/keberangkatan/${d.id}` })),
@@ -42,6 +43,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     </div>
     {search && <Modal title="Cari di workspace" onClose={() => setSearch(false)}><label className="search-dialog-input"><Search size={20} /><input autoFocus value={query} placeholder="Nama jamaah, booking, paket, invoice…" onChange={e => setQuery(e.target.value)} aria-label="Pencarian global" /><button aria-label="Hapus pencarian" onClick={() => setQuery("")}><X size={15} /></button></label><div className="search-results">{results.map(r => <Link key={r.href} href={r.href} onClick={() => setSearch(false)}><Search size={16} /><span><b>{r.name}</b><small>{r.sub}</small></span><ChevronRight size={15} /></Link>)}{!results.length && <Empty />}</div></Modal>}
     {create && <CreateForm kind={create} onClose={() => setCreate(null)} />}
-    {confirmReset && <Confirm title="Reset data demo?" text="Seluruh perubahan dalam sesi ini akan diganti dengan data awal. Tindakan ini tidak dapat dibatalkan." onClose={() => setConfirmReset(false)} onConfirm={reset} />}
+    {confirmReset && <Confirm title="Reset data demo?" text="Seluruh perubahan demo tersimpan di browser ini akan diganti dengan data awal. Tindakan ini tidak dapat dibatalkan." onClose={() => setConfirmReset(false)} onConfirm={reset} />}
   </div>;
 }
