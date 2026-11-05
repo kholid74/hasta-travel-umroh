@@ -16,6 +16,8 @@ M2 Perlengkapan Jamaah: [Rencana](docs/M2_IMPLEMENTATION_PLAN.md) · [Laporan, h
 
 Riwayat cicilan pada booking, jamaah dan PDF: [Audit dan hasil implementasi](docs/PAYMENT_HISTORY_PDF_AUDIT.md) · [Contoh invoice](docs/samples/payment-history/UMRAH-invoice.pdf) · [Contoh kuitansi](docs/samples/payment-history/UMRAH-receipt.pdf).
 
+Refinement invoice dari masukan klien: [Laporan pagination](docs/INVOICE_LAYOUT_REFINEMENT_REPORT.md) · [Invoice 4 pembayaran, satu halaman](docs/samples/invoice-layout/UMRAH-4.pdf).
+
 First, run the development server:
 
 ```bash

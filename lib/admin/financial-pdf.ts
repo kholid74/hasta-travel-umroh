@@ -79,10 +79,31 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
     text(model.id, left, y, 10, bold); badge(model.kind === "receipt" ? "Terverifikasi · DEMO" : d.status, y - 3); y += 20;
     paragraph(`Dibuat ${d.generated}${model.kind === "invoice" ? `  |  Tanggal invoice ${d.issued}${d.due ? `  |  Jatuh tempo ${d.due}` : ""}` : ""}`, 8);
     ensure(120);
+    if (model.kind === "invoice") {
+      const bank = model.presentation.bank;
+      if ([bank.name, bank.account, bank.holder].some(value => value.length > 120)) throw new Error("Informasi rekening maksimal 120 karakter per field. Perbarui Settings Pembayaran.");
+      const start = y;
+      text("Diterbitkan oleh", left, start, 9, regular, muted);
+      text("Hasta Travel", left, start + 15, 14, bold);
+      text("Penerbit demo fiktif", left, start + 35, 8, regular, muted);
+      text("Ditagihkan kepada", left, start + 48, 9, regular, muted);
+      let customerTop = start + 62;
+      const names = wrap(d.customer, 243, 14, bold);
+      for (const row of names.slice(0, 3)) { text(row, left, customerTop, 14, bold); customerTop += 19; }
+      for (const row of wrap(d.phone, 243, 9)) { text(row, left, customerTop + 4, 9, regular, muted); customerTop += 13; }
+      text("Rekening perusahaan · DEMO", 310, start, 9, bold);
+      let bankTop = start + 17;
+      for (const value of [bank.name || "Nama bank belum diisi", bank.account ? `No. ${bank.account}` : "Nomor rekening belum diisi", bank.holder ? `a.n. ${bank.holder}` : "Nama pemilik rekening belum diisi", "Simulasi · jangan transfer dana"]) {
+        for (const row of wrap(value, 243, 9)) { text(row, 310, bankTop, 9, regular, muted); bankTop += 13; }
+      }
+      y = Math.max(customerTop, bankTop) + 10; rule(y); y += 10;
+      if (names.length > 3) paragraph("Nama jamaah (lanjutan): " + names.slice(3).join(" "), 10, ink);
+      return;
+    }
     const start = y; text("Diterbitkan oleh", left, start, 9, regular, muted);
     text("Hasta Travel", left, start + 19, 14, bold);
     text("Penerbit demo fiktif", left, start + 42, 9, regular, muted);
-    text(model.kind === "invoice" ? "Ditagihkan kepada" : "Pemilik akun / jamaah", 310, start, 9, regular, muted);
+    text("Pemilik akun / jamaah", 310, start, 9, regular, muted);
     let t = start + 19;
     const names = wrap(d.customer, 243, 14, bold);
     for (const row of names.slice(0, 3)) { text(row, 310, t, 14, bold); t += 19; }
@@ -100,11 +121,11 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
       rect(left, y, width, h, pale);
       text(`${d.product}  ·  Booking ${d.bookingId}${offset ? "  ·  lanjutan" : ""}`, left + 16, y + 12, 8, bold, muted);
       rows.slice(offset, offset + count).forEach((row, i) => text(row, left + 16, y + 28 + i * 17, 12, bold));
-      y += h + 14; offset += count;
+      y += h + (model.kind === "invoice" ? 6 : 14); offset += count;
       if (offset < rows.length) next();
     }
   }
-  function table(title: string, labels: string[], widths: number[], rows: string[][], moneyColumn = -1) {
+  function table(title: string, labels: string[], widths: number[], rows: string[][], moneyColumn = -1, reserveEnd = 0) {
     const tableHeader = (continuation = false) => {
       heading(title + (continuation ? " · lanjutan" : ""));
       rect(left, y, width, 22, ink);
@@ -119,6 +140,8 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
       const length = Math.max(...cells.map(c => c.length));
       let offset = 0;
       while (offset < length) {
+        const tailHeight = (length - offset) * 13 + 14 + reserveEnd + 14;
+        if (reserveEnd && rowIndex === rows.length - 1 && tailHeight <= bottom - 159 && y + tailHeight > bottom) { next(); tableHeader(true); }
         if (bottom - y < 33) { next(); tableHeader(true); }
         const count = Math.max(1, Math.min(length - offset, Math.floor((bottom - y - 18) / 13)));
         const height = count * 13 + 14;
@@ -135,7 +158,7 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
     y += 14;
   }
   function summary(d: FinancialModel["presentation"]) {
-    ensure(113); rect(left, y, width, 98, ink);
+    ensure(model.kind === "invoice" ? 98 : 113); rect(left, y, width, 98, ink);
     text("Total Harga Paket", left + 18, y + 11, 8, regular, white);
     text(documentMoney(d.contract), left + 18, y + 25, 14, bold, white);
     text("Total Pembayaran Terverifikasi", left + 18, y + 53, 8, regular, white);
@@ -146,9 +169,9 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
     y += 113;
   }
   function paymentHistory(d: FinancialModel["presentation"]) {
-    table("Riwayat Pembayaran", ["Tanggal", "Metode", "Referensi", "Nominal (IDR)", "Status"], [82, 93, 117, 114, width - 406],
-      d.history.map(p => [p.date, p.method, p.id + (p.reference ? "\n" + p.reference : ""), documentMoney(p.amount), p.status + (p.verified ? "\nVerifikasi: " + p.verified : p.status === "Terverifikasi" ? "\nTanggal verifikasi tidak tercatat" : "")]), 3);
-    paragraph("Hanya pembayaran Terverifikasi mengurangi tagihan. Menunggu dan Dikembalikan tidak dihitung dalam total pembayaran terverifikasi.", 8);
+    table("Riwayat Pembayaran", ["Tanggal", "Metode", "Referensi", "Nominal (IDR)", "Status"], model.kind === "invoice" ? [82, 93, 101, 114, width - 390] : [82, 93, 117, 114, width - 406],
+      d.history.map(p => [p.date, p.method, p.id + (p.reference ? "\n" + p.reference : ""), documentMoney(p.amount), p.status + (p.verified ? "\nVerifikasi: " + p.verified : p.status === "Terverifikasi" ? "\nTanggal verifikasi tidak tercatat" : "")]), 3, model.kind === "invoice" ? 98 : 0);
+    if (model.kind !== "invoice") paragraph("Hanya pembayaran Terverifikasi mengurangi tagihan. Menunggu dan Dikembalikan tidak dihitung dalam total pembayaran terverifikasi.", 8);
   }
   header(); metadata();
   if (model.kind === "handover") {
@@ -188,15 +211,14 @@ export async function renderFinancialPDF(model: FinancialModel | HandoverPDFMode
     if (model.kind === "invoice") summary(d);
     else { ensure(45); text("Sisa tagihan", left, y + 5, 12, bold); amount(d.outstanding, left + 280, y, width - 280, 21); y += 44; }
   }
-  heading("Catatan dokumen");
-  paragraph(d.assumptions, 8);
-  if (d.legacyDescription) paragraph("Nama paket memakai metadata saat ini; arsip nama kontrak lama tidak tersedia. Nilai kontrak tetap mengikuti booking tersimpan.", 8);
-  if (model.kind === "invoice") {
-    paragraph("Tagihan mencakup satu paket untuk satu jamaah. Tidak ada rincian biaya tambahan pada kontrak sumber.", 8);
-    if (d.instructions) paragraph(`Instruksi demo: ${d.instructions}. Rekening simulasi; jangan transfer dana.`, 8);
+  if (model.kind !== "invoice") {
+    heading("Catatan dokumen");
+    paragraph(d.assumptions, 8);
+    if (d.legacyDescription) paragraph("Nama paket memakai metadata saat ini; arsip nama kontrak lama tidak tersedia. Nilai kontrak tetap mengikuti booking tersimpan.", 8);
   }
   pdf.getPages().forEach((p, i, all) => {
     page = p;
+    if (model.kind === "invoice") text("Hanya pembayaran Terverifikasi mengurangi tagihan. Menunggu dan Dikembalikan tidak dihitung.", left, 751, 7, regular, muted);
     rule(765);
     text("DEMO", left, 778, 8, bold, gold);
     text(model.kind === "handover" ? "Bukti perlengkapan simulasi. Ruang pengakuan bukan tanda tangan yang ditangkap atau diverifikasi." : "Bukan faktur pajak atau bukti pembayaran riil. Tidak menyatakan kepatuhan pajak.", left + 40, 778, 7, regular, muted);

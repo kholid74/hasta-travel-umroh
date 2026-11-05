@@ -22,6 +22,7 @@ export function decodeDemo(raw: string): DemoState {
     const data: unknown = JSON.parse(raw);
     if (!data || typeof data !== "object" || !("version" in data) || ![1, 2].includes(Number(data.version)) || !("state" in data) ) throw new Error();
     const state = data.state as DemoState;
+    if (state?.settings && typeof state.settings === "object" && !Object.hasOwn(state.settings, "accountHolder")) state.settings.accountHolder = "";
     if (data.version === 1) Object.assign(state, initializeInventory(state as unknown as Parameters<typeof initializeInventory>[0]));
     if (!sameShape(state, createSeed())) throw new Error();
     validateInventory(state);
