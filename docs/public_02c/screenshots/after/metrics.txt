@@ -1,0 +1,15 @@
+katalog @360: height 6523px, overflow no, cards visible 9/18
+katalog @390: height 6119px, overflow no, cards visible 9/18
+katalog @768: height 5878px, overflow no, cards visible 18/18
+katalog @1440: height 4569px, overflow no, cards visible 18/18
+tentang @390: height 6811px, overflow no
+tentang @1440: height 4632px, overflow no
+haji @360: height 8371px, overflow no
+haji @390: height 8115px, overflow no
+haji @1440: height 5502px, overflow no
+detail @360: height 8177px, overflow no
+detail @1440: height 5778px, overflow no
+jadwal @360: height 8500px, overflow no
+kontak @360: height 4497px, overflow no
+faq @360: height 3462px, overflow no
+beranda @360: height 12580px, overflow no, cards visible 3/3

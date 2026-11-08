@@ -1,0 +1,46 @@
+
+> travel-haji-umroh@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 18ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1743ms
+  Running TypeScript ...
+  Finished TypeScript in 1870ms ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/30) ...
+  Generating static pages using 11 workers (7/30) 
+  Generating static pages using 11 workers (14/30) 
+  Generating static pages using 11 workers (22/30) 
+✓ Generating static pages using 11 workers (30/30) in 935ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/[...path]
+├ ƒ /admin/login
+├ ○ /faq
+├ ○ /haji-khusus
+├ ○ /icon.png
+├ ○ /jadwal-keberangkatan
+├ ○ /kontak
+├ ○ /paket-umroh
+├   /paket-umroh/[slug]
+│ ├ ● /paket-umroh/umroh-hemat-9-hari
+│ ├ ● /paket-umroh/umroh-reguler-9-hari
+│ ├ ● /paket-umroh/umroh-reguler-12-hari
+│ └ ● [+15 more paths]
+├ ƒ /portal/[[...path]]
+└ ○ /tentang
+
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+
+BUILD EXIT 0

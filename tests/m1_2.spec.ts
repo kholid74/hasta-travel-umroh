@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { enterAs } from "./helpers/session";
+import { readFile } from "node:fs/promises";
+import { saveArtifact } from "./helpers/artifacts";
 import { createSeed } from "../content/admin/seed";
 import { financialDocument, renderFinancialPDF as renderPDF } from "../lib/admin/financial-documents";
 import { financialBalance, verifyPayment } from "../lib/admin/model";
@@ -19,9 +21,8 @@ async function inspect(bytes: Uint8Array) {
   const pages = doc.numPages; await task.destroy(); return { text, pages };
 }
 
-test("real PDF templates preserve both contracts, verified totals, pagination and state", async () => {
+test("real PDF templates preserve both contracts, verified totals, pagination and state", async ({}, testInfo) => {
   const s = createSeed();
-  await mkdir("test-results/m1-2", { recursive: true });
   for (const b of [s.bookings[0], s.bookings.find(b => b.productType === "HAJJ_SPECIAL")!]) {
     const before = encodeDemo(s);
     for (const kind of ["invoice", "receipt", "statement"] as const) {
@@ -32,7 +33,7 @@ test("real PDF templates preserve both contracts, verified totals, pagination an
       expect(parsed.text).toContain("DEMO");
       expect(parsed.text).toContain(b.productType === "HAJJ_SPECIAL" ? "Haji Khusus" : "Umrah");
       if (kind !== "receipt") expect(parsed.text).toContain(b.total.toLocaleString("id-ID"));
-      await writeFile(`test-results/m1-2/${b.productType}-${kind}.pdf`, bytes);
+      await saveArtifact(testInfo, `m1-2/${b.productType}-${kind}.pdf`, bytes);
     }
     expect(encodeDemo(s)).toBe(before);
   }
@@ -58,11 +59,11 @@ test("real PDF templates preserve both contracts, verified totals, pagination an
   expect(financialBalance(s, b).balance).toBe(BigInt(0));
 });
 
-test("financial previews download actual PDFs on desktop/mobile and survive refresh", async ({ page }) => {
+test("financial previews download actual PDFs on desktop/mobile and survive refresh", async ({ page }, testInfo) => {
   test.setTimeout(180000);
   const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message));
-  await page.goto("/admin/login"); await page.getByRole("button", { name: "Masuk ke workspace" }).click();
+  await enterAs(page);
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   for (const id of [createSeed().bookings[0].id, "BK-HAJ-1"]) {
     await page.goto(`/admin/booking/${id}`);
@@ -81,7 +82,7 @@ test("financial previews download actual PDFs on desktop/mobile and survive refr
       const path = await download.path(); const pdf = await inspect(new Uint8Array(await readFile(path!)));
       expect(pdf.text).toContain(id);
       if (title !== "Kuitansi Pembayaran") expect(pdf.text).toContain(collected.toLocaleString("id-ID"));
-      await page.screenshot({ path: `test-results/m1-2/${id}-${title.replaceAll(" ", "-")}.png`, fullPage: true });
+      await page.screenshot({ path: testInfo.outputPath(`${id}-${title.replaceAll(" ", "-")}.png`), fullPage: true });
       await dialog.getByRole("button", { name: "Tutup dialog" }).click();
     }
     await page.reload();

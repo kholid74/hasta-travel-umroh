@@ -1,5 +1,6 @@
 import { hotelMadinah, hotelMakkah } from "@/content/hotels";
 import { itinerary9, itinerary12, itinerary14 } from "@/content/itinerary";
+import { umrahRequirements } from "@/content/requirements";
 import type { Departure, OccupancyPrice, Package } from "@/content/types";
 
 /** SITUS DEMO — harga, ketersediaan seat, dan nama paket di bawah ini fiktif. */
@@ -22,7 +23,7 @@ const dep = (
 
 const FASILITAS = [
   "Tiket pesawat pulang-pergi kelas ekonomi",
-  "Visa umroh dan pengurusan Nusuk",
+  "Pengurusan visa umroh",
   "Akomodasi hotel sesuai paket",
   "Makan 3x sehari, menu Indonesia",
   "Bus ber-AC untuk seluruh perjalanan dan ziarah",
@@ -42,14 +43,8 @@ const EXCLUSIONS = [
   "Biaya perubahan tanggal keberangkatan setelah tiket terbit",
 ];
 
-const SYARAT = [
-  "Paspor berlaku minimal 8 bulan dengan nama minimal dua suku kata",
-  "Kartu vaksin meningitis yang masih berlaku",
-  "Pas foto berwarna latar putih ukuran 4x6",
-  "Kartu keluarga dan akta kelahiran untuk jamaah di bawah 17 tahun",
-  "Surat mahram untuk jamaah perempuan sesuai ketentuan yang berlaku",
-  "Uang muka saat pendaftaran, pelunasan 40 hari sebelum keberangkatan",
-];
+// Contoh persyaratan bersama — lihat content/requirements.ts (dikualifikasi, bukan aturan resmi).
+const SYARAT = umrahRequirements;
 
 type Draft = Omit<Package, "facilities" | "exclusions" | "requirements" | "itinerary"> & {
   itinerary?: Package["itinerary"];

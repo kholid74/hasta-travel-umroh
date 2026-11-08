@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Users, UserCheck, Plane, Wallet, Receipt, Contact, ArrowUpRight, ArrowRight, ChevronRight, CalendarDays, FileWarning, Clock3, PackageCheck } from "lucide-react";
+import { Users, UserCheck, Plane, Wallet, Receipt, Contact, ArrowUpRight, ArrowRight, ChevronRight, FileWarning, Clock3, PackageCheck } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useDemo } from "./Store";
-import { Badge, PageHeader, Panel, Progress, Stat } from "./ui";
+import { Badge, PageHeader, Panel, Progress, SimulationDate, Stat } from "./ui";
 import { bookingFor, dateLabel, documentPercent, financialBalance, members, outstanding, paid, paymentStatus, readiness, validPassport } from "@/lib/admin/model";
 import { rupiah, rupiahSingkat } from "@/lib/format";
 import { DEMO_TODAY } from "@/content/admin/seed";
@@ -37,7 +37,7 @@ export default function Dashboard() {
   const progress = ["Paspor", "Vaksin", "Foto"].map(n => ({ label: n, value: Math.round(state.jamaah.filter(j => j.documents[n] === "Terverifikasi").length / Math.max(1, state.jamaah.length) * 100) }));
   const pendingPayments = state.payments.filter(p => p.status === "Menunggu").length;
   return <>
-    <PageHeader title="Selamat pagi, Ahmad" description="Berikut ringkasan operasional Hasta Travel hari ini." actions={<><span className="muted" style={{ fontSize: 10 }}><CalendarDays size={12} style={{ display: "inline", marginRight: 5 }} />{dateLabel(DEMO_TODAY)}</span><select aria-label="Periode dashboard" value={period} onChange={e => setPeriod(e.target.value)}><option value="2026-10">Oktober 2026</option><option value="2026-09">September 2026</option><option value="2026-11">November 2026</option></select></>} />
+    <PageHeader title="Selamat pagi, Ahmad" description="Berikut ringkasan operasional Hasta Travel hari ini." actions={<><SimulationDate /><select aria-label="Bulan pada periode simulasi" value={period} onChange={e => setPeriod(e.target.value)}><option value="2026-10">Oktober 2026</option><option value="2026-09">September 2026</option><option value="2026-11">November 2026</option></select></>} />
     <div className="admin-stats six">
       <Stat label="Total jamaah" value={state.jamaah.length} detail="Seluruh jamaah terdaftar" icon={<Users />} />
       <Stat label="Jamaah aktif" value={new Set(active.map(b => b.jamaahId)).size} detail="Dalam persiapan perjalanan" icon={<UserCheck />} />

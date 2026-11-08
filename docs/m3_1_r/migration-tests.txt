@@ -1,0 +1,9 @@
+
+Running 3 tests using 1 worker
+
+  ok 1 tests\m2.spec.ts:83:5 › version 1 migrates inventory without losing finance/HPP, version 2 persists and reset is deterministic (44ms)
+  ok 2 tests\m3_1_gateway.spec.ts:59:5 › frozen v2 workspace migrates to v3 without touching business records (76ms)
+  ok 3 tests\m3_1_gateway.spec.ts:215:5 › saved v2 workspace opens after the upgrade and is re-saved as v3 only on change (2.6s)
+
+  3 passed (4.1s)
+EXIT 0

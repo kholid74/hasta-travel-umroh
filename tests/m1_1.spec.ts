@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterAs } from "./helpers/session";
 import { createSeed, newJamaah } from "../content/admin/seed";
 import { hajjPrice, registerHajj, saveHajjPackage, validateHajjPackage } from "../lib/admin/hajj";
 import { calculateCosting, latestCosting, newCosting, reviseCosting, saveCosting } from "../lib/admin/costing";
@@ -64,12 +65,11 @@ test("Hajj HPP exact totals, exchange assumptions, saved revisions and browser e
 });
 
 async function login(page: Page) {
-  await page.goto("/admin/login");
-  await page.getByRole("button", { name: "Masuk ke workspace" }).click();
+  await enterAs(page);
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
 }
 
-test("Hajj package editor, shared registration, HPP versions, refresh and reset work on desktop and mobile", async ({ page }) => {
+test("Hajj package editor, shared registration, HPP versions, refresh and reset work on desktop and mobile", async ({ page }, testInfo) => {
   test.setTimeout(240000);
   const errors: string[] = [];
   page.on("pageerror", e => errors.push(e.message));
@@ -80,10 +80,10 @@ test("Hajj package editor, shared registration, HPP versions, refresh and reset 
   await expect(page.getByRole("combobox", { name: "Versi A", exact: true })).toBeVisible();
   await expect(page.locator("tbody")).toContainText("Umrah");
   await expect(page.locator("tbody")).toContainText("Haji Khusus");
-  await page.screenshot({ path: "test-results/m1-1-product-comparison-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-product-comparison-desktop.png"), fullPage: true });
   await page.goto("/admin/haji-khusus");
   await expect(page.getByRole("heading", { name: "Haji Khusus", exact: true })).toBeVisible();
-  await page.screenshot({ path: "test-results/m1-1-hajj-list-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hajj-list-desktop.png"), fullPage: true });
   await page.getByRole("button", { name: "Buat paket Haji", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Nama paket Haji").fill("Haji Uji M1.1 Demo");
@@ -92,7 +92,7 @@ test("Hajj package editor, shared registration, HPP versions, refresh and reset 
   await dialog.getByRole("button", { name: "Simpan paket Haji", exact: true }).click();
   await expect(dialog.getByRole("alert")).toContainText("100%");
   await dialog.getByLabel("Persentase tahap 1").fill("20");
-  await page.screenshot({ path: "test-results/m1-1-hajj-editor-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hajj-editor-desktop.png"), fullPage: true });
   await dialog.getByRole("button", { name: "Simpan paket Haji", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await page.reload();
@@ -128,28 +128,28 @@ test("Hajj package editor, shared registration, HPP versions, refresh and reset 
   await page.getByRole("button", { name: "Simpan draft", exact: true }).click();
   await page.reload();
   await expect(page.getByLabel("Jamaah berbayar rencana", { exact: true })).toHaveValue("20");
-  await page.screenshot({ path: "test-results/m1-1-hpp-hajj-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hpp-hajj-desktop.png"), fullPage: true });
   await page.getByRole("button", { name: "Bandingkan versi", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Perbandingan versi HPP" })).toBeVisible();
   await expect(page.locator("tbody")).toContainText("20 / 0");
   await expect(page.locator("tbody")).toContainText("30 / 0");
-  await page.screenshot({ path: "test-results/m1-1-hpp-comparison-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hpp-comparison-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/m1-1-hpp-comparison-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hpp-comparison-mobile.png"), fullPage: true });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/admin/haji-khusus/HAJ-2028-A");
   await expect(page.getByRole("heading", { name: "Haji Khusus Amanah 2028 — Demo", exact: true })).toBeVisible();
-  await page.screenshot({ path: "test-results/m1-1-hajj-detail-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hajj-detail-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/m1-1-hajj-detail-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hajj-detail-mobile.png"), fullPage: true });
   await page.getByRole("button", { name: "Buka navigasi", exact: true }).click();
   await page.getByRole("dialog").getByRole("link", { name: "Haji Khusus", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Haji Khusus", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Buat paket Haji", exact: true }).click();
   expect(await dialog.evaluate(el => el.scrollWidth <= el.clientWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/m1-1-hajj-editor-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("m1-1-hajj-editor-mobile.png"), fullPage: true });
   await dialog.getByRole("button", { name: "Batal", exact: true }).click();
   await page.goto("/admin/booking/BK-HAJ-1");
   await expect(page.getByRole("heading", { name: "Booking BK-HAJ-1" })).toBeVisible();

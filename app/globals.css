@@ -1,27 +1,42 @@
 @import "tailwindcss";
 
 /*
- * Arah visual "Malam Gurun": satu tampilan gelap untuk seluruh situs.
- * Tidak ada mode terang — palet ini kehilangan seluruh karakternya kalau dibalik,
- * dan foto masjid justru paling kuat di latar gelap.
+ * PUBLIC-02A-R · "Sacred Journey — Warm Islamic Editorial".
+ * Bingkai merek (header, hero, penutup, footer) memakai hijau hutan pekat, bukan hitam.
+ * Konten dibaca di atas ivory/pasir lewat .band-light / .band-sand (di bawah).
+ * Emas redup = warna aksi; zamrud = aksen identitas di permukaan terang.
+ * Rasio kontras tercatat di docs/PUBLIC_02A_R_REPORT.md.
  */
 @theme {
-  --color-background: #0c1210;
-  --color-surface: #151c19;
-  --color-raised: #1d2621;
+  /* Bingkai hijau hutan (permukaan gelap) */
+  --color-background: #113126;
+  --color-surface: #18392d;
+  --color-raised: #1f4335;
 
-  --color-ink: #f2efe8;
-  --color-secondary: #f2efe8;
-  --color-muted: #9aa39d;
-  --color-hairline: #24302b;
+  --color-ink: #f4efe4;       /* 12,3:1 di #113126 */
+  --color-secondary: #f4efe4;
+  --color-muted: #b8c7bd;     /* 8,0:1 */
+  --color-hairline: #2f5243;  /* pemisah dekoratif saja */
 
-  /* Amber adalah satu-satunya warna panas di situs ini. */
-  --color-primary: #f0a62b;
-  --color-accent: #f0a62b;
-  --color-onprimary: #0c1210;
+  /* Emas redup: tombol utama dan detail terpilih. */
+  --color-primary: #e3b35a;
+  --color-primary-hover: #ecc274;
+  --color-accent: #e3b35a;    /* teks aksen di permukaan gelap (7,3:1) */
+  --color-onprimary: #13261d; /* teks di atas emas (8,2:1) */
 
-  --color-success: #7bc49a;
-  --color-warning: #ff8a6b;
+  --color-success: #7fd1a8;
+  --color-warning: #ff9a7d;
+
+  /* Nama warna merek. Dipakai lewat pita (.band-light/.band-sand), bukan langsung. */
+  --color-ivory: #f6f1e6;     /* latar konten utama */
+  --color-paper: #fdfaf3;     /* kartu & form di atas ivory */
+  --color-sand: #eadfc6;      /* pita pasir: selingan ritme, tanpa kontrol form */
+  --color-champagne: #d8c9a3; /* garis & ornamen emas di permukaan terang */
+  --color-emerald: #1d6b4f;   /* aksen identitas di terang (5,7:1 ivory, 4,9:1 pasir) */
+  --color-gold-ink: #7a5c1c;  /* teks emas di terang (5,5:1 ivory) */
+  --color-forest: #113126;    /* = bingkai; untuk teks/ikon di pita terang */
+  --color-deep: #17211c;      /* tinta di pita terang (14,4:1) */
+  --color-control: #8a8270;   /* batas kontrol form di ivory/paper (3,6:1) */
 
   --radius-card: 10px;
 
@@ -59,4 +74,109 @@ h1, h2, h3 {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* PUBLIC-01: mobile/tablet menu as a native modal dialog (focus kept inside, Escape closes). */
+dialog.site-menu {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  background: var(--color-background);
+  color: var(--color-ink);
+  overflow-y: auto;
+}
+dialog.site-menu::backdrop {
+  background: rgba(17, 49, 38, 0.7);
+}
+html:has(dialog.site-menu[open]) {
+  overflow: hidden;
+}
+
+/*
+ * Pita konten. .band-light / .band-sand memetakan ulang token semantik, jadi setiap
+ * komponen yang memakai bg-surface / text-ink / text-muted / border-hairline tampil benar
+ * di permukaan terang tanpa di-fork. Emas tetap isi tombol saja di terang (1,8:1 sebagai
+ * teks); aksen teks berganti zamrud.
+ */
+:root {
+  color-scheme: dark;
+  scrollbar-color: #3a5d4e var(--color-background);
+  caret-color: var(--color-primary);
+}
+.band-light,
+.band-sand {
+  color-scheme: light;
+  caret-color: var(--color-emerald);
+  --color-background: var(--color-ivory);
+  --color-surface: var(--color-paper);
+  --color-raised: #efe8da;
+  --color-ink: var(--color-deep);
+  --color-secondary: var(--color-deep);
+  --color-muted: #55615a;     /* 5,8:1 ivory · 4,9:1 pasir */
+  --color-hairline: #ddd1b6;  /* pemisah dekoratif saja */
+  --color-accent: var(--color-emerald);
+  --color-success: #2e6b45;
+  --color-warning: #a8432b;
+  background: var(--color-background);
+  color: var(--color-ink);
+}
+.band-sand { --color-background: var(--color-sand); --color-hairline: #cdbd97; }
+.band-light :focus-visible,
+.band-sand :focus-visible { outline-color: var(--color-emerald); }
+.band-light ::selection,
+.band-sand ::selection { background: var(--color-emerald); color: var(--color-paper); }
+/* Form controls in light bands need a ≥3:1 boundary. */
+.band-light select,
+.band-light input { border-color: var(--color-control); }
+
+/*
+ * PUBLIC-02B · mobile sticky action. While the single sticky bar is shown, keyboard focus and anchor
+ * jumps stop above it (scroll-padding) instead of landing underneath. The bar hides itself over
+ * [data-sticky-hide] zones (page CTAs, closing band, footer), so no spacer is needed below the footer.
+ */
+@media (max-width: 767.98px) {
+  html:has([data-sticky-cta="umum"][data-state="tampil"]) { scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 1023.98px) {
+  html:has([data-sticky-cta="detail"][data-state="tampil"]) { scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+}
+
+/* Disclosure marker for FAQ-style <details> (the native marker is hidden with list-none). */
+.disclosure > summary::after {
+  content: "";
+  flex: none;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-left: auto;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.disclosure[open] > summary::after { transform: translateY(15%) rotate(-135deg); }
+
+/*
+ * PUBLIC-02A-R · Motif arsitektur Islam — tiga saja, dipakai berulang dan pelan:
+ * 1. .motif-bintang(-gelap)  pola bintang delapan (khatam) berkontras rendah; hanya di area
+ *    tanpa teks (panel dekoratif di balik kartu atau di samping foto).
+ * 2. .bingkai-lengkung  bingkai foto/panel berpuncak lengkung, seperti relung mihrab.
+ * 3. <Ornamen/>  garis emas tipis dengan bintang kecil di tengah (components/home/Motif.tsx).
+ */
+.motif-bintang {
+  background-color: var(--color-sand);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%237a5c1c' stroke-opacity='.22' stroke-width='1'%3E%3Cpath d='M28 10l5.3 12.7L46 28l-12.7 5.3L28 46l-5.3-12.7L10 28l12.7-5.3z'/%3E%3Cpath d='M15.3 15.3h25.4v25.4H15.3z'/%3E%3Cpath d='M0 0l10 10M56 0L46 10M0 56l10-10M56 56L46 46'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 56px 56px;
+}
+.motif-bintang-gelap {
+  background-color: var(--color-surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23e3b35a' stroke-opacity='.18' stroke-width='1'%3E%3Cpath d='M28 10l5.3 12.7L46 28l-12.7 5.3L28 46l-5.3-12.7L10 28l12.7-5.3z'/%3E%3Cpath d='M15.3 15.3h25.4v25.4H15.3z'/%3E%3Cpath d='M0 0l10 10M56 0L46 10M0 56l10-10M56 56L46 46'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 56px 56px;
+}
+.bingkai-lengkung {
+  border-radius: 999px 999px var(--radius-card) var(--radius-card);
+  overflow: hidden;
 }

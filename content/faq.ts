@@ -1,3 +1,5 @@
+import { PASSPORT_MIN_MONTHS } from "@/content/requirements";
+
 export type FaqItem = { q: string; a: string; topik: Topik };
 export type Topik = "pendaftaran" | "pembayaran" | "pembatalan" | "dokumen" | "layanan";
 
@@ -13,8 +15,8 @@ export const LABEL_TOPIK: Record<Topik, string> = {
 export const faq: FaqItem[] = [
   {
     topik: "pendaftaran",
-    q: "Berapa uang muka untuk mengunci seat?",
-    a: "Contoh ketentuan: uang muka Rp 5.000.000 per jamaah, dan seat baru terkunci setelah uang muka masuk. Sebelum itu, seat masih bisa diambil pendaftar lain.",
+    q: "Berapa uang muka untuk mengunci kursi?",
+    a: "Contoh ketentuan: uang muka Rp 5.000.000 per jamaah, dan kursi baru terkunci setelah uang muka masuk. Sebelum itu, kursi masih bisa diambil pendaftar lain.",
   },
   {
     topik: "pembayaran",
@@ -34,17 +36,17 @@ export const faq: FaqItem[] = [
   {
     topik: "pembatalan",
     q: "Bisakah tanggal keberangkatan diubah?",
-    a: "Sebelum tiket terbit umumnya bisa, tergantung ketersediaan seat di tanggal tujuan. Setelah tiket terbit, perubahan mengikuti aturan maskapai dan ada biayanya.",
+    a: "Sebelum tiket terbit umumnya bisa, tergantung ketersediaan kursi di tanggal tujuan. Setelah tiket terbit, perubahan mengikuti aturan maskapai dan ada biayanya.",
   },
   {
     topik: "dokumen",
     q: "Berapa lama paspor harus berlaku?",
-    a: "Minimal 8 bulan dari tanggal keberangkatan, dengan nama minimal dua suku kata. Kalau nama di paspor hanya satu kata, paspor perlu diperbarui lebih dulu.",
+    a: `Contoh ketentuan: minimal ${PASSPORT_MIN_MONTHS} bulan dari tanggal keberangkatan, dengan nama minimal dua suku kata. Persyaratan terbaru dikonfirmasi saat konsultasi; bila nama di paspor hanya satu kata, tanyakan apakah perlu diperbarui.`,
   },
   {
     topik: "dokumen",
-    q: "Apakah vaksin meningitis wajib?",
-    a: "Ya. Kartu vaksin meningitis yang masih berlaku termasuk syarat masuk, dan diurus sendiri oleh jamaah di klinik atau kantor kesehatan pelabuhan.",
+    q: "Vaksin apa yang diperlukan?",
+    a: "Vaksinasi mengikuti ketentuan kesehatan terbaru untuk perjalanan ke Arab Saudi, misalnya meningitis. Daftar vaksin yang berlaku dikonfirmasi saat konsultasi, dan vaksin diurus sendiri oleh jamaah di fasilitas kesehatan.",
   },
   {
     topik: "layanan",
@@ -53,12 +55,12 @@ export const faq: FaqItem[] = [
   },
   {
     topik: "layanan",
-    q: "Apakah melayani Badal Umroh?",
-    a: "Ya. Badal Umroh dilaksanakan oleh petugas di Makkah, tanpa keberangkatan jamaah dari Indonesia, sehingga tidak memiliki tanggal, hotel, maupun itinerary seperti paket umroh biasa. Tanyakan langsung lewat WhatsApp untuk ketentuannya.",
+    q: "Apakah melayani Badal Umrah?",
+    a: "Ya. Badal Umrah dilaksanakan oleh petugas di Makkah, tanpa keberangkatan jamaah dari Indonesia, sehingga tidak memiliki tanggal, hotel, maupun itinerary seperti paket Umrah biasa. Tanyakan langsung lewat WhatsApp untuk ketentuannya.",
   },
 ];
 
 /** FAQ yang relevan ditampilkan di halaman detail paket. */
 export const faqDetailPaket = faq.filter((f) =>
-  ["Berapa uang muka untuk mengunci seat?", "Kapan pelunasan paling lambat?", "Kalau saya batal berangkat, apakah uang kembali?", "Berapa lama paspor harus berlaku?"].includes(f.q),
+  ["Berapa uang muka untuk mengunci kursi?", "Kapan pelunasan paling lambat?", "Kalau saya batal berangkat, apakah uang kembali?", "Berapa lama paspor harus berlaku?"].includes(f.q),
 );

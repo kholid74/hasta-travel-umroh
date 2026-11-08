@@ -1,0 +1,84 @@
+
+Running 29 tests using 1 worker
+
+  ok  1 tests\admin.spec.ts:9:5 › model preserves relationships, capacity, payment and allocation invariants (81ms)
+  ok  2 tests\admin.spec.ts:46:5 › signed session rejects forgery, expiry and invalid formats (3ms)
+  ok  3 tests\admin.spec.ts:66:5 › login protection, every sidebar route, public routes and responsive shell (17.4s)
+  ok  4 tests\admin.spec.ts:111:5 › admin guide covers every module and its journey works on desktop and mobile (3.0s)
+  ok  5 tests\admin.spec.ts:134:5 › lead converts to booking, payment verifies, and inventory follows shared state (5.9s)
+  ok  6 tests\admin.spec.ts:171:5 › documents, rooming, manasik, CMS and broadcast actions update the demo (5.0s)
+  ok  7 tests\costing.spec.ts:14:5 › costing calculates per person, fixed group, units and mixed currencies exactly (16ms)
+  ok  8 tests\costing.spec.ts:29:5 › costing allocates FOC costs to paying jamaah and distinguishes margin from markup (4ms)
+  ok  9 tests\costing.spec.ts:47:5 › costing rejects zero participants, negative or incomplete inputs and invalid exchange rates (45ms)
+  ok 10 tests\costing.spec.ts:61:5 › scenario profit, loss and break-even respect fixed units without mutating the base plan (4ms)
+  ok 11 tests\costing.spec.ts:74:5 › final costing is immutable, revisions and package templates are independent snapshots (18ms)
+  ok 12 tests\costing.spec.ts:106:5 › costing UI edits components, simulates, finalizes, revises and resets the demo (7.2s)
+  ok 13 tests\invoice_layout.spec.ts:10:5 › invoice bank placement, notes removal and intact summaries paginate 4, 10 and 25 records (6.9s)
+  ok 14 tests\invoice_layout.spec.ts:83:5 › payment settings save account holder, persist it and feed the actual invoice preview (4.3s)
+  ok 15 tests\m1_1.spec.ts:9:5 › Hajj validation, shared payments and contract snapshots preserve financial records (21ms)
+  ok 16 tests\m1_1.spec.ts:36:5 › Hajj HPP exact totals, exchange assumptions, saved revisions and browser encoding (65ms)
+  ok 17 tests\m1_1.spec.ts:72:5 › Hajj package editor, shared registration, HPP versions, refresh and reset work on desktop and mobile (15.9s)
+  ok 18 tests\m1_1.spec.ts:173:5 › corrupt storage requires explicit reset and failed storage writes do not save (2.8s)
+  ok 19 tests\m1_2.spec.ts:23:5 › real PDF templates preserve both contracts, verified totals, pagination and state (7.7s)
+  ok 20 tests\m1_2.spec.ts:62:5 › financial previews download actual PDFs on desktop/mobile and survive refresh (16.1s)
+  ok 21 tests\m1_2b.spec.ts:7:5 › branded PDFs embed logo/fonts and paginate tables without losing financial content (26.9s)
+  ok 22 tests\m2.spec.ts:11:5 › stock receipts, corrections, real reservations, partial/multiple handovers, release and returns balance exactly (53ms)
+  ok 23 tests\m2.spec.ts:63:5 › Umrah/Hajj associations, invalid references, cancellation and released partial kits preserve history (12ms)
+  ok 24 tests\m2.spec.ts:81:5 › version 1 migrates inventory without losing finance/HPP, version 2 persists and reset is deterministic (29ms)
+  ok 25 tests\m2.spec.ts:94:5 › posted handover PDF uses actual snapshots, logo and A4 geometry without financial amounts (303ms)
+  ok 26 tests\m2.spec.ts:111:5 › inventory UI receives stock, allocates both products, hands over partially, downloads, persists and resets (11.3s)
+  ok 27 tests\m2.spec.ts:157:5 › item/template editors, corrections, damaged return and release work through confirmed forms (6.6s)
+  ok 28 tests\payment_history.spec.ts:47:5 › all PDFs show chronological cash/transfer history while only verified installments reduce the contract (5.0s)
+  x  29 tests\payment_history.spec.ts:87:5 › booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence (11.2m)
+
+
+  1) tests\payment_history.spec.ts:87:5 › booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  getByRole('dialog').getByRole('link', { name: 'Unduh Statement of Account PDF' })
+    Expected: visible
+    Received: undefined
+
+    Call log:
+      - Expect "toBeVisible" getByRole('dialog').getByRole('link', { name: 'Unduh Statement of Account PDF' }) with timeout 20000ms
+      - waiting for getByRole('dialog').getByRole('link', { name: 'Unduh Statement of Account PDF' })
+      - Protocol error (Runtime.callFunctionOn): Internal server error, session closed.
+
+
+      111 |     await page.getByRole("button", { name: `Pratinjau ${title}`, exact: true }).first().click();
+      112 |     const modal = page.getByRole("dialog"), link = modal.getByRole("link", { name: `Unduh ${title} PDF` });
+    > 113 |     await expect(link).toBeVisible();
+          |                        ^
+      114 |     const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+      115 |     const result = await inspect(new Uint8Array(await readFile((await download.path())!)));
+      116 |     for (const text of ["BANK-UI-001", "CASH-UI-002", "1 Okt 2026", "10 Okt 2026", "10.000.000"]) expect(result.text).toContain(text);
+        at C:\workspace\code\kalsara\hasta-travel-umroh\tests\payment_history.spec.ts:113:24
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\payment_history-booking-an-a7d5c-F-downloads-and-persistence\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\payment_history-booking-an-a7d5c-F-downloads-and-persistence\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\payment_history-booking-an-a7d5c-F-downloads-and-persistence\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\payment_history-booking-an-a7d5c-F-downloads-and-persistence\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: tests\payment_history.spec.ts (11.3m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    tests\payment_history.spec.ts:87:5 › booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence 
+  28 passed (13.9m)
+
+--- Baseline note (2026-11-08) ---
+Full run before any M3.1 application change (only the enterAs test helper refactor applied):
+28 passed, 1 failed (13.9 min, cold dev server).
+Failed: payment_history.spec.ts:87 — "Unduh Statement of Account PDF" link not visible within 20 s.
+Isolated re-run of tests/payment_history.spec.ts: 2 passed (15.8 s) → classified as timing flake (PDF render under cold compile), not a regression.

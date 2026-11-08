@@ -2,43 +2,72 @@ import { company } from "@/content/company";
 import { tanggalPanjang } from "@/lib/format";
 
 /**
- * Baris penutup yang menandai bahwa pesan datang dari situs demo, bukan dari
- * jamaah sungguhan. CTA paket tetap membawa konteks paket apa adanya — itu
- * fitur yang sedang didemonstrasikan.
+ * Two audiences use WhatsApp on this showcase (PUBLIC-01):
+ *
+ * A. "operator" — a prospective pilgrim contacting the (fictional) Hasta Travel. On this demo the
+ *    destination is Kalsara Digital Studio's demonstration number, so every operator message ends
+ *    with a line that says so plainly. No operator phone number is invented.
+ * B. "studio"   — a business owner interested in Kalsara's software services.
  */
-const PENUTUP_DEMO = `\n\n— Pesan ini dikirim dari situs demo ${company.name} (${company.studio.name})`;
+export const WA_DEMO_NOTE =
+  "Demo: pesan dikirim ke nomor demonstrasi Kalsara Digital Studio, bukan ke biro perjalanan sungguhan.";
+
+const PENUTUP_DEMO = `\n\n[Pesan contoh dari situs demo ${company.name}. Nomor tujuan adalah kontak demonstrasi ${company.studio.name}, bukan biro perjalanan umroh/haji.]`;
 
 export type WaContext =
   | { kind: "umum" }
   | { kind: "paket"; namaPaket: string; tanggal: string; kota: string }
-  | { kind: "haji"; namaPaket?: string }
+  | { kind: "haji"; namaPaket?: string; kategori?: "khusus" | "mujamalah" }
   | { kind: "badal" }
+  | { kind: "lainnya" }
   | { kind: "studio" };
+
+export type WaAudience = "operator" | "studio";
+export const audienceOf = (context: WaContext): WaAudience => (context.kind === "studio" ? "studio" : "operator");
 
 export function pesanWa(context: WaContext): string {
   switch (context.kind) {
     case "umum":
-      return "Assalamualaikum, saya ingin tahu lebih lanjut soal paket Umroh & Haji." + PENUTUP_DEMO;
+      return (
+        "Assalamu'alaikum, saya ingin konsultasi paket Umrah.\n" +
+        "Rencana berangkat (bulan): \nJumlah jamaah: \nKota keberangkatan: " +
+        PENUTUP_DEMO
+      );
     case "paket":
       return (
-        `Assalamualaikum, saya tertarik dengan ${context.namaPaket} keberangkatan ` +
-        `${tanggalPanjang(context.tanggal)} dari ${context.kota}. Mohon informasi lengkapnya.` +
+        `Assalamu'alaikum, saya tertarik dengan ${context.namaPaket} keberangkatan ` +
+        `${tanggalPanjang(context.tanggal)} dari ${context.kota}.\n` +
+        "Tipe kamar (quad/triple/double): \nJumlah jamaah: \nMohon informasi lengkapnya." +
         PENUTUP_DEMO
       );
     case "haji":
+      // Haji Khusus is a queue (nomor porsi); Haji Mujamalah has no queue, so it never asks about waiting time.
+      if (context.kategori === "mujamalah") {
+        return (
+          `Assalamu'alaikum, saya ingin bertanya tentang ${context.namaPaket ?? "Haji Mujamalah"}: ` +
+          "ketersediaan, ketentuan pendaftaran, dan pengembalian dana bila visa tidak terbit." +
+          PENUTUP_DEMO
+        );
+      }
       return (
-        "Assalamualaikum, saya ingin tanya soal paket Haji Khusus" +
-        (context.namaPaket ? ` ${context.namaPaket}` : "") +
-        ", terutama masa tunggu dan skema pembayarannya." +
+        `Assalamu'alaikum, saya ingin konsultasi ${context.namaPaket ?? "Haji Khusus"}: ` +
+        "perkiraan masa tunggu, setoran awal, dan skema pelunasan." +
         PENUTUP_DEMO
       );
     case "badal":
-      return "Assalamualaikum, saya ingin tanya soal layanan Badal Umroh." + PENUTUP_DEMO;
+      return "Assalamu'alaikum, saya ingin bertanya tentang layanan Badal Umrah." + PENUTUP_DEMO;
+    case "lainnya":
+      return "Assalamu'alaikum, saya ingin bertanya:\n" + PENUTUP_DEMO;
     case "studio":
-      return `Halo ${company.studio.name}, saya ingin membuat website travel seperti demo ${company.name} ini.`;
+      return `Halo ${company.studio.name}, saya pemilik travel dan ingin membuat website serta sistem seperti demo ${company.name} ini.`;
   }
 }
 
 export function linkWa(context: WaContext): string {
   return `https://wa.me/${company.whatsapp}?text=${encodeURIComponent(pesanWa(context))}`;
+}
+
+/** Generic consultation context for a public route (header button, mobile bar). */
+export function consultContextForPath(pathname: string): WaContext {
+  return pathname.startsWith("/haji-khusus") ? { kind: "haji", kategori: "khusus" } : { kind: "umum" };
 }

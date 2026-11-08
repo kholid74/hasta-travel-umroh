@@ -1,0 +1,139 @@
+
+Running 135 tests using 1 worker
+
+[1/135] tests\home.spec.ts:16:5 › quick finder narrows by month and city and hands the same filters to the catalogue URL
+[2/135] tests\home.spec.ts:45:5 › quick finder never offers past departures and shows a useful empty state
+[3/135] tests\home.spec.ts:75:5 › homepage CTAs: Umrah catalogue first, operator WhatsApp second, distinct Haji Khusus path
+[4/135] tests\home.spec.ts:104:5 › no fabricated claims; the demo disclosure is stated once, not under every section
+[5/135] tests\home.spec.ts:118:5 › mobile homepage: hero CTAs in the first screen, comfortable tap targets, one sticky bar, no overflow
+[6/135] tests\home.spec.ts:137:5 › every homepage photo is self-hosted and credited with author and licence
+[7/135] tests\home.spec.ts:149:5 › hotel distances: phones show 3 nearest per city, larger screens 5, and every hotel stays reachable
+[8/135] tests\public_02b.spec.ts:17:5 › catalogue: filter combinations come from the URL, match the data and survive reload
+[9/135] tests\public_02b.spec.ts:48:5 › catalogue: an impossible combination shows a useful empty state with a working reset
+[10/135] tests\public_02b.spec.ts:61:5 › prices agree between catalogue card, detail table, desktop summary and mobile sticky bar
+[11/135] tests\public_02b.spec.ts:80:5 › detail: sold-out date stays explorable, is labelled honestly and offers open alternatives
+[12/135] tests\public_02b.spec.ts:102:5 › detail: itinerary stages keep every day, open by keyboard, and the WhatsApp text follows the date
+[13/135] tests\public_02b.spec.ts:131:5 › Haji Khusus and Mujamalah stay separate, with qualified waiting times and no guarantees
+[14/135] tests\public_02b.spec.ts:149:5 › schedule: month, city and type filters live in the URL and every row keeps its date for the detail page
+[15/135] tests\public_02b.spec.ts:178:5 › contact: Umrah, Haji Khusus and other enquiries each send their own operator message; studio stays in the demo panel
+[16/135] tests\public_02b.spec.ts:200:5 › terminology: visible labels say Umrah and Penuh; no 'Sold Out' or 'seat' wording on public pages
+[17/135] tests\public_02b.spec.ts:210:5 › mobile sticky action: one bar, hidden over page CTAs and the footer, no spacer, and focus stays clear of it
+[18/135] tests\public_02b.spec.ts:247:5 › homepage sticky bar waits until the hero actions scroll away
+[19/135] tests\public_02b.spec.ts:256:5 › no horizontal overflow on the refined pages with filters applied
+[20/135] tests\public_02c.spec.ts:20:5 › catalogue on phones: 9 first, 'Muat lebih banyak' reveals the rest, announces it and moves focus
+[21/135] tests\public_02c.spec.ts:41:5 › catalogue on phones: a filter change resets to the first page of the filtered set; sort keeps it
+[22/135] tests\public_02c.spec.ts:68:5 › catalogue: URL state is restored on phones and desktop shows every match without a load-more
+[23/135] tests\public_02c.spec.ts:85:5 › catalogue: sold-out matches stay explorable after loading more, with honest status
+[24/135] tests\public_02c.spec.ts:106:5 › package cards differ by verified data: no repeated destination photo, service tags without unverifiable claims
+[25/135] tests\public_02c.spec.ts:126:5 › package detail keeps the selected date when reached from a card beyond the first mobile page
+[26/135] tests\public_02c.spec.ts:140:5 › FAQ by keyboard: topic links jump to their group and accordions open and close
+[27/135] tests\public_02c.spec.ts:155:5 › demo disclosure hierarchy: one short note per page, contextual WhatsApp notes, full panel in the footer
+[28/135] tests\public_02c.spec.ts:175:5 › WhatsApp audiences stay separate on every public page
+[29/135] tests\public_02c.spec.ts:196:5 › About reads as an operator profile without invented history, numbers or certifications
+[30/135] tests\public_02c.spec.ts:209:5 › Haji Khusus on 360 px: comparable programmes, price and deposit first, details expandable, Mujamalah separate
+[31/135] tests\public_02c.spec.ts:229:5 › responsive QA: no overflow at 360/390/768/1440, and the load-more button is never under the sticky bar
+[32/135] tests\public.spec.ts:13:5 › business date: Jakarta day boundary, departure-day cutoff and unavailable reasons
+[33/135] tests\public.spec.ts:23:5 › WhatsApp messages: operator vs studio audiences, Haji wording and URL encoding
+[34/135] tests\public.spec.ts:43:5 › public routes respond and never overflow horizontally at 390, 768 and 1440 px
+[35/135] tests\public.spec.ts:55:5 › mobile menu: every destination, active route, Escape and focus return, gateway entry
+[36/135] tests\public.spec.ts:91:5 › desktop and tablet navigation keep branding; desktop marks the active page
+[37/135] tests\public.spec.ts:104:5 › WhatsApp CTAs: operator messages carry context and the demo disclosure; studio CTA lives only in the demo area
+[38/135] tests\public.spec.ts:122:5 › mobile sticky CTAs never stack: one generic bar on listings, only the date-aware bar on detail
+[39/135] tests\public.spec.ts:132:5 › package detail keeps the selected departure in the URL, the WhatsApp text and after reload
+[40/135] tests\public.spec.ts:144:5 › stale and unknown ?d= links show an unavailable-date state with alternatives
+[41/135] tests\public.spec.ts:158:5 › departure day is closed at Jakarta midnight on detail, catalogue, homepage and schedule
+[42/135] tests\public.spec.ts:185:5 › catalogue filters still sync with the URL
+[43/135] tests\public.spec.ts:196:5 › Haji page separates Haji Khusus from Mujamalah without contradictory waiting-time wording
+[44/135] tests\public.spec.ts:208:5 › licence and requirement claims are qualified; no dead verification link
+[45/135] tests\public.spec.ts:220:5 › branded Indonesian 404 with recovery links and a real 404 status
+[46/135] tests\home.spec.ts:16:5 › quick finder narrows by month and city and hands the same filters to the catalogue URL
+[47/135] tests\home.spec.ts:45:5 › quick finder never offers past departures and shows a useful empty state
+[48/135] tests\home.spec.ts:75:5 › homepage CTAs: Umrah catalogue first, operator WhatsApp second, distinct Haji Khusus path
+[49/135] tests\home.spec.ts:104:5 › no fabricated claims; the demo disclosure is stated once, not under every section
+[50/135] tests\home.spec.ts:118:5 › mobile homepage: hero CTAs in the first screen, comfortable tap targets, one sticky bar, no overflow
+[51/135] tests\home.spec.ts:137:5 › every homepage photo is self-hosted and credited with author and licence
+[52/135] tests\home.spec.ts:149:5 › hotel distances: phones show 3 nearest per city, larger screens 5, and every hotel stays reachable
+[53/135] tests\public_02b.spec.ts:17:5 › catalogue: filter combinations come from the URL, match the data and survive reload
+[54/135] tests\public_02b.spec.ts:48:5 › catalogue: an impossible combination shows a useful empty state with a working reset
+[55/135] tests\public_02b.spec.ts:61:5 › prices agree between catalogue card, detail table, desktop summary and mobile sticky bar
+[56/135] tests\public_02b.spec.ts:80:5 › detail: sold-out date stays explorable, is labelled honestly and offers open alternatives
+[57/135] tests\public_02b.spec.ts:102:5 › detail: itinerary stages keep every day, open by keyboard, and the WhatsApp text follows the date
+[58/135] tests\public_02b.spec.ts:131:5 › Haji Khusus and Mujamalah stay separate, with qualified waiting times and no guarantees
+[59/135] tests\public_02b.spec.ts:149:5 › schedule: month, city and type filters live in the URL and every row keeps its date for the detail page
+[60/135] tests\public_02b.spec.ts:178:5 › contact: Umrah, Haji Khusus and other enquiries each send their own operator message; studio stays in the demo panel
+[61/135] tests\public_02b.spec.ts:200:5 › terminology: visible labels say Umrah and Penuh; no 'Sold Out' or 'seat' wording on public pages
+[62/135] tests\public_02b.spec.ts:210:5 › mobile sticky action: one bar, hidden over page CTAs and the footer, no spacer, and focus stays clear of it
+[63/135] tests\public_02b.spec.ts:247:5 › homepage sticky bar waits until the hero actions scroll away
+[64/135] tests\public_02b.spec.ts:256:5 › no horizontal overflow on the refined pages with filters applied
+[65/135] tests\public_02c.spec.ts:20:5 › catalogue on phones: 9 first, 'Muat lebih banyak' reveals the rest, announces it and moves focus
+[66/135] tests\public_02c.spec.ts:41:5 › catalogue on phones: a filter change resets to the first page of the filtered set; sort keeps it
+[67/135] tests\public_02c.spec.ts:68:5 › catalogue: URL state is restored on phones and desktop shows every match without a load-more
+[68/135] tests\public_02c.spec.ts:85:5 › catalogue: sold-out matches stay explorable after loading more, with honest status
+[69/135] tests\public_02c.spec.ts:106:5 › package cards differ by verified data: no repeated destination photo, service tags without unverifiable claims
+[70/135] tests\public_02c.spec.ts:126:5 › package detail keeps the selected date when reached from a card beyond the first mobile page
+[71/135] tests\public_02c.spec.ts:140:5 › FAQ by keyboard: topic links jump to their group and accordions open and close
+[72/135] tests\public_02c.spec.ts:155:5 › demo disclosure hierarchy: one short note per page, contextual WhatsApp notes, full panel in the footer
+[73/135] tests\public_02c.spec.ts:175:5 › WhatsApp audiences stay separate on every public page
+[74/135] tests\public_02c.spec.ts:196:5 › About reads as an operator profile without invented history, numbers or certifications
+[75/135] tests\public_02c.spec.ts:209:5 › Haji Khusus on 360 px: comparable programmes, price and deposit first, details expandable, Mujamalah separate
+[76/135] tests\public_02c.spec.ts:229:5 › responsive QA: no overflow at 360/390/768/1440, and the load-more button is never under the sticky bar
+[77/135] tests\public.spec.ts:13:5 › business date: Jakarta day boundary, departure-day cutoff and unavailable reasons
+[78/135] tests\public.spec.ts:23:5 › WhatsApp messages: operator vs studio audiences, Haji wording and URL encoding
+[79/135] tests\public.spec.ts:43:5 › public routes respond and never overflow horizontally at 390, 768 and 1440 px
+[80/135] tests\public.spec.ts:55:5 › mobile menu: every destination, active route, Escape and focus return, gateway entry
+[81/135] tests\public.spec.ts:91:5 › desktop and tablet navigation keep branding; desktop marks the active page
+[82/135] tests\public.spec.ts:104:5 › WhatsApp CTAs: operator messages carry context and the demo disclosure; studio CTA lives only in the demo area
+[83/135] tests\public.spec.ts:122:5 › mobile sticky CTAs never stack: one generic bar on listings, only the date-aware bar on detail
+[84/135] tests\public.spec.ts:132:5 › package detail keeps the selected departure in the URL, the WhatsApp text and after reload
+[85/135] tests\public.spec.ts:144:5 › stale and unknown ?d= links show an unavailable-date state with alternatives
+[86/135] tests\public.spec.ts:158:5 › departure day is closed at Jakarta midnight on detail, catalogue, homepage and schedule
+[87/135] tests\public.spec.ts:185:5 › catalogue filters still sync with the URL
+[88/135] tests\public.spec.ts:196:5 › Haji page separates Haji Khusus from Mujamalah without contradictory waiting-time wording
+[89/135] tests\public.spec.ts:208:5 › licence and requirement claims are qualified; no dead verification link
+[90/135] tests\public.spec.ts:220:5 › branded Indonesian 404 with recovery links and a real 404 status
+[91/135] tests\home.spec.ts:16:5 › quick finder narrows by month and city and hands the same filters to the catalogue URL
+[92/135] tests\home.spec.ts:45:5 › quick finder never offers past departures and shows a useful empty state
+[93/135] tests\home.spec.ts:75:5 › homepage CTAs: Umrah catalogue first, operator WhatsApp second, distinct Haji Khusus path
+[94/135] tests\home.spec.ts:104:5 › no fabricated claims; the demo disclosure is stated once, not under every section
+[95/135] tests\home.spec.ts:118:5 › mobile homepage: hero CTAs in the first screen, comfortable tap targets, one sticky bar, no overflow
+[96/135] tests\home.spec.ts:137:5 › every homepage photo is self-hosted and credited with author and licence
+[97/135] tests\home.spec.ts:149:5 › hotel distances: phones show 3 nearest per city, larger screens 5, and every hotel stays reachable
+[98/135] tests\public_02b.spec.ts:17:5 › catalogue: filter combinations come from the URL, match the data and survive reload
+[99/135] tests\public_02b.spec.ts:48:5 › catalogue: an impossible combination shows a useful empty state with a working reset
+[100/135] tests\public_02b.spec.ts:61:5 › prices agree between catalogue card, detail table, desktop summary and mobile sticky bar
+[101/135] tests\public_02b.spec.ts:80:5 › detail: sold-out date stays explorable, is labelled honestly and offers open alternatives
+[102/135] tests\public_02b.spec.ts:102:5 › detail: itinerary stages keep every day, open by keyboard, and the WhatsApp text follows the date
+[103/135] tests\public_02b.spec.ts:131:5 › Haji Khusus and Mujamalah stay separate, with qualified waiting times and no guarantees
+[104/135] tests\public_02b.spec.ts:149:5 › schedule: month, city and type filters live in the URL and every row keeps its date for the detail page
+[105/135] tests\public_02b.spec.ts:178:5 › contact: Umrah, Haji Khusus and other enquiries each send their own operator message; studio stays in the demo panel
+[106/135] tests\public_02b.spec.ts:200:5 › terminology: visible labels say Umrah and Penuh; no 'Sold Out' or 'seat' wording on public pages
+[107/135] tests\public_02b.spec.ts:210:5 › mobile sticky action: one bar, hidden over page CTAs and the footer, no spacer, and focus stays clear of it
+[108/135] tests\public_02b.spec.ts:247:5 › homepage sticky bar waits until the hero actions scroll away
+[109/135] tests\public_02b.spec.ts:256:5 › no horizontal overflow on the refined pages with filters applied
+[110/135] tests\public_02c.spec.ts:20:5 › catalogue on phones: 9 first, 'Muat lebih banyak' reveals the rest, announces it and moves focus
+[111/135] tests\public_02c.spec.ts:41:5 › catalogue on phones: a filter change resets to the first page of the filtered set; sort keeps it
+[112/135] tests\public_02c.spec.ts:68:5 › catalogue: URL state is restored on phones and desktop shows every match without a load-more
+[113/135] tests\public_02c.spec.ts:85:5 › catalogue: sold-out matches stay explorable after loading more, with honest status
+[114/135] tests\public_02c.spec.ts:106:5 › package cards differ by verified data: no repeated destination photo, service tags without unverifiable claims
+[115/135] tests\public_02c.spec.ts:126:5 › package detail keeps the selected date when reached from a card beyond the first mobile page
+[116/135] tests\public_02c.spec.ts:140:5 › FAQ by keyboard: topic links jump to their group and accordions open and close
+[117/135] tests\public_02c.spec.ts:155:5 › demo disclosure hierarchy: one short note per page, contextual WhatsApp notes, full panel in the footer
+[118/135] tests\public_02c.spec.ts:175:5 › WhatsApp audiences stay separate on every public page
+[119/135] tests\public_02c.spec.ts:196:5 › About reads as an operator profile without invented history, numbers or certifications
+[120/135] tests\public_02c.spec.ts:209:5 › Haji Khusus on 360 px: comparable programmes, price and deposit first, details expandable, Mujamalah separate
+[121/135] tests\public_02c.spec.ts:229:5 › responsive QA: no overflow at 360/390/768/1440, and the load-more button is never under the sticky bar
+[122/135] tests\public.spec.ts:13:5 › business date: Jakarta day boundary, departure-day cutoff and unavailable reasons
+[123/135] tests\public.spec.ts:23:5 › WhatsApp messages: operator vs studio audiences, Haji wording and URL encoding
+[124/135] tests\public.spec.ts:43:5 › public routes respond and never overflow horizontally at 390, 768 and 1440 px
+[125/135] tests\public.spec.ts:55:5 › mobile menu: every destination, active route, Escape and focus return, gateway entry
+[126/135] tests\public.spec.ts:91:5 › desktop and tablet navigation keep branding; desktop marks the active page
+[127/135] tests\public.spec.ts:104:5 › WhatsApp CTAs: operator messages carry context and the demo disclosure; studio CTA lives only in the demo area
+[128/135] tests\public.spec.ts:122:5 › mobile sticky CTAs never stack: one generic bar on listings, only the date-aware bar on detail
+[129/135] tests\public.spec.ts:132:5 › package detail keeps the selected departure in the URL, the WhatsApp text and after reload
+[130/135] tests\public.spec.ts:144:5 › stale and unknown ?d= links show an unavailable-date state with alternatives
+[131/135] tests\public.spec.ts:158:5 › departure day is closed at Jakarta midnight on detail, catalogue, homepage and schedule
+[132/135] tests\public.spec.ts:185:5 › catalogue filters still sync with the URL
+[133/135] tests\public.spec.ts:196:5 › Haji page separates Haji Khusus from Mujamalah without contradictory waiting-time wording
+[134/135] tests\public.spec.ts:208:5 › licence and requirement claims are qualified; no dead verification link
+[135/135] tests\public.spec.ts:220:5 › branded Indonesian 404 with recovery links and a real 404 status
+  135 passed (4.0m)

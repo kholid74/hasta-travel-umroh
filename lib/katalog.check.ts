@@ -92,12 +92,18 @@ assert.equal(filterDariQuery(new URLSearchParams("maks=abc")).maks, undefined);
 const asli = {
   tipe: "umroh-plus" as const,
   bulan: "2027-03",
+  kota: "Surabaya",
   maks: 50e6,
   durasi: 14,
   sort: "harga-turun" as const,
 };
 assert.deepEqual(filterDariQuery(new URLSearchParams(queryDariFilter(asli))), asli);
 assert.equal(queryDariFilter({ sort: "tanggal" }), "");
+
+// Filter kota memilih keberangkatan dari kota itu saja (PUBLIC-02A).
+assert.deepEqual(saring(rows, { kota: "Jakarta", sort: "tanggal" }).length, 3);
+assert.deepEqual(saring(rows, { kota: "Medan", sort: "tanggal" }), []);
+assert.equal(filterDariQuery(new URLSearchParams("kota=")).kota, undefined);
 
 // Bulan tanpa keberangkatan tidak muncul di dropdown.
 assert.deepEqual(bulanTersedia(rows), ["2026-10", "2027-02", "2027-03"]);

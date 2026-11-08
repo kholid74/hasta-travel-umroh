@@ -1,17 +1,18 @@
 import { test, expect } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { enterAs } from "./helpers/session";
+import { readFile } from "node:fs/promises";
+import { saveArtifact } from "./helpers/artifacts";
 import { createCanvas } from "@napi-rs/canvas";
 import { createSeed } from "../content/admin/seed";
 import { financialDocument, renderFinancialPDF } from "../lib/admin/financial-documents";
 import { financialBalance } from "../lib/admin/model";
 import { decodeDemo, encodeDemo, DEMO_STORAGE_KEY } from "../lib/admin/persistence";
 
-test("invoice bank placement, notes removal and intact summaries paginate 4, 10 and 25 records", async () => {
+test("invoice bank placement, notes removal and intact summaries paginate 4, 10 and 25 records", async ({}, testInfo) => {
   test.setTimeout(180000);
   const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const [logo, regular, bold] = await Promise.all([readFile("public/logo-mark.png"), readFile("public/fonts/Lato-Regular.ttf"), readFile("public/fonts/Lato-Bold.ttf")]);
   const assets = { logo, regular, bold }, results = [];
-  await mkdir("docs/samples/invoice-layout", { recursive: true });
   for (const product of ["UMRAH", "HAJJ_SPECIAL"] as const) for (const count of [4, 10, 25]) {
     const state = createSeed(), booking = state.bookings.find(b => b.productType === product)!;
     if (product === "UMRAH") booking.total = 20000000;
@@ -51,7 +52,7 @@ test("invoice bank placement, notes removal and intact summaries paginate 4, 10 
       if (product === "UMRAH") {
         const viewport = page.getViewport({ scale: 1.4 }), canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
         await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: canvas.getContext("2d") as unknown as CanvasRenderingContext2D, viewport }).promise;
-        await writeFile(`docs/samples/invoice-layout/${product}-${count}-${i}.png`, canvas.toBuffer("image/png"));
+        await saveArtifact(testInfo, `invoice-layout/${product}-${count}-${i}.png`, canvas.toBuffer("image/png"), { sample: true });
       }
     }
     expect(summaryPages).toEqual([pdf.numPages]);
@@ -60,10 +61,10 @@ test("invoice bank placement, notes removal and intact summaries paginate 4, 10 
     if (count === 4) expect(pdf.numPages).toBe(1);
     if (count > 4) expect(pdf.numPages).toBeGreaterThan(1);
     results.push({ product, records: count, pages: pdf.numPages, verified: balance.collected.toString(), outstanding: balance.balance.toString() });
-    await writeFile(`docs/samples/invoice-layout/${product}-${count}.pdf`, bytes); await task.destroy();
+    await saveArtifact(testInfo, `invoice-layout/${product}-${count}.pdf`, bytes, { sample: true }); await task.destroy();
     expect(encodeDemo(state)).toBe(before);
   }
-  await writeFile("docs/samples/invoice-layout/pagination.json", JSON.stringify(results, null, 2) + "\n");
+  await saveArtifact(testInfo, "invoice-layout/pagination.json", JSON.stringify(results, null, 2) + "\n", { sample: true });
 
   const state = createSeed(), booking = state.bookings[0];
   delete state.settings.accountHolder;
@@ -80,7 +81,7 @@ test("invoice bank placement, notes removal and intact summaries paginate 4, 10 
 });
 
 test("payment settings save account holder, persist it and feed the actual invoice preview", async ({ page }) => {
-  await page.goto("/admin/login"); await page.getByRole("button", { name: "Masuk ke workspace" }).click(); await expect(page).toHaveURL(/dashboard$/);
+  await enterAs(page);
   await page.goto("/admin/settings"); await page.getByRole("button", { name: "Pembayaran", exact: true }).click();
   await page.getByLabel("Nama bank (demo)", { exact: true }).fill("Bank Config DEMO");
   await page.getByLabel("Nomor rekening (demo)", { exact: true }).fill("0000 5555 0000");

@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { enterAs } from "./helpers/session";
+import { readFile } from "node:fs/promises";
+import { saveArtifact } from "./helpers/artifacts";
 import { createCanvas } from "@napi-rs/canvas";
 import { createSeed } from "../content/admin/seed";
 import { financialBalance, recordPayment, verifyPayment } from "../lib/admin/model";
@@ -20,7 +22,7 @@ function fixture(product: "UMRAH" | "HAJJ_SPECIAL" = "UMRAH") {
   return { state, booking };
 }
 
-async function inspect(bytes: Uint8Array, save?: string) {
+async function inspect(bytes: Uint8Array, save?: (page: number, png: Buffer) => Promise<unknown>) {
   const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const task = getDocument({ data: new Uint8Array(bytes) }), pdf = await task.promise;
   let text = "";
@@ -37,15 +39,14 @@ async function inspect(bytes: Uint8Array, save?: string) {
     if (save) {
       const viewport = page.getViewport({ scale: 1.4 }), canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
       await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: canvas.getContext("2d") as unknown as CanvasRenderingContext2D, viewport }).promise;
-      await writeFile(`${save}-${i}.png`, canvas.toBuffer("image/png"));
+      await save(i, canvas.toBuffer("image/png"));
     }
   }
   const pages = pdf.numPages; await task.destroy(); return { text, pages };
 }
 
-test("all PDFs show chronological cash/transfer history while only verified installments reduce the contract", async () => {
+test("all PDFs show chronological cash/transfer history while only verified installments reduce the contract", async ({}, testInfo) => {
   const [logo, regular, bold] = await Promise.all([readFile("public/logo-mark.png"), readFile("public/fonts/Lato-Regular.ttf"), readFile("public/fonts/Lato-Bold.ttf")]);
-  await mkdir("docs/samples/payment-history", { recursive: true });
   for (const product of ["UMRAH", "HAJJ_SPECIAL"] as const) {
     const { state, booking } = fixture(product), before = encodeDemo(state), balance = financialBalance(state, booking);
     expect(balance.collected).toBe(BigInt(10000000)); expect(balance.balance).toBe(BigInt(booking.total - 10000000));
@@ -56,9 +57,9 @@ test("all PDFs show chronological cash/transfer history while only verified inst
       expect(model.presentation.collected).toBe(balance.collected); expect(model.presentation.outstanding).toBe(balance.balance);
       if (kind === "receipt") expect(model.presentation.payments.map(p => p.id)).toEqual(["TRX-001"]);
       const bytes = await renderFinancialPDF(model, { logo, regular, bold });
-      const path = `docs/samples/payment-history/${product}-${kind}`;
-      const parsed = await inspect(bytes, product === "UMRAH" ? path : undefined);
-      await writeFile(`${path}.pdf`, bytes);
+      const name = `payment-history/${product}-${kind}`;
+      const parsed = await inspect(bytes, product === "UMRAH" ? (page, png) => saveArtifact(testInfo, `${name}-${page}.png`, png, { sample: true }) : undefined);
+      await saveArtifact(testInfo, `${name}.pdf`, bytes, { sample: true });
       const history = parsed.text.slice(parsed.text.indexOf("Riwayat Pembayaran"));
       for (const value of ["TRX-001", "CASH-002", "PENDING-003", "REFUND-004", "Transfer bank", "Tunai di kantor", "Menunggu", "Dikembalikan", "BANK-DEMO-001", "KAS-DEMO-002", "1 Jan 2026", "10 Jan 2026", "2 Jan 2026", "11 Jan 2026"]) expect(history).toContain(value);
       expect(history.indexOf("TRX-001")).toBeLessThan(history.indexOf("CASH-002"));
@@ -83,9 +84,9 @@ test("all PDFs show chronological cash/transfer history while only verified inst
   expect(financialBalance(decodeDemo(encodeDemo(state)), booking).collected).toBe(BigInt(10000000));
 });
 
-test("booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence", async ({ page }) => {
+test("booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence", async ({ page }, testInfo) => {
   test.setTimeout(180000);
-  await page.goto("/admin/login"); await page.getByRole("button", { name: "Masuk ke workspace" }).click();
+  await enterAs(page);
   await expect(page).toHaveURL(/\/admin\/dashboard$/);
   const state = createSeed(), booking = state.bookings[0]; booking.total = 20000000;
   state.payments = state.payments.filter(p => p.bookingId !== booking.id);
@@ -115,17 +116,16 @@ test("booking and pilgrim pages share installment rows, verification, totals, re
     for (const text of ["BANK-UI-001", "CASH-UI-002", "1 Okt 2026", "10 Okt 2026", "10.000.000"]) expect(result.text).toContain(text);
     await modal.getByRole("button", { name: "Tutup dialog" }).click();
   }
-  await mkdir("test-results/payment-history", { recursive: true });
-  await panel.scrollIntoViewIfNeeded(); await page.screenshot({ path: "test-results/payment-history/booking.png", fullPage: true });
+  await panel.scrollIntoViewIfNeeded(); await page.screenshot({ path: testInfo.outputPath("booking.png"), fullPage: true });
   await page.goto(`/admin/jamaah/${booking.jamaahId}`); await page.getByRole("button", { name: "Pembayaran", exact: true }).click();
   for (const ref of ["BANK-UI-001", "CASH-UI-002"]) await expect(page.getByRole("row").filter({ hasText: ref })).toContainText("5.000.000");
   await expect(page.getByRole("row").filter({ hasText: "CASH-UI-002" })).toContainText("Tunai di kantor");
-  await page.screenshot({ path: "test-results/payment-history/pilgrim.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("pilgrim.png"), fullPage: true });
   await page.reload(); await page.getByRole("button", { name: "Pembayaran", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("columnheader", { name: /Metode/ })).toBeAttached();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/payment-history/pilgrim-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("pilgrim-mobile.png"), fullPage: true });
   const restored = decodeDemo(await page.evaluate(key => localStorage.getItem(key)!, DEMO_STORAGE_KEY));
   expect(financialBalance(restored, restored.bookings[0]).collected).toBe(BigInt(10000000));
   await page.goto("/admin/dashboard");

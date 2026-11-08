@@ -1,0 +1,22 @@
+
+Running 16 tests using 1 worker
+
+  ok  1 tests\admin.spec.ts:9:5 › model preserves relationships, capacity, payment and allocation invariants (55ms)
+  ok  2 tests\admin.spec.ts:46:5 › signed session rejects forgery, expiry and invalid formats (4ms)
+  ok  3 tests\admin.spec.ts:66:5 › login protection, every sidebar route, public routes and responsive shell (43.2s)
+  ok  4 tests\admin.spec.ts:109:5 › admin guide covers every module and its journey works on desktop and mobile (10.0s)
+  ok  5 tests\admin.spec.ts:132:5 › lead converts to booking, payment verifies, and inventory follows shared state (12.6s)
+  ok  6 tests\admin.spec.ts:169:5 › documents, rooming, manasik, CMS and broadcast actions update the demo (13.3s)
+  ok  7 tests\m3_1_gateway.spec.ts:19:5 › role matrix: homes, navigation, module access and sensitive actions (63ms)
+  ok  8 tests\m3_1_gateway.spec.ts:44:5 › v2 session tokens: signature, expiry, tamper, invalid role and legacy compatibility (19ms)
+  ok  9 tests\m3_1_gateway.spec.ts:59:5 › frozen v2 workspace migrates to v3 without touching business records (332ms)
+  ok 10 tests\m3_1_gateway.spec.ts:87:5 › all eight roles enter without credentials and land on their own home (16.8s)
+  ok 11 tests\m3_1_gateway.spec.ts:106:5 › navigation permissions, AccessDenied, read-only modules and deep links (24.7s)
+  ok 12 tests\m3_1_gateway.spec.ts:150:5 › invalid, expired and legacy sessions; logout clears both cookies (8.9s)
+  ok 13 tests\m3_1_gateway.spec.ts:181:5 › role switching keeps demo data, replaces navigation and records the acting persona (15.1s)
+  ok 14 tests\m3_1_gateway.spec.ts:215:5 › saved v2 workspace opens after the upgrade and is re-saved as v3 only on change (6.5s)
+  ok 15 tests\m3_1_gateway.spec.ts:231:5 › persona selection and mobile-first portal shells (6.4s)
+  ok 16 tests\m3_1_gateway.spec.ts:258:5 › refresh keeps the session; gateway reset needs confirmation and keeps the role (6.9s)
+
+  16 passed (2.9m)
+EXIT 0

@@ -4,6 +4,7 @@ import type { Booking, DemoState, Jamaah } from "./types";
 import { initializeInventory, type InventoryState } from "./inventory";
 import { createCostingSeed } from "./costing";
 import { createHajjSeed, hajjCostItems } from "./hajj";
+import { personaUsers } from "./roles";
 
 export const DEMO_TODAY = "2026-10-02";
 export const documentNames = ["KTP", "KK", "Paspor", "Foto", "Vaksin", "Buku nikah", "Akta kelahiran", "Asuransi"];
@@ -65,7 +66,7 @@ export function createSeed(): DemoState {
       { id: "CMS-5", kind: "galeri", title: "Masjidil Haram", category: "Perjalanan Umrah", body: "King Eliot · CC BY-SA 4.0; kredit lengkap di content/photos.ts.", status: "Terbit", date: "2026-09-20", image: "/foto/masjidil-haram.jpg" },
       { id: "CMS-6", kind: "galeri", title: "Masjid Nabawi", category: "Madinah", body: "Meshari Alawfi · CC BY 4.0; kredit lengkap di content/photos.ts.", status: "Terbit", date: "2026-09-20", image: "/foto/masjid-nabawi.jpg" },
     ],
-    users: [{ id: "USR-1", name: "Ahmad", email: "demo@hasta.example", role: "Owner", active: true }, { id: "USR-2", name: "Rina Amelia", email: "rina@hasta.example", role: "Sales", active: true }, { id: "USR-3", name: "Fajar Hidayat", email: "fajar@hasta.example", role: "Finance", active: true }],
+    users: [{ id: "USR-1", name: "Ahmad", email: "demo@hasta.example", role: "Super Admin", roleId: "SUPERADMIN", active: true }, { id: "USR-2", name: "Rina Amelia", email: "rina@hasta.example", role: "Sales", roleId: "SALES_CS", active: true }, { id: "USR-3", name: "Fajar Hidayat", email: "fajar@hasta.example", role: "Finance", roleId: "FINANCE", active: true }, ...personaUsers.map(u => ({ ...u }))],
     permissions: { Owner: ["Dashboard", "Jamaah", "Pembayaran", "Pengeluaran", "Laporan", "Edit Paket", "Kelola User"], "Super Admin": ["Dashboard", "Jamaah", "Pembayaran", "Pengeluaran", "Laporan", "Edit Paket", "Kelola User"], Operations: ["Dashboard", "Jamaah", "Edit Paket"], Finance: ["Dashboard", "Jamaah", "Pembayaran", "Pengeluaran", "Laporan"], Sales: ["Dashboard", "Jamaah"], "Document Officer": ["Dashboard", "Jamaah"], "Tour Leader": ["Dashboard", "Jamaah"] },
     settings: { name: company.name, license: company.licensePPIU, address: company.address.street, phone: "08000000000", email: "info@hasta.example", website: "https://hasta-travel-umroh.vercel.app", branches: "Jakarta, Bandung, Surabaya", bank: company.bank.name, account: company.bank.accountNumber, accountHolder: company.bank.accountHolder, color: "#f0a62b", notifications: "Aktif", documents: documentNames.join(", "), room: "Quad", duration: "9", session: "8 jam" }, broadcasts: [],
   };

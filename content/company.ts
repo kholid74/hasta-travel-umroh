@@ -20,6 +20,13 @@ export const company = {
     accountNumber: "0000 0000 0000 0000",
     accountHolder: "PT HASTA TRAVEL DEMO",
   },
+  /**
+   * Kanal resmi untuk memeriksa izin. Sengaja `null`: portal lama (simpu.kemenag.go.id) tidak dapat
+   * diakses saat audit dan alamat portal pengganti belum terverifikasi. Isi hanya dengan URL resmi
+   * yang sudah dikonfirmasi travel klien — jangan menebak alamat pemerintah.
+   */
+  licenseCheckUrl: null as string | null,
+  licenseAuthority: "kementerian yang membidangi penyelenggaraan haji dan umrah",
   whatsapp: "6285156589720",
   studio: {
     name: "Kalsara Digital Studio",
@@ -27,5 +34,10 @@ export const company = {
   },
 } as const;
 
+/**
+ * Level A of the public disclosure hierarchy (PUBLIC-02C): one short line per page.
+ * Level B sits next to operator WhatsApp CTAs (WA_DEMO_NOTE) and in the legal block; level C is the
+ * footer showcase panel. The old wording mentioned testimonials, which the site no longer shows.
+ */
 export const DEMO_NOTICE =
-  "Situs demo — seluruh data perusahaan, harga, dan testimoni di sini fiktif.";
+  "Situs demo: Hasta Travel adalah operator fiktif. Paket, harga, jadwal, dan nomor izin di sini adalah contoh.";
