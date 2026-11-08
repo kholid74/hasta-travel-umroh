@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterAs } from "./helpers/session";
 import { createSeed, newJamaah } from "../content/admin/seed";
 import { adminRoutes, moduleTitle } from "../content/admin/navigation";
 import { addBooking, assignRoom, autoAssign, convertLead, members, outstanding, paid, recordPayment, verifyPayment } from "../lib/admin/model";
@@ -53,9 +54,7 @@ test("signed session rejects forgery, expiry and invalid formats", () => {
 });
 
 async function login(page: Page) {
-  await page.goto("/admin/login");
-  await page.getByRole("button", { name: "Masuk ke workspace" }).click();
-  await expect(page).toHaveURL(/\/admin\/dashboard$/);
+  await enterAs(page, "SUPERADMIN");
   await expect(page.getByRole("heading", { name: "Selamat pagi, Ahmad" })).toBeVisible();
 }
 async function navigate(page: Page, slug: string) {
@@ -64,21 +63,19 @@ async function navigate(page: Page, slug: string) {
   await expect(page.locator("#admin-content h1")).toBeVisible();
 }
 
-test("login protection, every sidebar route, public routes and responsive shell", async ({ page, request }) => {
+test("login protection, every sidebar route, public routes and responsive shell", async ({ page, request }, testInfo) => {
   test.setTimeout(240000);
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
   page.on("console", message => { if (message.type() === "error") errors.push(message.text()); });
   await page.goto("/admin/jamaah");
   await expect(page).toHaveURL(/\/admin\/login$/);
-  await page.getByLabel("Kata sandi", { exact: true }).fill("incorrect");
-  await page.getByRole("button", { name: "Masuk ke workspace" }).click();
-  await expect(page.locator(".form-error")).toContainText("tidak sesuai");
-  await page.getByLabel("Kata sandi", { exact: true }).fill("HastaDemo2026!");
-  await page.getByRole("button", { name: "Masuk ke workspace" }).click();
-  await expect(page).toHaveURL(/\/admin\/dashboard$/);
+  // M3.1: role gateway replaces the credential form — no username/password inputs remain.
+  await expect(page.getByRole("heading", { name: "Pilih Akses Demo" })).toBeVisible();
+  await expect(page.locator("input[type=password], input[type=email]")).toHaveCount(0);
+  await enterAs(page, "SUPERADMIN");
   await expect(page.getByRole("heading", { name: "Selamat pagi, Ahmad" })).toBeVisible();
-  await page.screenshot({ path: "test-results/dashboard-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("dashboard-desktop.png"), fullPage: true });
   for (const slug of adminRoutes.filter(s => s !== "dashboard")) await navigate(page, slug);
   await navigate(page, "jamaah");
   await page.getByRole("textbox", { name: "Cari jamaah", exact: true }).fill("Ahmad Fauzi");
@@ -91,7 +88,7 @@ test("login protection, every sidebar route, public routes and responsive shell"
   await expect(page.getByRole("dialog").getByRole("link", { name: /Ahmad Fauzi Jamaah/ })).toBeVisible();
   await page.keyboard.press("Escape");
   await navigate(page, "rooming");
-  await page.screenshot({ path: "test-results/rooming-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("rooming-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole("button", { name: "Buka navigasi" })).toBeVisible();
   await page.getByRole("button", { name: "Buka navigasi" }).click();
@@ -99,7 +96,7 @@ test("login protection, every sidebar route, public routes and responsive shell"
   await expect(page.getByRole("heading", { name: "Selamat pagi, Ahmad" })).toBeVisible();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/dashboard-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("dashboard-mobile.png"), fullPage: true });
   for (const path of ["/", "/paket-umroh", "/paket-umroh/umroh-reguler-9-hari", "/haji-khusus", "/jadwal-keberangkatan", "/tentang", "/kontak", "/faq", "/favicon.ico"]) { const response = await request.get(path); expect(response.status(), path).toBe(200); }
   await page.getByRole("button", { name: "Menu profil Ahmad" }).click();
   await page.getByRole("button", { name: "Keluar", exact: true }).click();
@@ -109,7 +106,7 @@ test("login protection, every sidebar route, public routes and responsive shell"
   expect(errors).toEqual([]);
 });
 
-test("admin guide covers every module and its journey works on desktop and mobile", async ({ page }) => {
+test("admin guide covers every module and its journey works on desktop and mobile", async ({ page }, testInfo) => {
   await login(page);
   await navigate(page, "panduan");
   const featureLinks = page.locator(".guide-feature a");
@@ -121,7 +118,7 @@ test("admin guide covers every module and its journey works on desktop and mobil
   await page.locator(".guide-demo-steps").getByRole("link", { name: "Buka CRM / Leads" }).click();
   await expect(page).toHaveURL(/\/admin\/crm$/);
   await navigate(page, "panduan");
-  await page.screenshot({ path: "test-results/guide-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("guide-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   await page.getByRole("navigation", { name: "Tahapan perjalanan admin" }).getByRole("link", { name: /Lengkapi persiapan/ }).click();
@@ -129,7 +126,7 @@ test("admin guide covers every module and its journey works on desktop and mobil
   await page.getByRole("button", { name: "Buka navigasi" }).click();
   await page.getByRole("dialog").getByRole("link", { name: "Panduan Admin", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1 })).toBeInViewport();
-  await page.screenshot({ path: "test-results/guide-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("guide-mobile.png"), fullPage: true });
 });
 
 test("lead converts to booking, payment verifies, and inventory follows shared state", async ({ page }) => {

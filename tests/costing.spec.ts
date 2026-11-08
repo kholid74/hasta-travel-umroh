@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { enterAs } from "./helpers/session";
 import { createSeed } from "../content/admin/seed";
 import type { CostItem, CostPlan } from "../content/admin/costing";
 import { calculateCosting, costingMoney, costingPercent, newCosting, reviseCosting, saveCosting, saveCostScenario, saveCostTemplate } from "../lib/admin/costing";
@@ -102,13 +103,12 @@ test("final costing is immutable, revisions and package templates are independen
   expect(createSeed().costings).toEqual(original.costings);
 });
 
-test("costing UI edits components, simulates, finalizes, revises and resets the demo", async ({ page }) => {
+test("costing UI edits components, simulates, finalizes, revises and resets the demo", async ({ page }, testInfo) => {
   test.setTimeout(180000);
   const seed = createSeed(), departure = seed.departures[0];
   const errors: string[] = [];
   page.on("pageerror", error => errors.push(error.message));
-  await page.goto("/admin/login");
-  await page.getByRole("button", { name: "Masuk ke workspace" }).click();
+  await enterAs(page);
   await page.locator(".admin-sidebar").getByRole("link", { name: "HPP & Kalkulasi Paket", exact: true }).click();
   await expect(page.locator("tbody tr")).toHaveCount(8);
   await expect(page.locator(".table-footer")).toContainText(`dari ${seed.departures.length + seed.hajjPackages.length} data`);
@@ -163,10 +163,10 @@ test("costing UI edits components, simulates, finalizes, revises and resets the 
   await page.getByRole("button", { name: "Ringkasan", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Biaya aktual tercatat" })).toBeVisible();
   await page.getByRole("button", { name: "Tutup notifikasi" }).click();
-  await page.screenshot({ path: "test-results/hpp-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("hpp-desktop.png"), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-  await page.screenshot({ path: "test-results/hpp-mobile.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("hpp-mobile.png"), fullPage: true });
   await page.getByRole("button", { name: "Menu profil Ahmad" }).click();
   await page.getByRole("button", { name: "Reset data demo", exact: true }).click();
   await dialog.getByRole("button", { name: "Ya, lanjutkan" }).click();

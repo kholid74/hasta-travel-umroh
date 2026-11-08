@@ -5,8 +5,11 @@ import { Modal } from "./ui";
 import { addBooking, recordPayment, uid } from "@/lib/admin/model";
 import { DEMO_TODAY, newJamaah } from "@/content/admin/seed";
 import type { Booking } from "@/content/admin/types";
+import type { Permission } from "@/content/admin/roles";
 
 export type CreateKind = "Jamaah" | "Booking" | "Lead" | "Paket" | "Pembayaran" | "Pengeluaran";
+/** Permission needed for each create form (quick-create menu and in-page buttons). */
+export const createPermission: Record<CreateKind, Permission> = { Jamaah: "jamaah:write", Booking: "booking.create", Lead: "lead.create", Paket: "paket:write", Pembayaran: "payment.record", Pengeluaran: "pengeluaran:write" };
 export function CreateForm({ kind, onClose, bookingId = "" }: { kind: CreateKind; onClose: () => void; bookingId?: string }) {
   const { state, transact } = useDemo();
   const [error, setError] = useState("");
@@ -33,7 +36,7 @@ export function CreateForm({ kind, onClose, bookingId = "" }: { kind: CreateKind
         const id = uid("PKT");
         s.packages.unshift({ ...structuredClone(template), id, slug: id.toLowerCase(), name: text("name"), duration: Number(text("duration")), price: { quad: price, triple: price + 2000000, double: price + 5000000 }, status: "Draft", featured: false });
       }
-    }, `${title} berhasil disimpan`, kind);
+    }, `${title} berhasil disimpan`, kind, createPermission[kind]);
     if (ok) onClose(); else setError("Belum tersimpan. Periksa rincian kesalahan pada notifikasi.");
   }}>
     {["Jamaah", "Lead", "Paket"].includes(kind) && <label>Nama {kind.toLowerCase()}<input name="name" required minLength={3} maxLength={100} placeholder={kind === "Paket" ? "Umrah Reguler 9 Hari" : "Nama lengkap"} /></label>}

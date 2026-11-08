@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { saveArtifact } from "./helpers/artifacts";
 import { createCanvas } from "@napi-rs/canvas";
 import { createSeed } from "../content/admin/seed";
 import { financialDocument, renderFinancialPDF } from "../lib/admin/financial-documents";
 
-test("branded PDFs embed logo/fonts and paginate tables without losing financial content", async () => {
+test("branded PDFs embed logo/fonts and paginate tables without losing financial content", async ({}, testInfo) => {
   const { getDocument, OPS } = await import("pdfjs-dist/legacy/build/pdf.mjs");
   const [logo, regular, bold] = await Promise.all([readFile("public/logo-mark.png"), readFile("public/fonts/Lato-Regular.ttf"), readFile("public/fonts/Lato-Bold.ttf")]);
   const assets = { logo, regular, bold }, state = createSeed();
-  await mkdir("docs/samples/m1_2b", { recursive: true });
   for (const booking of [state.bookings[0], state.bookings.find(b => b.productType === "HAJJ_SPECIAL")!]) {
     const payment = state.payments.find(p => p.bookingId === booking.id && p.status === "Terverifikasi")!;
     for (const kind of ["invoice", "receipt", "statement"] as const) {
@@ -22,8 +22,8 @@ test("branded PDFs embed logo/fonts and paginate tables without losing financial
       expect(document.numPages).toBeLessThanOrEqual(kind === "receipt" ? 2 : 1);
       const viewport = page.getViewport({ scale: 1.6 }), canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
       await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: canvas.getContext("2d") as unknown as CanvasRenderingContext2D, viewport }).promise;
-      const filename = `docs/samples/m1_2b/${booking.productType}-${kind}`;
-      await writeFile(`${filename}.pdf`, bytes); await writeFile(`${filename}.png`, canvas.toBuffer("image/png"));
+      const filename = `m1_2b/${booking.productType}-${kind}`;
+      await saveArtifact(testInfo, `${filename}.pdf`, bytes, { sample: true }); await saveArtifact(testInfo, `${filename}.png`, canvas.toBuffer("image/png"), { sample: true });
       await task.destroy();
     }
   }

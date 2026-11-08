@@ -1,8 +1,28 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowDownUp, ChevronLeft, ChevronRight, Download, Search, X, Inbox } from "lucide-react";
+import { ArrowDownUp, CalendarClock, ChevronLeft, ChevronRight, Download, Search, X, Inbox } from "lucide-react";
 import { exportExcel } from "@/lib/admin/export";
+import { DEMO_TODAY } from "@/content/admin/seed";
+
+const shortDate = (iso: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(iso.slice(0, 10) + "T00:00:00Z"));
+
+/**
+ * Business date of the demo data. Statuses (due/overdue, upcoming departures, follow-ups) are computed
+ * from DEMO_TODAY, so it is shown as a "Periode simulasi" next to the visitor's real date — fixture
+ * dates are never shifted (that would break booking, payment, costing and departure relationships).
+ */
+export function SimulationDate({ className = "" }: { className?: string }) {
+  const [today, setToday] = useState("");
+  // The real date is read after mount so server and client render the same markup.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setToday(new Date().toISOString().slice(0, 10)); }, []);
+  return <span className={`simulation-date ${className}`} title="Data demo memakai tanggal bisnis tetap. Jatuh tempo, keberangkatan mendatang, dan follow-up dihitung dari tanggal ini — bukan dari tanggal hari ini.">
+    <CalendarClock size={14} aria-hidden="true" />
+    <span><b>Periode simulasi</b> · {shortDate(DEMO_TODAY)}</span>
+    {today && today !== DEMO_TODAY && <small>Tanggal Anda: {shortDate(today)}</small>}
+  </span>;
+}
 
 export function PageHeader({ title, description, actions }: { title: string; description: string; actions?: ReactNode }) {
   return <header className="admin-page-header"><div><h1>{title}</h1><p>{description}</p></div>{actions && <div className="admin-actions">{actions}</div>}</header>;

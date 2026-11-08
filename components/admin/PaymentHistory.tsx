@@ -7,7 +7,7 @@ import { documentMoney } from "@/lib/admin/financial-documents";
 import FinancialDocuments from "./FinancialDocuments";
 
 export default function PaymentHistory({ bookingId, action }: { bookingId: string; action?: ReactNode }) {
-  const { state, transact } = useDemo();
+  const { state, transact, can } = useDemo();
   const booking = state.bookings.find(b => b.id === bookingId);
   if (!booking) return <Empty title="Booking tidak ditemukan" />;
   const balance = financialBalance(state, booking);
@@ -21,7 +21,7 @@ export default function PaymentHistory({ bookingId, action }: { bookingId: strin
       { label: "Metode", value: p => p.method },
       { label: "Nominal", value: p => p.amount, render: p => documentMoney(BigInt(p.amount)) },
       { label: "Status verifikasi", value: p => p.status, render: p => <><Badge>{p.status}</Badge>{p.verifiedAt && <small>Verifikasi: {dateLabel(p.verifiedAt)}</small>}</> },
-      { label: "Aksi", value: p => p.status, render: p => <>{p.status === "Menunggu" && <button className="admin-button" disabled={booking.status !== "Aktif"} onClick={() => transact(s => verifyPayment(s, p.id), `Pembayaran ${p.id} terverifikasi`, "Pembayaran")}>Verifikasi</button>}<FinancialDocuments bookingId={booking.id} paymentId={p.id} /></> },
+      { label: "Aksi", value: p => p.status, render: p => <>{p.status === "Menunggu" && can("payment.verify") && <button className="admin-button" disabled={booking.status !== "Aktif"} onClick={() => transact(s => verifyPayment(s, p.id), `Pembayaran ${p.id} terverifikasi`, "Pembayaran", "payment.verify")}>Verifikasi</button>}<FinancialDocuments bookingId={booking.id} paymentId={p.id} /></> },
     ]} />
   </Panel>;
 }

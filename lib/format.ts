@@ -1,4 +1,5 @@
 import type { Departure, DepartureStatus, OccupancyPrice } from "@/content/types";
+import { openDepartures } from "./departures.ts";
 
 const BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -53,7 +54,7 @@ export function statusKeberangkatan(seatsAvailable: number): DepartureStatus {
 export const LABEL_STATUS: Record<DepartureStatus, string> = {
   available: "Tersedia",
   limited: "Sisa terbatas",
-  "sold-out": "Sold Out",
+  "sold-out": "Penuh",
 };
 
 export function hargaKeberangkatan(
@@ -63,14 +64,15 @@ export function hargaKeberangkatan(
   return keberangkatan.price ?? paket.price;
 }
 
-/** Keberangkatan terdekat yang belum lewat; sold-out tetap ditampilkan apa adanya. */
+/**
+ * Keberangkatan terdekat yang masih bisa didaftar (setelah hari ini, waktu Jakarta);
+ * sold-out tetap ditampilkan apa adanya.
+ */
 export function keberangkatanTerdekat(
   paket: { departures: Departure[] },
   hariIni: string,
 ): Departure | undefined {
-  return paket.departures
-    .filter((d) => d.date >= hariIni)
-    .sort((a, b) => a.date.localeCompare(b.date))[0];
+  return openDepartures(paket.departures, hariIni)[0];
 }
 
 /** "US$ 12.500" — harga Haji Khusus dikutip dalam dolar, seperti praktik industrinya. */

@@ -1,105 +1,56 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { DEMO_NOTICE } from "@/content/company";
+import { JadwalClient, type BarisJadwal } from "@/components/JadwalClient";
+import { CatatanDemo, PageIntro } from "@/components/public/ui";
 import { packages } from "@/content/packages";
-import {
-  LABEL_STATUS,
-  bulanTahun,
-  hargaKeberangkatan,
-  rupiahSingkat,
-  statusKeberangkatan,
-  tanggalPanjang,
-} from "@/lib/format";
+import { businessToday, isOpenForRegistration } from "@/lib/departures";
+import { hargaKeberangkatan } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Jadwal Keberangkatan",
   description:
-    "Seluruh tanggal keberangkatan umroh dikelompokkan per bulan, dibaca dari data yang sama dengan katalog paket. Situs demo.",
+    "Seluruh tanggal keberangkatan Umrah per bulan, bisa disaring menurut kota dan jenis paket, dibaca dari data yang sama dengan katalog. Situs demo.",
 };
 
+// ISR: dibangun ulang paling lama tiap jam; JadwalClient juga menyaring ulang di browser
+// dengan tanggal Jakarta saat ini, jadi tanggal yang sudah lewat tidak pernah ditawarkan.
+export const revalidate = 3600;
+
 export default function JadwalPage() {
-  const hariIni = new Date().toISOString().slice(0, 10);
+  const hariIni = businessToday();
 
   // Sumber datanya sama persis dengan katalog — halaman ini hanya tampilan lain.
-  const baris = packages
+  const baris: BarisJadwal[] = packages
     .flatMap((paket) =>
       paket.departures
-        .filter((d) => d.date >= hariIni)
-        .map((d) => ({ paket, keberangkatan: d })),
+        .filter((d) => isOpenForRegistration(d.date, hariIni))
+        .map((d) => ({
+          id: d.id,
+          date: d.date,
+          slug: paket.slug,
+          namaPaket: paket.name,
+          tipe: paket.type,
+          durasi: paket.duration,
+          departureCity: d.departureCity,
+          airline: d.airline,
+          seatsAvailable: d.seatsAvailable,
+          jarakMakkah: paket.makkahHotel.distanceMeters,
+          hargaQuad: hargaKeberangkatan(paket, d).quad,
+        })),
     )
-    .sort((a, b) => a.keberangkatan.date.localeCompare(b.keberangkatan.date));
-
-  const perBulan = new Map<string, typeof baris>();
-  for (const b of baris) {
-    const kunci = b.keberangkatan.date.slice(0, 7);
-    perBulan.set(kunci, [...(perBulan.get(kunci) ?? []), b]);
-  }
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
-    <main className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 sm:py-12">
-      <header className="max-w-2xl">
-        <h1 className="text-3xl sm:text-4xl">Jadwal Keberangkatan</h1>
-        <p className="mt-3 text-muted">
-          Seluruh {baris.length} tanggal keberangkatan yang dijadwalkan, termasuk yang sudah penuh.
-          Daftar ini dibaca dari data yang sama dengan katalog paket, jadi tidak akan berbeda
-          dengan yang Anda lihat di halaman paket.
-        </p>
-        <p className="mt-2 text-sm text-muted">{DEMO_NOTICE}</p>
-      </header>
-
-      <div className="mt-8 space-y-8">
-        {[...perBulan.entries()].map(([kunci, isi]) => (
-          <section key={kunci} aria-labelledby={`bulan-${kunci}`}>
-            <h2 id={`bulan-${kunci}`} className="text-xl">
-              {bulanTahun(`${kunci}-01`)}
-              <span className="ml-2 text-sm font-normal text-muted">
-                {isi.length} keberangkatan
-              </span>
-            </h2>
-            <ul className="mt-3 space-y-2">
-              {isi.map(({ paket, keberangkatan }) => {
-                const status = statusKeberangkatan(keberangkatan.seatsAvailable);
-                const warna =
-                  status === "sold-out"
-                    ? "text-warning"
-                    : status === "limited"
-                      ? "text-accent"
-                      : "text-muted";
-                return (
-                  <li
-                    key={keberangkatan.id}
-                    className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 rounded-card border border-hairline bg-surface px-4 py-3"
-                  >
-                    <div className="min-w-[16rem] flex-1">
-                      <p className="font-medium tabular-nums">
-                        {tanggalPanjang(keberangkatan.date)}
-                      </p>
-                      <Link
-                        href={`/paket-umroh/${paket.slug}?d=${keberangkatan.date}`}
-                        className="text-sm underline underline-offset-4 hover:text-primary"
-                      >
-                        {paket.name}
-                      </Link>
-                      <p className="text-sm text-muted">
-                        {keberangkatan.departureCity} · {keberangkatan.airline} ·{" "}
-                        {paket.makkahHotel.distanceMeters} m dari Masjidil Haram
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-sm font-semibold ${warna}`}>
-                        {LABEL_STATUS[status]}
-                        {status !== "sold-out" && ` · sisa ${keberangkatan.seatsAvailable}`}
-                      </p>
-                      <p className="font-display text-lg font-semibold tabular-nums text-secondary">
-                        {rupiahSingkat(hargaKeberangkatan(paket, keberangkatan).quad)}
-                      </p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        ))}
+    <main>
+      <PageIntro
+        judul={<>Jadwal <em className="italic text-primary">keberangkatan</em></>}
+        lead={<p>Semua tanggal Umrah yang masih bisa didaftar, per bulan. Pilih satu tanggal untuk melihat harga kamar dan konsultasi dengan tanggal itu.</p>}
+      >
+        <CatatanDemo className="mt-5" />
+      </PageIntro>
+      <div className="band-light">
+        <div className="mx-auto w-full max-w-[1200px] px-4 pb-20 pt-10 sm:px-6 sm:pt-12">
+          <JadwalClient baris={baris} serverToday={hariIni} />
+        </div>
       </div>
     </main>
   );

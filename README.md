@@ -1,6 +1,8 @@
 Hasta Travel: website publik Umroh & Haji dan admin showcase oleh Kalsara Digital Studio.
 
-Admin: `/admin/login` · `demo@hasta.example` / `HastaDemo2026!`.
+Admin: buka `/admin/login` → **Pilih Akses Demo**. Pilih salah satu dari 8 peran (Superadmin, Owner, Sales & CS, Finance, Operasional, Agen, Tour Leader, Jamaah) tanpa kata sandi. Ini akses demo, bukan keamanan produksi. Ganti peran kapan saja lewat "Ganti akses demo"; data demo di browser tidak berubah.
+
+M3.1 akses berbasis peran: [Laporan implementasi](docs/M3_1_IMPLEMENTATION_REPORT.md) · [Matriks peran](docs/HASTA_V2_ROLE_MATRIX.md) · [Roadmap V2](docs/HASTA_V2_ROADMAP.md).
 
 Panduan lengkap: [Admin Showcase](docs/ADMIN_SHOWCASE.md) · [Future Backend](docs/FUTURE_BACKEND.md).
 
@@ -34,7 +36,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-Proyek menggunakan Next.js 16, React 19, Tailwind 4, Manrope dan Instrument Serif. Production login memerlukan environment `ADMIN_SESSION_SECRET` minimal 32 karakter acak. Data operasional merupakan simulasi yang tersimpan di localStorage browser ini setelah disimpan. Refresh mempertahankan data; menu profil → Reset data demo mengembalikan contoh awal. Gunakan data fiktif.
+Proyek menggunakan Next.js 16, React 19, Tailwind 4, Manrope dan Instrument Serif. Produksi memerlukan environment `ADMIN_SESSION_SECRET` minimal 32 karakter acak untuk menandatangani cookie sesi demo (`hasta_demo_session`). Data operasional merupakan simulasi yang tersimpan di localStorage browser ini setelah disimpan. Refresh mempertahankan data; menu profil → Reset data demo mengembalikan contoh awal. Gunakan data fiktif.
 
 ## Learn More
 

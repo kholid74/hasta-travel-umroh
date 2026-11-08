@@ -113,6 +113,7 @@ export default function Guide() {
         <div><b>Paket = penawaran</b><p>Produk yang dijual, berisi layanan, durasi, dan harga.</p></div>
         <div><b>Keberangkatan = rombongan</b><p>Pelaksanaan paket pada tanggal dan kuota tertentu.</p></div>
         <div><b>Booking = pendaftaran</b><p>Penghubung jamaah, rombongan, pilihan kamar, dan tagihan.</p></div>
+        <div><b>Akses demo = peran</b><p>Superadmin melihat semua modul. Owner, Sales, Finance, dan Operasional hanya melihat modul perannya; Agen, Tour Leader, dan Jamaah memakai portal ponsel. Ganti peran lewat menu profil — data demo tidak berubah.</p></div>
       </section>
 
       <nav className="guide-nav" aria-label="Tahapan perjalanan admin">

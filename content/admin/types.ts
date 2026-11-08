@@ -2,6 +2,7 @@ import type { Package } from "../types";
 import type { Costing, CostScenario, CostTemplate } from "./costing";
 import type { HajjPackage, HajjRegistrationStatus, HajjPlanningStatus } from "./hajj";
 import type { InventoryState } from "./inventory";
+import type { UserRole } from "./roles";
 
 export type ProductType = "UMRAH" | "HAJJ_SPECIAL";
 export const productLabels: Record<ProductType, string> = { UMRAH: "Umrah", HAJJ_SPECIAL: "Haji Khusus" };
@@ -39,7 +40,8 @@ export type Manasik = { id: string; name: string; date: string; time: string; lo
 export type Activity = { id: string; date: string; user: string; module: string; action: string };
 export type Notification = { id: string; category: string; title: string; text: string; href: string; read: boolean };
 export type CmsEntry = { id: string; kind: "artikel" | "testimoni" | "galeri"; title: string; category: string; body: string; status: "Draft" | "Terbit"; date: string; image?: string };
-export type Staff = { id: string; name: string; email: string; role: string; active: boolean };
+/** `role` is the legacy display label; `roleId` (storage v3) links the staff member to a demo role. */
+export type Staff = { id: string; name: string; email: string; role: string; roleId: UserRole; active: boolean };
 export type DemoState = InventoryState & {
   hajjPackages: HajjPackage[];
   costings: Costing[]; costTemplates: CostTemplate[]; costScenarios: CostScenario[];

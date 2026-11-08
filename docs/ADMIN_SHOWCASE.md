@@ -11,14 +11,14 @@ npm ci
 npm run dev
 ```
 
-Buka `/admin/login`. Akun demo:
+Buka `/admin/login` → **Pilih Akses Demo** (sejak M3.1). Klik salah satu dari 8 peran untuk masuk tanpa kata sandi:
 
-- Email: `demo@hasta.example`
-- Password: `HastaDemo2026!`
+- Tim kantor (`/admin/*`): Superadmin (semua modul), Owner / Direktur, Sales & Customer Service, Finance, Operasional.
+- Portal ponsel (`/portal/*`): Agen / Mitra, Tour Leader, Jamaah — dengan pilihan persona.
 
-Kredensial ini sengaja terbuka dan hanya memberikan akses ke data simulasi. Jangan menaruh data jamaah sungguhan dalam showcase.
+Pilihan peran hanya mengatur navigasi dan tindakan demo; ini **akses demo, bukan keamanan produksi**. "Ganti akses demo" tersedia di menu profil, sidebar, dan portal; mengganti peran tidak mengubah data demo. Hanya memberikan akses ke data simulasi — jangan menaruh data jamaah sungguhan dalam showcase. Rincian: [Matriks peran](HASTA_V2_ROLE_MATRIX.md), [Laporan M3.1](M3_1_IMPLEMENTATION_REPORT.md).
 
-Untuk production build, tetapkan `ADMIN_SESSION_SECRET` dengan minimal 32 karakter acak di environment server. Contoh membuat secret: `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Simpan hasil sebagai secret, bukan di Git. Kemudian jalankan `npm run build` dan `npm start`. Tanpa secret yang memadai, login produksi menampilkan error konfigurasi dan tidak menerbitkan sesi. Tidak ada database yang diperlukan.
+Untuk production build, tetapkan `ADMIN_SESSION_SECRET` dengan minimal 32 karakter acak di environment server. Contoh membuat secret: `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Simpan hasil sebagai secret, bukan di Git. Kemudian jalankan `npm run build` dan `npm start`. Tanpa secret yang memadai, gerbang akses demo menampilkan error konfigurasi dan tidak menerbitkan sesi. Tidak ada database yang diperlukan.
 
 Font menggunakan konfigurasi `next/font/google` yang sudah ada. Build pertama membutuhkan akses ke Google Fonts.
 
@@ -116,6 +116,6 @@ node lib/format.check.ts
 node lib/katalog.check.ts
 ```
 
-Playwright menggunakan Chrome yang terpasang, satu worker, dan port 3100. Server dev dijalankan otomatis jika belum tersedia. Tes memeriksa relasi data, batas kapasitas, nominal pembayaran, tanda tangan sesi, redirect login/logout, seluruh menu sidebar, semua halaman publik utama, viewport mobile, pencarian, tab, dialog, serta alur CRM–booking–payment–inventory dan operasi lain. Screenshot hasil pemeriksaan berada di `test-results/` (diabaikan Git).
+Playwright menggunakan Chrome yang terpasang, satu worker, dan port 3100. Berkas hasil tes (PDF, PNG, screenshot) ditulis ke folder output per tes di `test-results/`; contoh PDF di `docs/samples/` hanya diperbarui bila diminta dengan `UPDATE_SAMPLES=1 npm run test:admin` (sejak M3.1-R). Server dev dijalankan otomatis jika belum tersedia. Tes memeriksa relasi data, batas kapasitas, nominal pembayaran, tanda tangan sesi, redirect login/logout, seluruh menu sidebar, semua halaman publik utama, viewport mobile, pencarian, tab, dialog, serta alur CRM–booking–payment–inventory dan operasi lain. Screenshot hasil pemeriksaan berada di `test-results/` (diabaikan Git).
 
 Lihat [FUTURE_BACKEND.md](./FUTURE_BACKEND.md) untuk batas demo dan jalur integrasi Neon.

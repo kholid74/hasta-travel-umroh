@@ -1,0 +1,51 @@
+
+> travel-haji-umroh@0.1.0 test:admin
+> playwright test
+
+
+Running 41 tests using 1 worker
+
+  ok  1 tests\admin.spec.ts:9:5 › model preserves relationships, capacity, payment and allocation invariants (65ms)
+  ok  2 tests\admin.spec.ts:46:5 › signed session rejects forgery, expiry and invalid formats (3ms)
+  ok  3 tests\admin.spec.ts:66:5 › login protection, every sidebar route, public routes and responsive shell (13.4s)
+  ok  4 tests\admin.spec.ts:109:5 › admin guide covers every module and its journey works on desktop and mobile (3.2s)
+  ok  5 tests\admin.spec.ts:132:5 › lead converts to booking, payment verifies, and inventory follows shared state (3.8s)
+  ok  6 tests\admin.spec.ts:169:5 › documents, rooming, manasik, CMS and broadcast actions update the demo (4.0s)
+  ok  7 tests\costing.spec.ts:14:5 › costing calculates per person, fixed group, units and mixed currencies exactly (14ms)
+  ok  8 tests\costing.spec.ts:29:5 › costing allocates FOC costs to paying jamaah and distinguishes margin from markup (3ms)
+  ok  9 tests\costing.spec.ts:47:5 › costing rejects zero participants, negative or incomplete inputs and invalid exchange rates (10ms)
+  ok 10 tests\costing.spec.ts:61:5 › scenario profit, loss and break-even respect fixed units without mutating the base plan (1ms)
+  ok 11 tests\costing.spec.ts:74:5 › final costing is immutable, revisions and package templates are independent snapshots (15ms)
+  ok 12 tests\costing.spec.ts:106:5 › costing UI edits components, simulates, finalizes, revises and resets the demo (4.0s)
+  ok 13 tests\invoice_layout.spec.ts:11:5 › invoice bank placement, notes removal and intact summaries paginate 4, 10 and 25 records (4.6s)
+  ok 14 tests\invoice_layout.spec.ts:83:5 › payment settings save account holder, persist it and feed the actual invoice preview (3.2s)
+  ok 15 tests\m1_1.spec.ts:9:5 › Hajj validation, shared payments and contract snapshots preserve financial records (16ms)
+  ok 16 tests\m1_1.spec.ts:36:5 › Hajj HPP exact totals, exchange assumptions, saved revisions and browser encoding (39ms)
+  ok 17 tests\m1_1.spec.ts:72:5 › Hajj package editor, shared registration, HPP versions, refresh and reset work on desktop and mobile (8.4s)
+  ok 18 tests\m1_1.spec.ts:173:5 › corrupt storage requires explicit reset and failed storage writes do not save (2.4s)
+  ok 19 tests\m1_2.spec.ts:24:5 › real PDF templates preserve both contracts, verified totals, pagination and state (4.7s)
+  ok 20 tests\m1_2.spec.ts:62:5 › financial previews download actual PDFs on desktop/mobile and survive refresh (10.5s)
+  ok 21 tests\m1_2b.spec.ts:8:5 › branded PDFs embed logo/fonts and paginate tables without losing financial content (16.0s)
+  ok 22 tests\m2.spec.ts:13:5 › stock receipts, corrections, real reservations, partial/multiple handovers, release and returns balance exactly (51ms)
+  ok 23 tests\m2.spec.ts:65:5 › Umrah/Hajj associations, invalid references, cancellation and released partial kits preserve history (10ms)
+  ok 24 tests\m2.spec.ts:83:5 › version 1 migrates inventory without losing finance/HPP, version 2 persists and reset is deterministic (19ms)
+  ok 25 tests\m2.spec.ts:97:5 › posted handover PDF uses actual snapshots, logo and A4 geometry without financial amounts (342ms)
+  ok 26 tests\m2.spec.ts:114:5 › inventory UI receives stock, allocates both products, hands over partially, downloads, persists and resets (8.0s)
+  ok 27 tests\m2.spec.ts:159:5 › item/template editors, corrections, damaged return and release work through confirmed forms (6.1s)
+  ok 28 tests\m3_1_gateway.spec.ts:19:5 › role matrix: homes, navigation, module access and sensitive actions (13ms)
+  ok 29 tests\m3_1_gateway.spec.ts:44:5 › v2 session tokens: signature, expiry, tamper, invalid role and legacy compatibility (4ms)
+  ok 30 tests\m3_1_gateway.spec.ts:59:5 › frozen v2 workspace migrates to v3 without touching business records (63ms)
+  ok 31 tests\m3_1_gateway.spec.ts:87:5 › all eight roles enter without credentials and land on their own home (4.3s)
+  ok 32 tests\m3_1_gateway.spec.ts:106:5 › navigation permissions, AccessDenied, read-only modules and deep links (8.1s)
+  ok 33 tests\m3_1_gateway.spec.ts:150:5 › invalid, expired and legacy sessions; logout clears both cookies (2.7s)
+  ok 34 tests\m3_1_gateway.spec.ts:181:5 › role switching keeps demo data, replaces navigation and records the acting persona (4.0s)
+  ok 35 tests\m3_1_gateway.spec.ts:215:5 › saved v2 workspace opens after the upgrade and is re-saved as v3 only on change (2.9s)
+  ok 36 tests\m3_1_gateway.spec.ts:231:5 › persona selection and mobile-first portal shells (1.9s)
+  ok 37 tests\m3_1_gateway.spec.ts:258:5 › refresh keeps the session; gateway reset needs confirmation and keeps the role (2.9s)
+  ok 38 tests\m3_1_gateway.spec.ts:276:5 › M3.1-R: read-only roles see no mutation controls while search, filters, details and export remain (7.2s)
+  ok 39 tests\m3_1_gateway.spec.ts:325:5 › M3.1-R: dashboards label the simulated business period separately from the visitor's date (2.9s)
+  ok 40 tests\payment_history.spec.ts:48:5 › all PDFs show chronological cash/transfer history while only verified installments reduce the contract (5.1s)
+  ok 41 tests\payment_history.spec.ts:87:5 › booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence (6.6s)
+
+  41 passed (2.4m)
+EXIT 0

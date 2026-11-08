@@ -57,11 +57,17 @@ export type Package = {
   departures: Departure[];
 };
 
-/** Haji Khusus tidak dijual sebagai keberangkatan — yang dibeli adalah antrean. */
+/**
+ * Haji Khusus tidak dijual sebagai keberangkatan — yang dibeli adalah antrean (nomor porsi).
+ * Haji Mujamalah adalah jalur lain (visa undangan, tanpa nomor porsi) dan ditampilkan terpisah.
+ */
+export type HajiKategori = "khusus" | "mujamalah";
 export type HajiPackage = {
   id: string;
   slug: string;
   name: string;
+  kategori: HajiKategori;
+  /** Perkiraan masa tunggu (tahun) — hanya bermakna untuk Haji Khusus. */
   waitingYears: number;
   estimatedDepartureYear: number;
   quotaNote: string;

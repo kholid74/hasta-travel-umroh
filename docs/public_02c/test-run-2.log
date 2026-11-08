@@ -1,0 +1,94 @@
+
+> travel-haji-umroh@0.1.0 test:admin
+> playwright test --reporter=line
+
+
+Running 86 tests using 1 worker
+
+[1/86] tests\admin.spec.ts:9:5 › model preserves relationships, capacity, payment and allocation invariants
+[2/86] tests\admin.spec.ts:46:5 › signed session rejects forgery, expiry and invalid formats
+[3/86] tests\admin.spec.ts:66:5 › login protection, every sidebar route, public routes and responsive shell
+[4/86] tests\admin.spec.ts:109:5 › admin guide covers every module and its journey works on desktop and mobile
+[5/86] tests\admin.spec.ts:132:5 › lead converts to booking, payment verifies, and inventory follows shared state
+[6/86] tests\admin.spec.ts:169:5 › documents, rooming, manasik, CMS and broadcast actions update the demo
+[7/86] tests\costing.spec.ts:14:5 › costing calculates per person, fixed group, units and mixed currencies exactly
+[8/86] tests\costing.spec.ts:29:5 › costing allocates FOC costs to paying jamaah and distinguishes margin from markup
+[9/86] tests\costing.spec.ts:47:5 › costing rejects zero participants, negative or incomplete inputs and invalid exchange rates
+[10/86] tests\costing.spec.ts:61:5 › scenario profit, loss and break-even respect fixed units without mutating the base plan
+[11/86] tests\costing.spec.ts:74:5 › final costing is immutable, revisions and package templates are independent snapshots
+[12/86] tests\costing.spec.ts:106:5 › costing UI edits components, simulates, finalizes, revises and resets the demo
+[13/86] tests\home.spec.ts:16:5 › quick finder narrows by month and city and hands the same filters to the catalogue URL
+[14/86] tests\home.spec.ts:45:5 › quick finder never offers past departures and shows a useful empty state
+[15/86] tests\home.spec.ts:75:5 › homepage CTAs: Umrah catalogue first, operator WhatsApp second, distinct Haji Khusus path
+[16/86] tests\home.spec.ts:104:5 › no fabricated claims; the demo disclosure is stated once, not under every section
+[17/86] tests\home.spec.ts:118:5 › mobile homepage: hero CTAs in the first screen, comfortable tap targets, one sticky bar, no overflow
+[18/86] tests\home.spec.ts:137:5 › every homepage photo is self-hosted and credited with author and licence
+[19/86] tests\home.spec.ts:149:5 › hotel distances: phones show 3 nearest per city, larger screens 5, and every hotel stays reachable
+[20/86] tests\invoice_layout.spec.ts:11:5 › invoice bank placement, notes removal and intact summaries paginate 4, 10 and 25 records
+[21/86] tests\invoice_layout.spec.ts:83:5 › payment settings save account holder, persist it and feed the actual invoice preview
+[22/86] tests\m1_1.spec.ts:9:5 › Hajj validation, shared payments and contract snapshots preserve financial records
+[23/86] tests\m1_1.spec.ts:36:5 › Hajj HPP exact totals, exchange assumptions, saved revisions and browser encoding
+[24/86] tests\m1_1.spec.ts:72:5 › Hajj package editor, shared registration, HPP versions, refresh and reset work on desktop and mobile
+[25/86] tests\m1_1.spec.ts:173:5 › corrupt storage requires explicit reset and failed storage writes do not save
+[26/86] tests\m1_2.spec.ts:24:5 › real PDF templates preserve both contracts, verified totals, pagination and state
+[27/86] tests\m1_2.spec.ts:62:5 › financial previews download actual PDFs on desktop/mobile and survive refresh
+[28/86] tests\m1_2b.spec.ts:8:5 › branded PDFs embed logo/fonts and paginate tables without losing financial content
+[29/86] tests\m2.spec.ts:13:5 › stock receipts, corrections, real reservations, partial/multiple handovers, release and returns balance exactly
+[30/86] tests\m2.spec.ts:65:5 › Umrah/Hajj associations, invalid references, cancellation and released partial kits preserve history
+[31/86] tests\m2.spec.ts:83:5 › version 1 migrates inventory without losing finance/HPP, version 2 persists and reset is deterministic
+[32/86] tests\m2.spec.ts:97:5 › posted handover PDF uses actual snapshots, logo and A4 geometry without financial amounts
+[33/86] tests\m2.spec.ts:114:5 › inventory UI receives stock, allocates both products, hands over partially, downloads, persists and resets
+[34/86] tests\m2.spec.ts:159:5 › item/template editors, corrections, damaged return and release work through confirmed forms
+[35/86] tests\m3_1_gateway.spec.ts:19:5 › role matrix: homes, navigation, module access and sensitive actions
+[36/86] tests\m3_1_gateway.spec.ts:44:5 › v2 session tokens: signature, expiry, tamper, invalid role and legacy compatibility
+[37/86] tests\m3_1_gateway.spec.ts:59:5 › frozen v2 workspace migrates to v3 without touching business records
+[38/86] tests\m3_1_gateway.spec.ts:87:5 › all eight roles enter without credentials and land on their own home
+[39/86] tests\m3_1_gateway.spec.ts:106:5 › navigation permissions, AccessDenied, read-only modules and deep links
+[40/86] tests\m3_1_gateway.spec.ts:150:5 › invalid, expired and legacy sessions; logout clears both cookies
+[41/86] tests\m3_1_gateway.spec.ts:181:5 › role switching keeps demo data, replaces navigation and records the acting persona
+[42/86] tests\m3_1_gateway.spec.ts:215:5 › saved v2 workspace opens after the upgrade and is re-saved as v3 only on change
+[43/86] tests\m3_1_gateway.spec.ts:231:5 › persona selection and mobile-first portal shells
+[44/86] tests\m3_1_gateway.spec.ts:258:5 › refresh keeps the session; gateway reset needs confirmation and keeps the role
+[45/86] tests\m3_1_gateway.spec.ts:276:5 › M3.1-R: read-only roles see no mutation controls while search, filters, details and export remain
+[46/86] tests\m3_1_gateway.spec.ts:325:5 › M3.1-R: dashboards label the simulated business period separately from the visitor's date
+[47/86] tests\payment_history.spec.ts:48:5 › all PDFs show chronological cash/transfer history while only verified installments reduce the contract
+[48/86] tests\payment_history.spec.ts:87:5 › booking and pilgrim pages share installment rows, verification, totals, real PDF downloads and persistence
+[49/86] tests\public_02b.spec.ts:17:5 › catalogue: filter combinations come from the URL, match the data and survive reload
+[50/86] tests\public_02b.spec.ts:48:5 › catalogue: an impossible combination shows a useful empty state with a working reset
+[51/86] tests\public_02b.spec.ts:61:5 › prices agree between catalogue card, detail table, desktop summary and mobile sticky bar
+[52/86] tests\public_02b.spec.ts:80:5 › detail: sold-out date stays explorable, is labelled honestly and offers open alternatives
+[53/86] tests\public_02b.spec.ts:102:5 › detail: itinerary stages keep every day, open by keyboard, and the WhatsApp text follows the date
+[54/86] tests\public_02b.spec.ts:131:5 › Haji Khusus and Mujamalah stay separate, with qualified waiting times and no guarantees
+[55/86] tests\public_02b.spec.ts:149:5 › schedule: month, city and type filters live in the URL and every row keeps its date for the detail page
+[56/86] tests\public_02b.spec.ts:178:5 › contact: Umrah, Haji Khusus and other enquiries each send their own operator message; studio stays in the demo panel
+[57/86] tests\public_02b.spec.ts:200:5 › terminology: visible labels say Umrah and Penuh; no 'Sold Out' or 'seat' wording on public pages
+[58/86] tests\public_02b.spec.ts:210:5 › mobile sticky action: one bar, hidden over page CTAs and the footer, no spacer, and focus stays clear of it
+[59/86] tests\public_02b.spec.ts:247:5 › homepage sticky bar waits until the hero actions scroll away
+[60/86] tests\public_02b.spec.ts:256:5 › no horizontal overflow on the refined pages with filters applied
+[61/86] tests\public_02c.spec.ts:20:5 › catalogue on phones: 9 first, 'Muat lebih banyak' reveals the rest, announces it and moves focus
+[62/86] tests\public_02c.spec.ts:41:5 › catalogue on phones: a filter change resets to the first page of the filtered set; sort keeps it
+[63/86] tests\public_02c.spec.ts:68:5 › catalogue: URL state is restored on phones and desktop shows every match without a load-more
+[64/86] tests\public_02c.spec.ts:85:5 › catalogue: sold-out matches stay explorable after loading more, with honest status
+[65/86] tests\public_02c.spec.ts:106:5 › package cards differ by verified data: no repeated destination photo, service tags without unverifiable claims
+[66/86] tests\public_02c.spec.ts:126:5 › package detail keeps the selected date when reached from a card beyond the first mobile page
+[67/86] tests\public_02c.spec.ts:140:5 › FAQ by keyboard: topic links jump to their group and accordions open and close
+[68/86] tests\public_02c.spec.ts:155:5 › demo disclosure hierarchy: one short note per page, contextual WhatsApp notes, full panel in the footer
+[69/86] tests\public_02c.spec.ts:175:5 › WhatsApp audiences stay separate on every public page
+[70/86] tests\public_02c.spec.ts:196:5 › About reads as an operator profile without invented history, numbers or certifications
+[71/86] tests\public_02c.spec.ts:209:5 › Haji Khusus on 360 px: comparable programmes, price and deposit first, details expandable, Mujamalah separate
+[72/86] tests\public_02c.spec.ts:229:5 › responsive QA: no overflow at 360/390/768/1440, and the load-more button is never under the sticky bar
+[73/86] tests\public.spec.ts:13:5 › business date: Jakarta day boundary, departure-day cutoff and unavailable reasons
+[74/86] tests\public.spec.ts:23:5 › WhatsApp messages: operator vs studio audiences, Haji wording and URL encoding
+[75/86] tests\public.spec.ts:43:5 › public routes respond and never overflow horizontally at 390, 768 and 1440 px
+[76/86] tests\public.spec.ts:55:5 › mobile menu: every destination, active route, Escape and focus return, gateway entry
+[77/86] tests\public.spec.ts:91:5 › desktop and tablet navigation keep branding; desktop marks the active page
+[78/86] tests\public.spec.ts:104:5 › WhatsApp CTAs: operator messages carry context and the demo disclosure; studio CTA lives only in the demo area
+[79/86] tests\public.spec.ts:122:5 › mobile sticky CTAs never stack: one generic bar on listings, only the date-aware bar on detail
+[80/86] tests\public.spec.ts:132:5 › package detail keeps the selected departure in the URL, the WhatsApp text and after reload
+[81/86] tests\public.spec.ts:144:5 › stale and unknown ?d= links show an unavailable-date state with alternatives
+[82/86] tests\public.spec.ts:158:5 › departure day is closed at Jakarta midnight on detail, catalogue, homepage and schedule
+[83/86] tests\public.spec.ts:185:5 › catalogue filters still sync with the URL
+[84/86] tests\public.spec.ts:196:5 › Haji page separates Haji Khusus from Mujamalah without contradictory waiting-time wording
+[85/86] tests\public.spec.ts:208:5 › licence and requirement claims are qualified; no dead verification link
+[86/86] tests\public.spec.ts:220:5 › branded Indonesian 404 with recovery links and a real 404 status
+  86 passed (6.0m)

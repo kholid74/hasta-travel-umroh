@@ -7,7 +7,7 @@ import { productLabels } from "@/content/admin/types";
 import CostingComparison from "./CostingComparison";
 import { costingTargets, type CostingTarget, calculateCosting, costingMoney as money, costingPercent as percent, itemBase, latestCosting, newCosting, reviseCosting, saveCosting, saveCostScenario, saveCostTemplate } from "@/lib/admin/costing";
 import { dateLabel, uid } from "@/lib/admin/model";
-import { useDemo } from "./Store";
+import { useDemo, useModuleAccess } from "./Store";
 import { Badge, Confirm, DataTable, Empty, Modal, PageHeader, Panel, SelectFilter, Stat, Tabs } from "./ui";
 
 function calculate(plan: CostPlan) {
@@ -17,6 +17,7 @@ function calculate(plan: CostPlan) {
 
 export default function Costing({ id }: { id?: string }) {
   const { state, resetVersion, transact } = useDemo();
+  const { writable } = useModuleAccess();
   const [packageId, setPackageId] = useState("");
   const [productType, setProductType] = useState("");
   const [view, setView] = useState("Perhitungan");
@@ -30,7 +31,7 @@ export default function Costing({ id }: { id?: string }) {
     if (!current) return <>
       <Link className="text-button" href="/admin/hpp">← Semua costing</Link>
       <PageHeader title="Mulai costing keberangkatan" description={`${departure.id} · ${departure.name}`} />
-      <Panel title="Gunakan template paket"><div className="panel-body stack"><p>{state.costTemplates.some(t => t.packageId === departure.packageId) ? "Komponen biaya dan kurs dari template paket akan disalin ke draft baru. Tinjau kuantitas, harga, dan jumlah peserta sebelum menyimpan." : "Paket ini belum memiliki template. Mulai draft kosong dan tambahkan komponen biaya sesuai kebutuhan."}</p><button className="admin-button primary" onClick={() => transact(s => { newCosting(s, departure.id); }, `Draft HPP ${departure.id} dibuat`, "HPP")}>Buat draft costing</button></div></Panel>
+      <Panel title="Gunakan template paket"><div className="panel-body stack"><p>{state.costTemplates.some(t => t.packageId === departure.packageId) ? "Komponen biaya dan kurs dari template paket akan disalin ke draft baru. Tinjau kuantitas, harga, dan jumlah peserta sebelum menyimpan." : "Paket ini belum memiliki template. Mulai draft kosong dan tambahkan komponen biaya sesuai kebutuhan."}</p>{writable && <button className="admin-button primary" onClick={() => transact(s => { newCosting(s, departure.id); }, `Draft HPP ${departure.id} dibuat`, "HPP")}>Buat draft costing</button>}</div></Panel>
     </>;
     return <CostingEditor key={`${current.id}:${resetVersion}`} costing={current} departure={departure} onRevision={setVersionId} versions={versions} />;
   }
@@ -65,7 +66,8 @@ export default function Costing({ id }: { id?: string }) {
 }
 
 function CostingEditor({ costing, departure, onRevision, versions }: { costing: CostingRecord; departure: CostingTarget; onRevision: (id: string) => void; versions: CostingRecord[] }) {
-  const { state, transact, notify } = useDemo();
+  const { state, transact, notify, can } = useDemo();
+  const { writable } = useModuleAccess();
   const [plan, setPlan] = useState<CostPlan>(() => structuredClone(costing));
   const [dirty, setDirty] = useState(false);
   const [tab, setTab] = useState("Breakdown biaya");
@@ -78,25 +80,25 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
   const product = { id: departure.packageId, name: departure.name };
   function patch(update: Partial<CostPlan>) { setPlan(p => ({ ...p, ...update })); setDirty(true); }
   function save(final = false) {
-    if (transact(s => saveCosting(s, costing.id, plan, final), `HPP ${departure.id} revisi ${costing.revision} ${final ? "difinalisasi" : "disimpan sebagai draft"}`, "HPP")) setDirty(false);
+    if (transact(s => saveCosting(s, costing.id, plan, final), `HPP ${departure.id} revisi ${costing.revision} ${final ? "difinalisasi" : "disimpan sebagai draft"}`, "HPP", final ? "hpp.finalize" : "hpp:write")) setDirty(false);
   }
   const rows = grouped ? [...plan.items].sort((a, b) => a.category.localeCompare(b.category, "id")) : plan.items;
   return <>
     <Link className="text-button" href="/admin/hpp">← Semua costing</Link>
     <PageHeader title={`HPP ${departure.id}`} description={`${productLabels[costing.productType]} · ${costing.packageName} · Rencana ${costing.departureYear} · Revisi ${costing.revision}`} actions={<><Badge>{costing.status}</Badge><label className="costing-version">Revisi costing<select aria-label="Revisi costing" value={costing.id} onChange={e => { if (!dirty || window.confirm("Perubahan belum disimpan. Tinggalkan draft lokal?")) onRevision(e.target.value); }}>{versions.map(c => <option key={c.id} value={c.id}>Revisi {c.revision} · {c.status}</option>)}</select></label></>} />
     <div className="admin-actions costing-actions">
-      {!locked ? <><button className="admin-button primary" disabled={!result} onClick={() => save()}>Simpan draft</button><button className="admin-button" disabled={!result} onClick={() => setConfirm("final")}>Finalisasi costing</button></> : <button className="admin-button primary" disabled={latestCosting(state, departure.id)?.id !== costing.id} onClick={() => {
+      {!writable ? null : !locked ? <><button className="admin-button primary" disabled={!result} onClick={() => save()}>Simpan draft</button>{can("hpp.finalize") && <button className="admin-button" disabled={!result} onClick={() => setConfirm("final")}>Finalisasi costing</button>}</> : <button className="admin-button primary" disabled={latestCosting(state, departure.id)?.id !== costing.id} onClick={() => {
         let nextId = "";
         if (transact(s => { nextId = reviseCosting(s, costing.id).id; }, `Revisi baru HPP ${departure.id} dibuat`, "HPP")) onRevision(nextId);
       }}>Buat revisi baru</button>}
-      <button className="admin-button" disabled={dirty || !result} onClick={() => setConfirm("template")}>Jadikan template paket</button>
+      {writable && <button className="admin-button" disabled={dirty || !result} onClick={() => setConfirm("template")}>Jadikan template paket</button>}
       {departure.productType === "UMRAH" && <Link className="text-button" href={`/admin/keberangkatan/${departure.id}`}>Lihat keberangkatan →</Link>}
       <Link className="text-button" href={`/admin/${departure.productType === "HAJJ_SPECIAL" ? "haji-khusus" : "paket"}/${product.id}`}>Lihat paket →</Link>
     </div>
     <p className="admin-notice">{locked ? `Versi final dikunci${costing.finalizedAt ? ` sejak ${dateLabel(costing.finalizedAt)}` : ""}. Buat revisi untuk mengubah biaya atau harga; versi ini tetap tersimpan.` : dirty ? "Ada perubahan yang belum disimpan. Simpan draft sebelum berpindah revisi, membuat template, atau meninggalkan halaman." : "Draft tersimpan di browser ini. Refresh mempertahankan versi tersimpan; Reset data demo mengembalikan contoh awal."} Costing tidak mengubah harga paket publik atau invoice.</p>
     <Tabs items={["Breakdown biaya", "Simulasi harga", "Ringkasan", "Bandingkan versi"]} value={tab} onChange={setTab} />
     {tab !== "Simulasi harga" && tab !== "Bandingkan versi" && <Panel title="Dasar perhitungan" subtitle="Biaya peserta gratis tetap masuk, pembagi HPP hanya jamaah berbayar">
-      <fieldset disabled={locked} className="costing-inputs">
+      <fieldset disabled={locked || !writable} className="costing-inputs">
         <label>Tanggal asumsi kurs<input required type="date" value={plan.assumptionDate} onChange={e => patch({ assumptionDate: e.target.value })} /></label>
         <label>Jamaah berbayar rencana<input aria-label="Jamaah berbayar rencana" type="number" min={1} max={10000} step={1} value={Number.isNaN(plan.payingCount) ? "" : plan.payingCount} onChange={e => patch({ payingCount: e.target.value === "" ? NaN : Number(e.target.value) })} /></label>
         <label>Peserta gratis / FOC<input aria-label="Peserta gratis / FOC" type="number" min={0} max={10000} step={1} value={Number.isNaN(plan.focCount) ? "" : plan.focCount} onChange={e => patch({ focCount: e.target.value === "" ? NaN : Number(e.target.value) })} /></label>
@@ -106,13 +108,13 @@ function CostingEditor({ costing, departure, onRevision, versions }: { costing: 
       {plan.payingCount + plan.focCount > departure.capacity && <p className="admin-notice warning">Rencana total peserta melebihi kapasitas keberangkatan ({departure.capacity}). Ini hanya simulasi; tinjau kebutuhan kursi, kamar, dan kendaraan.</p>}
     </Panel>}
     {tab === "Breakdown biaya" && <div className="section-gap">
-      <DataTable title="komponen biaya" rows={rows} filters={<label className="costing-group"><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)} />Kelompokkan kategori</label>} actions={!locked && <button className="admin-button primary" onClick={() => setEditing({ id: uid("CI"), name: "", category: "Biaya lain-lain", type: "person", audience: "all", quantity: "1", unit: "orang", unitPrice: "", currency: "IDR", exchangeRate: "1", notes: "" })}><Plus size={15} />Tambah komponen</button>} columns={[
+      <DataTable title="komponen biaya" rows={rows} filters={<label className="costing-group"><input type="checkbox" checked={grouped} onChange={e => setGrouped(e.target.checked)} />Kelompokkan kategori</label>} actions={!locked && writable && <button className="admin-button primary" onClick={() => setEditing({ id: uid("CI"), name: "", category: "Biaya lain-lain", type: "person", audience: "all", quantity: "1", unit: "orang", unitPrice: "", currency: "IDR", exchangeRate: "1", notes: "" })}><Plus size={15} />Tambah komponen</button>} columns={[
         { label: "Kategori", value: i => i.category }, { label: "Nama biaya", value: i => i.name, render: i => <><b>{i.name}</b><small className="costing-note">{i.notes}</small></> },
         { label: "Tipe / sasaran", value: i => `${typeLabels[i.type]}${i.type === "person" ? ` · ${audienceLabels[i.audience]}` : ""}` },
         { label: "Kuantitas", value: i => `${i.quantity} ${i.unit}` }, { label: "Harga satuan", value: i => `${i.currency} ${i.unitPrice}` },
         { label: "Kurs ke IDR", value: i => i.exchangeRate },
         { label: "Total IDR", value: i => result ? money(result.lines.find(l => l.id === i.id)!.total) : "Periksa dasar perhitungan" },
-        { label: "Aksi", value: () => "", render: i => !locked ? <div className="admin-actions"><button className="icon-button" aria-label={`Edit ${i.name}`} onClick={() => setEditing(structuredClone(i))}><Pencil size={15} /></button><button className="icon-button" aria-label={`Hapus ${i.name}`} onClick={() => setRemoving(i.id)}><Trash2 size={15} /></button></div> : "Terkunci" },
+        { label: "Aksi", value: () => "", render: i => !locked && writable ? <div className="admin-actions"><button className="icon-button" aria-label={`Edit ${i.name}`} onClick={() => setEditing(structuredClone(i))}><Pencil size={15} /></button><button className="icon-button" aria-label={`Hapus ${i.name}`} onClick={() => setRemoving(i.id)}><Trash2 size={15} /></button></div> : locked ? "Terkunci" : "—" },
       ]} />
       <p className="admin-notice section-gap">Per jamaah = kuantitas × harga × kurs × peserta sasaran. Per grup dan per unit = kuantitas × harga × kurs. Harga per jamaah dibulatkan ke 2 desimal IDR sebelum dikalikan peserta. Kuantitas hotel dapat diisi kamar × malam; unit tidak bertambah otomatis saat jumlah jamaah berubah.</p>
     </div>}
@@ -177,6 +179,7 @@ function CostItemForm({ item, onClose, onSave }: { item: CostItem; onClose: () =
 
 function Simulation({ costingId, source, capacity }: { costingId: string; source: CostPlan; capacity: number }) {
   const { state, transact } = useDemo();
+  const { writable } = useModuleAccess();
   const [plan, setPlan] = useState<CostPlan>(() => structuredClone(source));
   const [name, setName] = useState("Skenario alternatif");
   const { result, error } = calculate(plan);
@@ -191,7 +194,7 @@ function Simulation({ costingId, source, capacity }: { costingId: string; source
         <label>Diskon simulasi / jamaah (IDR)<input aria-label="Diskon simulasi / jamaah (IDR)" type="number" min="0" step="0.01" value={plan.discountPerPerson} onChange={e => setPlan({ ...plan, discountPerPerson: e.target.value })} /></label>
         <label>Nama skenario<input aria-label="Nama skenario" value={name} onChange={e => setName(e.target.value)} /></label>
       </div>
-      <div className="panel-body admin-actions"><button className="admin-button primary" disabled={!result || !name.trim()} onClick={() => transact(s => saveCostScenario(s, costingId, name, plan), `Skenario HPP ${name} disimpan sebagai draft`, "HPP")}>Simpan skenario draft</button><span className="muted">FOC: {plan.focCount} · Kapasitas keberangkatan: {capacity}</span></div>
+      <div className="panel-body admin-actions">{writable && <button className="admin-button primary" disabled={!result || !name.trim()} onClick={() => transact(s => saveCostScenario(s, costingId, name, plan), `Skenario HPP ${name} disimpan sebagai draft`, "HPP")}>Simpan skenario draft</button>}<span className="muted">FOC: {plan.focCount} · Kapasitas keberangkatan: {capacity}</span></div>
     </Panel>
     {error && <p role="alert" className="form-error section-gap">{error}</p>}
     {result && <><CostSummary plan={plan} /><div className="section-gap"><DataTable title="simulasi HPP" rows={rows} pageSize={5} columns={[

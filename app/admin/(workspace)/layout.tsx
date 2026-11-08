@@ -3,6 +3,7 @@ import { DemoProvider } from "@/components/admin/Store";
 import { Shell } from "@/components/admin/Shell";
 
 export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
-  await requireSession();
-  return <DemoProvider><Shell>{children}</Shell></DemoProvider>;
+  const session = await requireSession("staff");
+  // key: a role switch remounts the provider so identity, navigation and guards update together.
+  return <DemoProvider key={`${session.role}:${session.personaId}`} access={{ role: session.role, personaId: session.personaId }}><Shell>{children}</Shell></DemoProvider>;
 }

@@ -1,9 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { enterAs } from "./helpers/session";
+import { readFile } from "node:fs/promises";
+import { saveArtifact } from "./helpers/artifacts";
 import { createCanvas } from "@napi-rs/canvas";
 import { createSeed } from "../content/admin/seed";
 import { allocateKit, assertInventoryHistory, delivered, handoverDocument, postHandover, postMovement, postReturn, releaseAllocation, saveInventoryItem, saveKitTemplate, stockBalance, validateInventory } from "../lib/admin/inventory";
 import { decodeDemo, encodeDemo } from "../lib/admin/persistence";
+import { CURRENT_DEMO_VERSION } from "../lib/admin/migrations";
 import { renderFinancialPDF } from "../lib/admin/financial-pdf";
 import { DEMO_STORAGE_KEY } from "../lib/admin/persistence";
 
@@ -86,11 +89,12 @@ test("version 1 migrates inventory without losing finance/HPP, version 2 persist
   expect(upgraded.costings).toEqual(seed.costings); expect(upgraded.payments).toEqual(seed.payments); expect(upgraded.bookings).toEqual(seed.bookings);
   expect(upgraded.inventory).toEqual(seed.inventory);
   expect(upgraded.stockMovements).toEqual(seed.stockMovements);
-  expect(JSON.parse(encodeDemo(upgraded)).version).toBe(2);
+  // M3.1 bumped storage to v3: v1 data is migrated through v2 and re-saved at the current version.
+  expect(JSON.parse(encodeDemo(upgraded)).version).toBe(CURRENT_DEMO_VERSION);
   expect(createSeed()).toEqual(seed);
 });
 
-test("posted handover PDF uses actual snapshots, logo and A4 geometry without financial amounts", async () => {
+test("posted handover PDF uses actual snapshots, logo and A4 geometry without financial amounts", async ({}, testInfo) => {
   const s = createSeed(), a = allocateKit(s, s.bookings[0].id, "KIT-UMRAH", "WH-JKT", "SAMPLE-A");
   const h = postHandover(s, { id: "SAMPLE-HO", allocationId: a.id, quantities: [{ itemId: "ITM-1", quantity: 1 }], receivedAt: "2026-10-02", receivedBy: "Ahmad Fauzi Demo", notes: "Penyerahan parsial. Tas dan seragam menyusul." });
   const original = encodeDemo(s), model = handoverDocument(s, h.id);
@@ -103,31 +107,30 @@ test("posted handover PDF uses actual snapshots, logo and A4 geometry without fi
   expect((await page.getOperatorList()).fnArray).toContain(OPS.paintImageXObject);
   const viewport = page.getViewport({ scale: 1.6 }), canvas = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
   await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: canvas.getContext("2d") as unknown as CanvasRenderingContext2D, viewport }).promise;
-  await mkdir("docs/samples/m2", { recursive: true }); await writeFile("docs/samples/m2/handover-demo.pdf", bytes); await writeFile("docs/samples/m2/handover-demo.png", canvas.toBuffer("image/png"));
+  await saveArtifact(testInfo, "m2/handover-demo.pdf", bytes, { sample: true }); await saveArtifact(testInfo, "m2/handover-demo.png", canvas.toBuffer("image/png"), { sample: true });
   expect(encodeDemo(s)).toBe(original); await task.destroy();
 });
 
-test("inventory UI receives stock, allocates both products, hands over partially, downloads, persists and resets", async ({ page }) => {
+test("inventory UI receives stock, allocates both products, hands over partially, downloads, persists and resets", async ({ page }, testInfo) => {
   test.setTimeout(240000); const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
-  await mkdir("test-results/m2", { recursive: true });
-  await page.goto("/admin/login"); await page.getByRole("button", { name: "Masuk ke workspace" }).click(); await expect(page).toHaveURL(/\/admin\/dashboard$/);
+  await enterAs(page); await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await page.goto("/admin/perlengkapan"); await expect(page.getByRole("heading", { name: "Perlengkapan Jamaah", exact: true })).toBeVisible();
-  await page.screenshot({ path: "test-results/m2/overview-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("overview-desktop.png"), fullPage: true });
   await page.getByRole("button", { name: "Catat stok masuk / koreksi", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Kuantitas", { exact: true }).fill("5");
-  await page.screenshot({ path: "test-results/m2/stock-receipt.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("stock-receipt.png"), fullPage: true });
   await dialog.getByRole("button", { name: "Tinjau pencatatan" }).click(); await dialog.last().getByRole("button", { name: "Ya, lanjutkan" }).click();
   await expect(page.getByRole("status")).toContainText("Barang masuk 5");
   await page.getByRole("button", { name: "Distribusi", exact: true }).click();
   for (const [bookingId, templateId] of [[createSeed().bookings[0].id, "KIT-UMRAH"], ["BK-HAJ-1", "KIT-HAJJ_SPECIAL"]]) {
     await page.getByRole("button", { name: "Alokasikan kit", exact: true }).click();
     await dialog.getByRole("combobox", { name: "Booking aktif", exact: true }).selectOption(bookingId); await dialog.getByRole("combobox", { name: "Template kit", exact: true }).selectOption(templateId);
-    await page.screenshot({ path: `test-results/m2/allocation-${templateId}.png`, fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath(`allocation-${templateId}.png`), fullPage: true });
     await dialog.getByRole("button", { name: "Tinjau pencatatan" }).click(); await dialog.last().getByRole("button", { name: "Ya, lanjutkan" }).click();
     await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill(bookingId);
     await page.getByRole("button", { name: "Serahkan", exact: true }).click(); await dialog.getByLabel("Serahkan Koper Besar", { exact: true }).fill("1");
-    await page.screenshot({ path: "test-results/m2/partial-handover.png", fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath("partial-handover.png"), fullPage: true });
     await dialog.getByRole("button", { name: "Tinjau pencatatan" }).click(); await dialog.last().getByRole("button", { name: "Ya, lanjutkan" }).click();
     await expect(page.locator("tbody")).toContainText("Sebagian diterima");
     await page.getByRole("button", { name: "Bukti PDF", exact: true }).click();
@@ -135,7 +138,7 @@ test("inventory UI receives stock, allocates both products, hands over partially
     const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
     const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs"), task = getDocument({ data: new Uint8Array(await readFile((await download.path())!)) }), pdf = await task.promise;
     const text = (await (await pdf.getPage(1)).getTextContent()).items.map(i => "str" in i ? i.str : "").join(" "); expect(text).toContain(bookingId); expect(text).toContain("Koper Besar"); await task.destroy();
-    await page.screenshot({ path: "test-results/m2/handover-preview.png", fullPage: true }); await dialog.getByRole("button", { name: "Tutup dialog" }).click();
+    await page.screenshot({ path: testInfo.outputPath("handover-preview.png"), fullPage: true }); await dialog.getByRole("button", { name: "Tutup dialog" }).click();
     await page.getByRole("button", { name: "Serahkan", exact: true }).click();
     await dialog.getByLabel("Serahkan Tas Paspor", { exact: true }).fill("1"); await dialog.getByLabel("Serahkan Seragam Batik", { exact: true }).fill("1");
     await dialog.getByRole("button", { name: "Tinjau pencatatan" }).click(); await dialog.last().getByRole("button", { name: "Ya, lanjutkan" }).click();
@@ -143,19 +146,19 @@ test("inventory UI receives stock, allocates both products, hands over partially
   }
   await page.reload(); await page.getByRole("button", { name: "Distribusi", exact: true }).click();
   await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill("BK-HAJ-1"); await expect(page.locator("tbody")).toContainText("Selesai");
-  await page.screenshot({ path: "test-results/m2/distribution-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("distribution-desktop.png"), fullPage: true });
   await page.getByRole("button", { name: "Laporan", exact: true }).click();
   const [csv] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Ekspor CSV" }).click()]); expect((await readFile((await csv.path())!, "utf8"))).toContain("Reservasi");
-  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy(); await page.screenshot({ path: "test-results/m2/reports-mobile.png", fullPage: true });
+  await page.setViewportSize({ width: 390, height: 844 }); expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy(); await page.screenshot({ path: testInfo.outputPath("reports-mobile.png"), fullPage: true });
   await page.getByRole("button", { name: "Buka navigasi", exact: true }).click(); await dialog.getByRole("link", { name: "Perlengkapan Jamaah", exact: true }).click();
   await page.getByRole("button", { name: "Menu profil Ahmad" }).click(); await page.getByRole("button", { name: "Reset data demo", exact: true }).click(); await dialog.getByRole("button", { name: "Ya, lanjutkan" }).click();
   await page.reload(); await page.getByRole("button", { name: "Distribusi", exact: true }).click(); await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill("BK-HAJ-1"); await expect(page.locator("tbody tr")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
-test("item/template editors, corrections, damaged return and release work through confirmed forms", async ({ page }) => {
+test("item/template editors, corrections, damaged return and release work through confirmed forms", async ({ page }, testInfo) => {
   test.setTimeout(180000);
-  await page.goto("/admin/login"); await page.getByRole("button", { name: "Masuk ke workspace" }).click(); await expect(page).toHaveURL(/\/admin\/dashboard$/);
+  await enterAs(page); await expect(page).toHaveURL(/\/admin\/dashboard$/);
   await page.goto("/admin/perlengkapan");
   const dialog = page.getByRole("dialog");
   const confirm = async () => { await dialog.getByRole("button", { name: "Tinjau pencatatan" }).click(); await dialog.last().getByRole("button", { name: "Ya, lanjutkan" }).click(); };
@@ -176,7 +179,7 @@ test("item/template editors, corrections, damaged return and release work throug
   await page.getByRole("button", { name: "Template Perlengkapan", exact: true }).click(); await page.getByRole("button", { name: "Tambah template", exact: true }).click();
   await dialog.getByLabel("Nama template").fill("Kit Tas M2 Demo"); await dialog.getByRole("checkbox", { name: /Tas Dokumen M2/ }).check(); await dialog.getByLabel("Jumlah Tas Dokumen M2", { exact: true }).fill("2"); await dialog.getByRole("button", { name: "Simpan", exact: true }).click();
   const template = (await stored()).kitTemplates.find(t => t.name === "Kit Tas M2 Demo")!;
-  await page.screenshot({ path: "test-results/m2/templates-desktop.png", fullPage: true });
+  await page.screenshot({ path: testInfo.outputPath("templates-desktop.png"), fullPage: true });
   await page.getByRole("button", { name: "Distribusi", exact: true }).click(); await page.getByRole("button", { name: "Alokasikan kit", exact: true }).click();
   await dialog.getByRole("combobox", { name: "Booking aktif", exact: true }).selectOption(createSeed().bookings[0].id); await dialog.getByRole("combobox", { name: "Template kit", exact: true }).selectOption(template.id); await dialog.getByRole("combobox", { name: "Gudang alokasi", exact: true }).selectOption("WH-BDG"); await confirm();
   await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill("Kit Tas M2 Demo"); await page.getByRole("button", { name: "Serahkan", exact: true }).click();
@@ -185,7 +188,7 @@ test("item/template editors, corrections, damaged return and release work throug
   expect(stockBalance(await stored(), item.id, "WH-BDG")).toEqual({ physical: 1, reserved: 1, available: 0 });
   await page.getByRole("button", { name: "Riwayat Serah Terima", exact: true }).click(); await page.getByRole("textbox", { name: "Cari serah terima" }).fill(h.receiptNumber); await page.getByRole("button", { name: "Catat retur", exact: true }).click();
   await dialog.getByRole("combobox", { name: "Barang yang dikembalikan", exact: true }).selectOption(item.id); await dialog.getByLabel("Kuantitas retur").fill("1"); await dialog.getByRole("combobox", { name: "Kondisi / disposisi", exact: true }).selectOption("DAMAGED"); await dialog.getByLabel("Alasan retur").fill("Sobek, tidak layak digunakan");
-  await page.screenshot({ path: "test-results/m2/damaged-return.png", fullPage: true }); await confirm();
+  await page.screenshot({ path: testInfo.outputPath("damaged-return.png"), fullPage: true }); await confirm();
   expect(stockBalance(await stored(), item.id, "WH-BDG")).toEqual({ physical: 1, reserved: 1, available: 0 });
   await page.getByRole("button", { name: "Distribusi", exact: true }).click(); await page.getByRole("textbox", { name: "Cari alokasi kit" }).fill("Kit Tas M2 Demo"); await page.getByRole("button", { name: "Rilis sisa", exact: true }).click(); await dialog.getByRole("button", { name: "Ya, lanjutkan" }).click();
   expect(stockBalance(await stored(), item.id, "WH-BDG")).toEqual({ physical: 1, reserved: 0, available: 1 });

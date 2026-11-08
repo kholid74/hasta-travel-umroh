@@ -1,13 +1,14 @@
 import type { DemoState } from "@/content/admin/types";
+import { isRole } from "@/content/admin/roles";
 import { createSeed } from "@/content/admin/seed";
 import { validateHajjPackage, validDate } from "./hajj";
 import { calculateCosting, costingTargetId, itemBase } from "./costing";
 
-import { initializeInventory } from "@/content/admin/inventory";
 import { validateInventory } from "./inventory";
+import { CURRENT_DEMO_VERSION, migrateDemo } from "./migrations";
 
 export const DEMO_STORAGE_KEY = "hasta-workspace-m1.1";
-export function encodeDemo(state: DemoState) { return JSON.stringify({ version: 2, state }); }
+export function encodeDemo(state: DemoState) { return JSON.stringify({ version: CURRENT_DEMO_VERSION, state }); }
 
 function sameShape(value: unknown, sample: unknown): boolean {
   if (Array.isArray(sample)) return Array.isArray(value) && value.length <= 10000 && (!sample.length || value.every(v => sameShape(v, sample[0])));
@@ -20,12 +21,13 @@ export function decodeDemo(raw: string): DemoState {
   try {
     if (raw.length > 10000000) throw new Error();
     const data: unknown = JSON.parse(raw);
-    if (!data || typeof data !== "object" || !("version" in data) || ![1, 2].includes(Number(data.version)) || !("state" in data) ) throw new Error();
+    if (!data || typeof data !== "object" || !("version" in data) || !Number.isInteger(data.version) || Number(data.version) < 1 || Number(data.version) > CURRENT_DEMO_VERSION || !("state" in data) ) throw new Error();
     const state = data.state as DemoState;
     if (state?.settings && typeof state.settings === "object" && !Object.hasOwn(state.settings, "accountHolder")) state.settings.accountHolder = "";
-    if (data.version === 1) Object.assign(state, initializeInventory(state as unknown as Parameters<typeof initializeInventory>[0]));
+    migrateDemo(Number(data.version), state as unknown as Record<string, unknown>);
     if (!sameShape(state, createSeed())) throw new Error();
     validateInventory(state);
+    if (new Set(state.users.map(u => u.id)).size !== state.users.length || state.users.some(u => !isRole(u.roleId))) throw new Error();
     for (const list of [state.packages, state.hajjPackages, state.departures, state.jamaah, state.bookings, state.payments, state.costings]) {
       if (new Set(list.map(v => v.id)).size !== list.length) throw new Error();
     }
