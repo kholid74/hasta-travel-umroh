@@ -1,10 +1,11 @@
 import { packages as catalog } from "../packages";
 import { company } from "../company";
-import type { Booking, DemoState, Jamaah } from "./types";
+import type { Agent, Booking, DemoState, Jamaah, Lead } from "./types";
 import { initializeInventory, type InventoryState } from "./inventory";
 import { createCostingSeed } from "./costing";
 import { createHajjSeed, hajjCostItems } from "./hajj";
 import { personaUsers } from "./roles";
+import { createDefaultCareerRuleSet } from "./career";
 
 export const DEMO_TODAY = "2026-10-02";
 export const documentNames = ["KTP", "KK", "Paspor", "Foto", "Vaksin", "Buku nikah", "Akta kelahiran", "Asuransi"];
@@ -24,14 +25,92 @@ export function createSeed(): DemoState {
     const p = catalog[index], d = p.departures[0];
     return { id: `UMR-${d.date.slice(2).replaceAll("-", "")}-${String.fromCharCode(65 + i)}`, packageId: p.id, date: d.date, capacity: i === 4 ? 25 : 45, airline: d.airline, flight: ["SV 817", "TK 57", "JT 110", "SV 823", "GA 980", "SV 819", "QR 957", "GA 982"][i], origin: "CGK", pnr: `HT${1026 + i}`, status: "Persiapan" as const, checks: { "Tiket pesawat": true, Hotel: true, Bus: i < 5, "Tour leader": true, Muthawwif: i < 6, Asuransi: true } };
   });
-  const agents = ["Ahmad Hidayat", "Fitria Ramadhani", "H. Mansur Ali", "Nina Herlina", "Rizal Firmansyah", "Siti Khadijah", "Umar Faruq", "Yuliana Dewi", "Samsul Arifin", "Laila Fitria"].map((name, i) => ({ id: `AGT-${String(i + 1).padStart(3, "0")}`, name, phone: `08000000${String(i + 11).padStart(3, "0")}`, city: cities[i % 6], level: ["Coordinator", "Senior Agent", "Agent"][i % 3], commission: 1000000, status: i < 3 ? "Dibayar" as const : i < 6 ? "Disetujui" as const : "Menunggu" as const }));
+  const agentTree = [
+    { name: "Ahmad Hidayat", parentId: "", code: "HASTA-AH01", level: "Coordinator", levelId: "CL-3", joinedAt: "2026-01-15" },
+    { name: "Fitria Ramadhani", parentId: "AGT-001", code: "HASTA-FR02", level: "Senior Agent", levelId: "CL-2", joinedAt: "2026-02-01" },
+    { name: "H. Mansur Ali", parentId: "", code: "HASTA-MA03", level: "Agent", levelId: "CL-1", joinedAt: "2026-01-20" },
+    { name: "Nina Herlina", parentId: "AGT-002", code: "HASTA-NH04", level: "Senior Agent", levelId: "CL-2", joinedAt: "2026-03-10" },
+    { name: "Rizal Firmansyah", parentId: "AGT-002", code: "HASTA-RF05", level: "Agent", levelId: "CL-1", joinedAt: "2026-04-12" },
+    { name: "Siti Khadijah", parentId: "AGT-003", code: "HASTA-SK06", level: "Coordinator", levelId: "CL-3", joinedAt: "2026-03-01" },
+    { name: "Umar Faruq", parentId: "AGT-001", code: "HASTA-UF07", level: "Coordinator", levelId: "CL-3", joinedAt: "2026-02-20" },
+    { name: "Yuliana Dewi", parentId: "AGT-003", code: "HASTA-YD08", level: "Senior Agent", levelId: "CL-2", joinedAt: "2026-03-15" },
+    { name: "Samsul Arifin", parentId: "AGT-007", code: "HASTA-SA09", level: "Coordinator", levelId: "CL-3", joinedAt: "2026-05-05" },
+    { name: "Laila Fitria", parentId: "AGT-008", code: "HASTA-LF10", level: "Senior Agent", levelId: "CL-2", joinedAt: "2026-04-25" },
+  ];
+  const agents: Agent[] = agentTree.map((item, i) => ({
+    id: `AGT-${String(i + 1).padStart(3, "0")}`,
+    name: item.name,
+    phone: `08000000${String(i + 11).padStart(3, "0")}`,
+    city: cities[i % 6],
+    level: item.level,
+    levelId: item.levelId,
+    code: item.code,
+    parentId: item.parentId,
+    joinedAt: item.joinedAt,
+    accountStatus: "ACTIVE" as const,
+    commission: 1000000,
+    status: i < 3 ? "Dibayar" as const : i < 6 ? "Disetujui" as const : "Menunggu" as const,
+    email: `${item.name.toLowerCase().replace(/[^a-z]/g, "")}@mitra.example`,
+  }));
+  const uplinesFor = (agentId: string) => {
+    const list: string[] = [];
+    let cur = agents.find(a => a.id === agentId);
+    while (cur && cur.parentId) {
+      list.push(cur.parentId);
+      cur = agents.find(a => a.id === cur?.parentId);
+    }
+    return list;
+  };
   const jamaah: Jamaah[] = names.map((name, i) => ({ ...newJamaah(`JMH-${10281 + i}`, name, `08000000${100 + i}`, i % 2 ? "Perempuan" : "Laki-laki"), email: `${name.toLowerCase().replaceAll(" ", ".")}@example.com`, city: cities[i % 6], birthPlace: cities[(i + 1) % 6], passportOffice: cities[i % 6], visaSubmitted: "2026-09-20", visaApproved: i % 8 && i % 5 ? "2026-09-25" : "", visaExpiry: i % 8 && i % 5 ? "2026-12-25" : "", address: `Jl. Melati No. ${i + 12}, ${cities[i % 6]}`, nik: `DEMO-${10281 + i}`, birthDate: `${1968 + i % 28}-0${1 + i % 9}-${String(10 + i % 18)}`, emergency: `Keluarga ${name.split(" ")[0]} · 08000000000`, passport: i % 9 === 0 ? "" : `DEMO-A${1000000 + i}`, passportIssue: "2022-06-15", passportExpiry: i % 11 === 0 ? "2027-01-10" : "2032-06-15", documents: Object.fromEntries(documentNames.map((n, k) => [n, i % 9 === 0 && n === "Paspor" ? "Belum ada" : (i + k) % 13 === 0 ? "Diunggah" : (i + k) % 17 === 0 ? "Belum ada" : "Terverifikasi"])) as Jamaah["documents"], visa: i % 8 === 0 ? "Belum diajukan" as const : i % 5 === 0 ? "Diproses" as const : "Disetujui" as const, visaNumber: i % 8 && i % 5 ? `DEMO-V${24001 + i}` : "", agentId: agents[i % agents.length].id, family: i < 4 ? "Keluarga Fauzi" : "", equipment: i % 4 === 0 ? [] : ["Koper Besar", "Tas Paspor", "Seragam Batik"], bus: i < 12 ? "Bus 01" : "" }));
-  const bookings: Booking[] = jamaah.map((j, i) => { const d = departures[i < 16 ? 0 : (i % 7) + 1]; const p = packages.find(p => p.id === d.packageId)!; return { id: `BK-${2026001 + i}`, productType: "UMRAH", jamaahId: j.id, departureId: d.id, roomType: "Quad" as const, total: p.price.quad, date: `2026-09-${String(1 + i % 28).padStart(2, "0")}`, due: "2026-10-05", status: "Aktif" as const }; });
+  const bookings: Booking[] = jamaah.map((j, i) => {
+    const d = departures[i < 16 ? 0 : (i % 7) + 1];
+    const p = packages.find(p => p.id === d.packageId)!;
+    const agent = agents.find(a => a.id === j.agentId);
+    const date = `2026-09-${String(1 + i % 28).padStart(2, "0")}`;
+    return {
+      id: `BK-${2026001 + i}`,
+      productType: "UMRAH",
+      jamaahId: j.id,
+      departureId: d.id,
+      roomType: "Quad" as const,
+      total: p.price.quad,
+      date,
+      due: "2026-10-05",
+      status: "Aktif" as const,
+      attribution: {
+        agentId: agent ? agent.id : "",
+        source: "MIGRATED" as const,
+        code: agent ? agent.code : "",
+        attributedAt: date,
+        attributedBy: "USR-2",
+        lockedAt: date,
+        uplineSnapshot: agent ? uplinesFor(agent.id) : [],
+        levelSnapshot: agent ? agent.levelId : "",
+      },
+    };
+  });
   const payments = bookings.flatMap((b, i) => [
     { id: `PAY-${i + 1}-DP`, bookingId: b.id, amount: 10000000, date: b.date, method: "Transfer bank", status: "Terverifikasi" as const },
     ...(i % 4 === 0 ? [] : [{ id: `PAY-${i + 1}-02`, bookingId: b.id, amount: b.total - 10000000, date: i % 2 ? "2026-10-01" : "2026-09-28", method: "Transfer bank", status: i % 7 === 0 ? "Menunggu" as const : "Terverifikasi" as const }]),
   ]);
-  const leads = ["Salman Al Farisi", "Zahra Aulia", "Hana Syafira", "Rizwan Hakim", "Putri Maharani", "Fikri Ramadhan", "Raisa Annisa", "Naufal Irfan", "Dian Kartika", "Iqbal Maulana", "Suci Ramadhani", "Faisal Akbar", "Dina Oktaviani", "Rafi Abdullah", "Nabila Azmi", "Benny Saputra", "Husna Karim", "Asep Saefullah", "Intan Safira", "Teguh Santoso", "Winda Apriliyani", "Farhan Zaki", "Meutia Azzahra", "Lukman Hakim"].map((name, i) => ({ id: `LD-${301 + i}`, name, phone: `08000000${200 + i}`, packageId: departures[i % 8].packageId, source: ["Website", "WhatsApp", "Instagram", "Referral", "Agen", "Walk-in", "Meta Ads"][i % 7], sales: ["Rina Amelia", "Dimas Pratama", "Nadia Putri"][i % 3], stage: (["Lead Baru", "Dihubungi", "Follow Up", "Qualified", "Lost"] as const)[i % 5], lastContact: "2026-10-01", followUp: "2026-10-03", notes: ["Tertarik keberangkatan bersama keluarga. Meminta rincian hotel dan jadwal manasik."] }));
+  const leads: Lead[] = ["Salman Al Farisi", "Zahra Aulia", "Hana Syafira", "Rizwan Hakim", "Putri Maharani", "Fikri Ramadhan", "Raisa Annisa", "Naufal Irfan", "Dian Kartika", "Iqbal Maulana", "Suci Ramadhani", "Faisal Akbar", "Dina Oktaviani", "Rafi Abdullah", "Nabila Azmi", "Benny Saputra", "Husna Karim", "Asep Saefullah", "Intan Safira", "Teguh Santoso", "Winda Apriliyani", "Farhan Zaki", "Meutia Azzahra", "Lukman Hakim"].map((name, i) => {
+    const source = ["Website", "WhatsApp", "Instagram", "Referral", "Agen", "Walk-in", "Meta Ads"][i % 7];
+    const isAgent = source === "Agen" || source === "Referral";
+    return {
+      id: `LD-${301 + i}`,
+      name,
+      phone: `08000000${200 + i}`,
+      packageId: departures[i % 8].packageId,
+      source,
+      sales: ["Rina Amelia", "Dimas Pratama", "Nadia Putri"][i % 3],
+      stage: (["Lead Baru", "Dihubungi", "Follow Up", "Qualified", "Lost"] as const)[i % 5],
+      lastContact: "2026-10-01",
+      followUp: "2026-10-03",
+      notes: ["Tertarik keberangkatan bersama keluarga. Meminta rincian hotel dan jadwal manasik."],
+      agentId: isAgent ? "AGT-001" : "",
+      referralCode: isAgent ? "HASTA-AH01" : "",
+    };
+  });
   const hajjPackages = createHajjSeed();
   const costingSeed = createCostingSeed(packages, departures);
   for (const p of hajjPackages) {
@@ -45,13 +124,29 @@ export function createSeed(): DemoState {
     j.documents.KK = "Terverifikasi";
     if (i === 0) { j.documents.Paspor = "Terverifikasi"; j.documents.Foto = "Terverifikasi"; }
     jamaah.push(j);
-    const b: Booking = { id: "BK-HAJ-" + (i + 1), productType: "HAJJ_SPECIAL", hajjPackageId: hajjPackages[0].id, jamaahId: j.id, departureId: "", roomType: "Quad", total: Number(hajjPackages[0].sellingPrice) * Number(hajjPackages[0].exchangeRate), date: DEMO_TODAY, due: "", status: "Aktif", hajjRegistration: i === 0 ? "Dikonfirmasi" : "Terdaftar", hajjPlanning: "Persiapan", priceAssumption: { currency: hajjPackages[0].currency, amount: hajjPackages[0].sellingPrice, exchangeRate: hajjPackages[0].exchangeRate, date: hajjPackages[0].assumptionDate } };
+    const agent = agents[i % agents.length];
+    const b: Booking = {
+      id: "BK-HAJ-" + (i + 1), productType: "HAJJ_SPECIAL", hajjPackageId: hajjPackages[0].id, jamaahId: j.id, departureId: "", roomType: "Quad", total: Number(hajjPackages[0].sellingPrice) * Number(hajjPackages[0].exchangeRate), date: DEMO_TODAY, due: "", status: "Aktif", hajjRegistration: i === 0 ? "Dikonfirmasi" : "Terdaftar", hajjPlanning: "Persiapan", priceAssumption: { currency: hajjPackages[0].currency, amount: hajjPackages[0].sellingPrice, exchangeRate: hajjPackages[0].exchangeRate, date: hajjPackages[0].assumptionDate },
+      attribution: {
+        agentId: agent.id,
+        source: "MIGRATED",
+        code: agent.code,
+        attributedAt: DEMO_TODAY,
+        attributedBy: "USR-2",
+        lockedAt: DEMO_TODAY,
+        uplineSnapshot: uplinesFor(agent.id),
+        levelSnapshot: agent.levelId,
+      },
+    };
     bookings.push(b);
     payments.push({ id: "PAY-HAJ-" + (i + 1), bookingId: b.id, amount: 40000000, date: DEMO_TODAY, method: "Transfer bank", status: "Terverifikasi" });
   }
   const state: Omit<DemoState, keyof InventoryState> & Pick<Parameters<typeof initializeInventory>[0], "inventory"> = {
     ...costingSeed, hajjPackages,
     packages, departures, jamaah, bookings, payments, leads, agents,
+    careerRuleSets: [createDefaultCareerRuleSet()],
+    careerSnapshots: [],
+    agentHierarchyEvents: [],
     rooms: departures.flatMap(d => ["Makkah", "Madinah"].flatMap(hotel => Array.from({ length: 4 }, (_, i) => ({ id: `${d.id}-${hotel}-${i}`, departureId: d.id, hotel: hotel as "Makkah" | "Madinah", number: String(1201 + i), capacity: i < 2 ? 4 : i === 2 ? 3 : 2, gender: i % 2 ? "Perempuan" as const : "Laki-laki" as const, jamaahIds: bookings.filter(b => b.departureId === d.id).map(b => jamaah.find(j => j.id === b.jamaahId)!).filter(j => j.gender === (i % 2 ? "Perempuan" : "Laki-laki")).slice(i < 2 ? 0 : 3, i < 2 ? 3 : 4).map(j => j.id) })))),
     expenses: departures.flatMap((d, i) => ["Tiket pesawat", "Hotel", "Visa", "Transportasi", "Katering", "Pembimbing", "Handling", "Perlengkapan", "Marketing", "Lainnya"].map((category, k) => ({ id: `EXP-${i}-${k}`, departureId: d.id, category, vendor: [d.airline, "Al Haramain Hospitality", "Nusantara Visa Services", "Al Noor Transport"][k % 4], amount: [90000000, 45000000, 12000000, 8000000, 6500000, 4000000, 2000000, 4000000, 1500000, 1000000][k] * (i === 0 ? 1 : 0.25), date: "2026-09-28", status: k % 3 === 0 ? "Menunggu" as const : "Dibayar" as const }))),
     inventory: ["Koper Besar", "Koper Kabin", "Tas Paspor", "Kain Ihram", "Mukena", "Seragam Batik", "Buku Manasik", "ID Card", "Luggage Tag"].map((name, i) => ({ id: `ITM-${i + 1}`, name, stock: i === 6 ? 42 : 80 + i * 5, minimum: 25 })),
