@@ -102,7 +102,7 @@ export const roles: Readonly<Record<UserRole, RoleDefinition>> = {
     destination: "Portal agen · ponsel",
     shell: "portal", home: "/portal/agen", persona: { kind: "agent", defaultId: "AGT-001" },
     modules: {}, actions: [],
-    portalTabs: [{ id: "", label: "Beranda", icon: "home" }, { id: "jamaah", label: "Jamaah", icon: "users" }, { id: "komisi", label: "Komisi", icon: "wallet" }, { id: "tim", label: "Tim", icon: "network" }, { id: "lainnya", label: "Lainnya", icon: "menu" }],
+    portalTabs: [{ id: "", label: "Beranda", icon: "home" }, { id: "jamaah", label: "Jamaah", icon: "users" }, { id: "tim", label: "Tim", icon: "network" }, { id: "karier", label: "Karier", icon: "award" }, { id: "lainnya", label: "Lainnya", icon: "menu" }],
   },
   TOUR_LEADER: {
     id: "TOUR_LEADER", label: "Tour Leader", shortLabel: "Tour Leader",

@@ -1,4 +1,6 @@
 import type { Booking, DemoState, Jamaah, Room } from "@/content/admin/types";
+import type { BookingAttribution } from "@/content/admin/career";
+import { ancestorsOf } from "@/content/admin/career";
 import { kitReady } from "./inventory";
 import { validDate } from "./hajj";
 import { DEMO_TODAY, newJamaah } from "@/content/admin/seed";
@@ -52,14 +54,47 @@ export function manifestReady(s: DemoState, j: Jamaah, departureId: string) {
   const b = bookingFor(s, j.id);
   return Boolean(j.nik && j.birthDate && documentPercent(j) === 100 && validPassport(j, d.date) && j.visa === "Disetujui" && b && outstanding(s, b) === 0 && d.checks["Tiket pesawat"]);
 }
-export function addBooking(s: DemoState, jamaahId: string, departureId: string, roomType: Booking["roomType"] = "Quad") {
+export function addBooking(
+  s: DemoState,
+  jamaahId: string,
+  departureId: string,
+  roomType: Booking["roomType"] = "Quad",
+  attributionOverride?: Partial<BookingAttribution>,
+) {
   const d = s.departures.find(d => d.id === departureId);
   const p = s.packages.find(p => p.id === d?.packageId);
-  if (!d || !p || !s.jamaah.some(j => j.id === jamaahId)) throw new Error("Pilih jamaah dan keberangkatan yang valid.");
+  const j = s.jamaah.find(j => j.id === jamaahId);
+  if (!d || !p || !j) throw new Error("Pilih jamaah dan keberangkatan yang valid.");
   if (p.status !== "Terbit" || d.status !== "Persiapan") throw new Error("Pendaftaran keberangkatan ini sudah ditutup.");
   if (bookingFor(s, jamaahId)) throw new Error("Jamaah sudah memiliki booking aktif.");
   if (members(s, departureId).length >= d.capacity) throw new Error("Kapasitas keberangkatan sudah penuh.");
-  const booking: Booking = { id: uid("BK"), contractDescription: p.name, productType: "UMRAH", jamaahId, departureId, roomType, total: p.price[roomType.toLowerCase() as "quad" | "triple" | "double"], date: DEMO_TODAY, due: d.date, status: "Aktif" };
+
+  const agentId = attributionOverride?.agentId ?? j.agentId ?? "";
+  const agent = agentId ? s.agents.find(a => a.id === agentId) : undefined;
+  const attribution: BookingAttribution = {
+    agentId,
+    source: attributionOverride?.source ?? (agent ? "MANUAL" : "MANUAL"),
+    code: attributionOverride?.code ?? agent?.code ?? "",
+    attributedAt: attributionOverride?.attributedAt ?? DEMO_TODAY,
+    attributedBy: attributionOverride?.attributedBy ?? "USR-2",
+    lockedAt: "",
+    uplineSnapshot: [],
+    levelSnapshot: "",
+  };
+
+  const booking: Booking = {
+    id: uid("BK"),
+    contractDescription: p.name,
+    productType: "UMRAH",
+    jamaahId,
+    departureId,
+    roomType,
+    total: p.price[roomType.toLowerCase() as "quad" | "triple" | "double"],
+    date: DEMO_TODAY,
+    due: d.date,
+    status: "Aktif",
+    attribution,
+  };
   s.bookings.unshift(booking);
   return booking;
 }
@@ -69,8 +104,15 @@ export function convertLead(s: DemoState, leadId: string, departureId: string) {
   const d = s.departures.find(d => d.id === departureId);
   if (!d || d.packageId !== lead.packageId) throw new Error("Pilih keberangkatan dari paket yang diminati.");
   const j = newJamaah(uid("JMH"), lead.name, lead.phone);
+  if (lead.agentId) j.agentId = lead.agentId;
   s.jamaah.unshift(j);
-  const b = addBooking(s, j.id, departureId);
+  const b = addBooking(s, j.id, departureId, "Quad", lead.agentId ? {
+    agentId: lead.agentId,
+    source: lead.referralCode ? "REFERRAL_CODE" : "LEAD",
+    code: lead.referralCode ?? "",
+    attributedAt: DEMO_TODAY,
+    attributedBy: s.users.find(u => u.name === lead.sales)?.id ?? "USR-2",
+  } : undefined);
   lead.stage = "Booking";
   lead.bookingId = b.id;
   return b;
@@ -91,6 +133,12 @@ export function verifyPayment(s: DemoState, id: string) {
   if (b.status !== "Aktif" || p.amount > outstanding(s, b)) throw new Error("Pembayaran melebihi sisa tagihan atau booking dibatalkan.");
   p.status = "Terverifikasi";
   p.verifiedAt = new Date().toISOString();
+  if (b.attribution?.agentId && !b.attribution.lockedAt) {
+    const agent = s.agents.find(a => a.id === b.attribution!.agentId);
+    b.attribution.lockedAt = p.date;
+    b.attribution.levelSnapshot = agent?.levelId ?? "";
+    b.attribution.uplineSnapshot = ancestorsOf(s, agent?.id ?? "");
+  }
   const lead = s.leads.find(l => l.bookingId === b.id);
   if (lead && outstanding(s, b) === 0) lead.stage = "Won";
 }

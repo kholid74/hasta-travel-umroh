@@ -28,9 +28,11 @@ export function decodeDemo(raw: string): DemoState {
     if (!sameShape(state, createSeed())) throw new Error();
     validateInventory(state);
     if (new Set(state.users.map(u => u.id)).size !== state.users.length || state.users.some(u => !isRole(u.roleId))) throw new Error();
-    for (const list of [state.packages, state.hajjPackages, state.departures, state.jamaah, state.bookings, state.payments, state.costings]) {
+    for (const list of [state.packages, state.hajjPackages, state.departures, state.jamaah, state.bookings, state.payments, state.costings, state.agents]) {
       if (new Set(list.map(v => v.id)).size !== list.length) throw new Error();
     }
+    if (new Set(state.agents.map(a => a.code.toUpperCase())).size !== state.agents.length) throw new Error();
+    for (const a of state.agents) if (a.parentId && !state.agents.some(p => p.id === a.parentId)) throw new Error();
     for (const p of state.hajjPackages) validateHajjPackage(p, state.bookings.filter(b => b.hajjPackageId === p.id && b.status === "Aktif").length);
     for (const b of state.bookings) {
       if (!state.jamaah.some(j => j.id === b.jamaahId) || !Number.isSafeInteger(b.total) || b.total <= 0 || !["Aktif", "Batal"].includes(b.status)) throw new Error();

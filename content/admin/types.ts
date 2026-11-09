@@ -3,6 +3,7 @@ import type { Costing, CostScenario, CostTemplate } from "./costing";
 import type { HajjPackage, HajjRegistrationStatus, HajjPlanningStatus } from "./hajj";
 import type { InventoryState } from "./inventory";
 import type { UserRole } from "./roles";
+import type { CareerRuleSet, CareerSnapshot, AgentHierarchyEvent, BookingAttribution } from "./career";
 
 export type ProductType = "UMRAH" | "HAJJ_SPECIAL";
 export const productLabels: Record<ProductType, string> = { UMRAH: "Umrah", HAJJ_SPECIAL: "Haji Khusus" };
@@ -29,11 +30,22 @@ export type Booking = {
   priceAssumption?: { currency: "IDR" | "USD" | "SAR"; amount: string; exchangeRate: string; date: string };
   id: string; jamaahId: string; departureId: string; roomType: "Quad" | "Triple" | "Double";
   total: number; date: string; due: string; status: "Aktif" | "Batal";
+  attribution?: BookingAttribution;
 };
 export type Payment = { verifiedAt?: string; reference?: string; id: string; bookingId: string; amount: number; date: string; method: string; status: "Menunggu" | "Terverifikasi" | "Dikembalikan" };
 export const leadStages = ["Lead Baru", "Dihubungi", "Follow Up", "Qualified", "Booking", "Won", "Lost"] as const;
-export type Lead = { id: string; name: string; phone: string; packageId: string; source: string; sales: string; stage: typeof leadStages[number]; lastContact: string; followUp: string; notes: string[]; bookingId?: string };
-export type Agent = { id: string; name: string; phone: string; city: string; level: string; commission: number; status: "Menunggu" | "Disetujui" | "Dibayar" };
+export type Lead = {
+  id: string; name: string; phone: string; packageId: string; source: string; sales: string;
+  stage: typeof leadStages[number]; lastContact: string; followUp: string; notes: string[];
+  bookingId?: string; agentId?: string; referralCode?: string;
+};
+export type Agent = {
+  id: string; name: string; phone: string; city: string;
+  level: string; commission: number; status: "Menunggu" | "Disetujui" | "Dibayar";
+  code: string; parentId: string; joinedAt: string;
+  accountStatus: "ACTIVE" | "SUSPENDED" | "INACTIVE";
+  levelId: string; email?: string;
+};
 export type Room = { id: string; departureId: string; hotel: "Makkah" | "Madinah"; number: string; capacity: number; gender: "Laki-laki" | "Perempuan"; jamaahIds: string[] };
 export type Expense = { id: string; departureId: string; category: string; vendor: string; amount: number; date: string; status: "Menunggu" | "Dibayar" };
 export type Manasik = { id: string; name: string; date: string; time: string; location: string; speaker: string; departureId: string; attendees: string[] };
@@ -50,4 +62,7 @@ export type DemoState = InventoryState & {
   manasik: Manasik[]; activities: Activity[]; notifications: Notification[];
   cms: CmsEntry[]; users: Staff[]; permissions: Record<string, string[]>;
   settings: Record<string, string>; broadcasts: { id: string; title: string; recipients: number; channel: string; date: string }[];
+  careerRuleSets: CareerRuleSet[];
+  careerSnapshots: CareerSnapshot[];
+  agentHierarchyEvents: AgentHierarchyEvent[];
 };

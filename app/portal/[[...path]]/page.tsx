@@ -10,7 +10,7 @@ export default async function PortalPage({ params }: { params: Promise<{ path?: 
   const { path = [] } = await params;
   const own = portalSlug[session.role];
   const section = path[1] ?? "";
-  const known = (roles[session.role].portalTabs ?? []).some(t => t.id === section);
+  const known = (roles[session.role].portalTabs ?? []).some(t => t.id === section) || (session.role === "AGENT" && section === "komisi");
   if (path[0] !== own || path.length > 2 || !known) redirect(homeFor(session.role));
   return <PortalScreen key={section} section={section} />;
 }

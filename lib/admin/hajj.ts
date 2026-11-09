@@ -46,10 +46,21 @@ export function registerHajj(state: DemoState, packageId: string, jamaahId: stri
   validateHajjPackage(p, count);
   const person = state.jamaah.find(j => j.id === jamaahId)!;
   p.requirements.forEach(r => { person.documents[r] ??= "Belum ada"; });
+  const agent = person.agentId ? state.agents.find(a => a.id === person.agentId) : undefined;
   const booking: Booking = {
     id: uid("BK-HAJ"), contractDescription: p.name, productType: "HAJJ_SPECIAL", hajjPackageId: p.id, departureId: "", jamaahId, roomType: "Quad",
     total: hajjPrice(p), date: DEMO_TODAY, due: "", status: "Aktif", hajjRegistration: "Terdaftar", hajjPlanning: "Belum direncanakan",
     priceAssumption: { currency: p.currency, amount: p.sellingPrice, exchangeRate: p.exchangeRate, date: p.assumptionDate },
+    attribution: {
+      agentId: person.agentId || "",
+      source: person.agentId ? "MANUAL" : "MANUAL",
+      code: agent?.code ?? "",
+      attributedAt: DEMO_TODAY,
+      attributedBy: "USR-2",
+      lockedAt: "",
+      uplineSnapshot: [],
+      levelSnapshot: "",
+    },
   };
   state.bookings.unshift(booking);
   return booking;

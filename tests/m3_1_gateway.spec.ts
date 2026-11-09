@@ -56,11 +56,15 @@ test("v2 session tokens: signature, expiry, tamper, invalid role and legacy comp
   expect(readLegacySession(legacy, secret, now + 60001)).toBeNull();
 });
 
-test("frozen v2 workspace migrates to v3 without touching business records", () => {
+test("frozen v2 workspace migrates to current version without touching business records", () => {
   const before = JSON.parse(FIXTURE);
   expect(before.version).toBe(2);
   const state = decodeDemo(FIXTURE);
-  const preserved = ["bookings", "jamaah", "payments", "costings", "costTemplates", "costScenarios", "hajjPackages", "packages", "departures", "inventory", "warehouses", "stockMovements", "kitTemplates", "kitAllocations", "handovers", "agents", "activities", "leads", "rooms", "expenses", "manasik", "settings", "permissions"] as const;
+  // bookings are excluded because migration v4 backfills the new `attribution` field;
+  // agents are excluded because migration v4 backfills code/levelId/parentId/joinedAt/accountStatus/email;
+  // leads are excluded because migration v4 backfills agentId/referralCode;
+  // their integrity is verified below via spot-checks and financialBalance().
+  const preserved = ["jamaah", "payments", "costings", "costTemplates", "costScenarios", "hajjPackages", "packages", "departures", "inventory", "warehouses", "stockMovements", "kitTemplates", "kitAllocations", "handovers", "activities", "rooms", "expenses", "manasik", "settings", "permissions"] as const;
   for (const key of preserved) expect(state[key], key).toEqual(before.state[key]);
   // Spot checks on the records the fixture deliberately exercised.
   expect(state.costings.find(c => c.status === "Final")?.finalizedAt).toBe("2026-10-02T05:00:00.000Z");
@@ -75,12 +79,12 @@ test("frozen v2 workspace migrates to v3 without touching business records", () 
   // Staff: role ids + three new personas, nothing else.
   expect(state.users.map(u => [u.id, u.roleId])).toEqual([["USR-1", "SUPERADMIN"], ["USR-2", "SALES_CS"], ["USR-3", "FINANCE"], ["USR-4", "OWNER"], ["USR-5", "OPERATIONS"], ["USR-6", "TOUR_LEADER"]]);
   expect(state.users[0].role).toBe("Super Admin");
-  // Re-encode as v3; decoding again and re-running the step are no-ops.
-  const v3 = encodeDemo(state);
-  expect(JSON.parse(v3).version).toBe(CURRENT_DEMO_VERSION);
-  expect(decodeDemo(v3)).toEqual(state);
+  // Re-encode at current version; decoding again and re-running the step are no-ops.
+  const encoded = encodeDemo(state);
+  expect(JSON.parse(encoded).version).toBe(CURRENT_DEMO_VERSION);
+  expect(decodeDemo(encoded)).toEqual(state);
   expect(migrateDemo(2, structuredClone(state) as unknown as Record<string, unknown>).users).toEqual(state.users);
-  // A fresh seed is already v3-shaped.
+  // A fresh seed is already current-version-shaped.
   expect(decodeDemo(encodeDemo(createSeed())).users).toHaveLength(6);
 });
 
@@ -212,18 +216,20 @@ test("role switching keeps demo data, replaces navigation and records the acting
   await expect(page.locator("tbody")).toContainText("Lead Ganti Peran Demo");
 });
 
-test("saved v2 workspace opens after the upgrade and is re-saved as v3 only on change", async ({ page }) => {
+test("saved v2 workspace opens after the upgrade and is re-saved at current version only on change", async ({ page }) => {
   await page.goto("/admin/login");
   await page.evaluate(([key, raw]) => localStorage.setItem(key, raw), [DEMO_STORAGE_KEY, FIXTURE]);
   await enterAs(page, "SUPERADMIN");
   await expect(page.getByRole("heading", { name: "Selamat pagi, Ahmad" })).toBeVisible();
   await page.goto("/admin/invoice/BK-HAJ-FIXTURE");
   await expect(page.getByRole("heading", { name: "INV/BK-HAJ-FIXTURE" })).toBeVisible();
+  // After load the workspace is not yet re-persisted (read-only page load) — version stays at v2
   expect(JSON.parse((await stored(page))!).version).toBe(2);
   await page.goto("/admin/notifikasi");
   await page.getByRole("button", { name: "Tandai semua dibaca" }).click();
   const saved = JSON.parse((await stored(page))!);
-  expect(saved.version).toBe(3);
+  // After a mutation the workspace is saved at the CURRENT_DEMO_VERSION (v4 since M3.2)
+  expect(saved.version).toBe(CURRENT_DEMO_VERSION);
   expect(saved.state.users.map((u: { roleId: string }) => u.roleId)).toContain("TOUR_LEADER");
   expect(saved.state.handovers.some((h: { id: string }) => h.id === "HO-FIXTURE")).toBe(true);
 });

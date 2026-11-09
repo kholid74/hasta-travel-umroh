@@ -2,11 +2,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, CircleCheck, FileText, Home, Menu, Network, Plane, Repeat2, Users, Wallet, type LucideIcon } from "lucide-react";
+import { AlertTriangle, Award, CircleCheck, FileText, Home, Menu, Network, Plane, Repeat2, Users, Wallet, type LucideIcon } from "lucide-react";
 import { portalSlug, roles } from "@/content/admin/roles";
 import { useDemo } from "@/components/admin/Store";
 
-const icons: Record<string, LucideIcon> = { home: Home, users: Users, wallet: Wallet, network: Network, menu: Menu, check: CircleCheck, alert: AlertTriangle, file: FileText, plane: Plane };
+const icons: Record<string, LucideIcon> = { home: Home, users: Users, wallet: Wallet, network: Network, menu: Menu, check: CircleCheck, alert: AlertTriangle, file: FileText, plane: Plane, award: Award };
 
 /** Mobile-first shell for Agent, Tour Leader and Pilgrim portals (M3.1 foundation). */
 export function PortalShell({ children }: { children: React.ReactNode }) {

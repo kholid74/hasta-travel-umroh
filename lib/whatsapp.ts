@@ -15,22 +15,24 @@ export const WA_DEMO_NOTE =
 const PENUTUP_DEMO = `\n\n[Pesan contoh dari situs demo ${company.name}. Nomor tujuan adalah kontak demonstrasi ${company.studio.name}, bukan biro perjalanan umroh/haji.]`;
 
 export type WaContext =
-  | { kind: "umum" }
-  | { kind: "paket"; namaPaket: string; tanggal: string; kota: string }
-  | { kind: "haji"; namaPaket?: string; kategori?: "khusus" | "mujamalah" }
-  | { kind: "badal" }
-  | { kind: "lainnya" }
+  | { kind: "umum"; referralCode?: string }
+  | { kind: "paket"; namaPaket: string; tanggal: string; kota: string; referralCode?: string }
+  | { kind: "haji"; namaPaket?: string; kategori?: "khusus" | "mujamalah"; referralCode?: string }
+  | { kind: "badal"; referralCode?: string }
+  | { kind: "lainnya"; referralCode?: string }
   | { kind: "studio" };
 
 export type WaAudience = "operator" | "studio";
 export const audienceOf = (context: WaContext): WaAudience => (context.kind === "studio" ? "studio" : "operator");
 
 export function pesanWa(context: WaContext): string {
+  const ref = "referralCode" in context && context.referralCode ? `\nKode referensi mitra: ${context.referralCode}` : "";
   switch (context.kind) {
     case "umum":
       return (
         "Assalamu'alaikum, saya ingin konsultasi paket Umrah.\n" +
         "Rencana berangkat (bulan): \nJumlah jamaah: \nKota keberangkatan: " +
+        ref +
         PENUTUP_DEMO
       );
     case "paket":
@@ -38,6 +40,7 @@ export function pesanWa(context: WaContext): string {
         `Assalamu'alaikum, saya tertarik dengan ${context.namaPaket} keberangkatan ` +
         `${tanggalPanjang(context.tanggal)} dari ${context.kota}.\n` +
         "Tipe kamar (quad/triple/double): \nJumlah jamaah: \nMohon informasi lengkapnya." +
+        ref +
         PENUTUP_DEMO
       );
     case "haji":
@@ -46,18 +49,20 @@ export function pesanWa(context: WaContext): string {
         return (
           `Assalamu'alaikum, saya ingin bertanya tentang ${context.namaPaket ?? "Haji Mujamalah"}: ` +
           "ketersediaan, ketentuan pendaftaran, dan pengembalian dana bila visa tidak terbit." +
+          ref +
           PENUTUP_DEMO
         );
       }
       return (
         `Assalamu'alaikum, saya ingin konsultasi ${context.namaPaket ?? "Haji Khusus"}: ` +
         "perkiraan masa tunggu, setoran awal, dan skema pelunasan." +
+        ref +
         PENUTUP_DEMO
       );
     case "badal":
-      return "Assalamu'alaikum, saya ingin bertanya tentang layanan Badal Umrah." + PENUTUP_DEMO;
+      return "Assalamu'alaikum, saya ingin bertanya tentang layanan Badal Umrah." + ref + PENUTUP_DEMO;
     case "lainnya":
-      return "Assalamu'alaikum, saya ingin bertanya:\n" + PENUTUP_DEMO;
+      return "Assalamu'alaikum, saya ingin bertanya:\n" + ref + PENUTUP_DEMO;
     case "studio":
       return `Halo ${company.studio.name}, saya pemilik travel dan ingin membuat website serta sistem seperti demo ${company.name} ini.`;
   }
